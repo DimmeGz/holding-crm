@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractLineEntity } from '../../entities';
 import { Order } from './order.entity';
@@ -23,4 +23,11 @@ export class OrderLine extends AbstractLineEntity {
   })
   @JoinColumn({ name: 'product_buy_id' })
   productBuy: Product;
+
+  @Column({
+    name: 'batch_rename',
+    type: 'varchar',
+    length: 10,
+  })
+  batchRename: string;
 }

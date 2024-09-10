@@ -147,4 +147,11 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @Column({
+    name: 'contract_info',
+    type: 'varchar',
+    length: 200,
+  })
+  contractInfo: string;
 }
