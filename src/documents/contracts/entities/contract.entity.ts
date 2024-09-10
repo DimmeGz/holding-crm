@@ -10,6 +10,7 @@ import {
 
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
+import { ContractLine } from './contract-line.entity';
 
 @Entity({ name: 'documents_contract' })
 export class Contract extends AbstractDocumentEntity<Contract> {
@@ -99,4 +100,7 @@ export class Contract extends AbstractDocumentEntity<Contract> {
 
   @Column({ name: 'is_archived', default: false })
   isArchived: boolean;
+
+  @OneToMany(() => ContractLine, (contractLine) => contractLine.contract)
+  contractLines: ContractLine[];
 }

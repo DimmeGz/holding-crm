@@ -24,6 +24,7 @@ export class ContractsService {
       .leftJoin('children.seller', 'childSeller')
       .leftJoin('children.buyer', 'childBuyer')
       .select([
+        'actualContract.id',
         'actualContract.name',
         'seller.name',
         'buyer.name',
@@ -47,6 +48,7 @@ export class ContractsService {
       .leftJoin('children.seller', 'childSeller')
       .leftJoin('children.buyer', 'childBuyer')
       .select([
+        'archivedContract.id',
         'archivedContract.name',
         'seller.name',
         'buyer.name',
@@ -71,6 +73,7 @@ export class ContractsService {
       .leftJoin('children.seller', 'childSeller')
       .leftJoin('children.buyer', 'childBuyer')
       .select([
+        'archivedChildContract.id',
         'archivedChildContract.name',
         'seller.name',
         'buyer.name',
@@ -90,5 +93,44 @@ export class ContractsService {
       actualContracts,
       archivedContracts,
     };
+  }
+
+  async getContract(contractId: number): Promise<Contract> {
+    const contract = await this.contractsRepository
+      .createQueryBuilder('contract')
+      .where('contract.id = :contractId', { contractId })
+      .leftJoin('contract.seller', 'seller')
+      .leftJoin('contract.buyer', 'buyer')
+      .leftJoin('contract.currency', 'currency')
+      .leftJoin('contract.incoterms', 'incoterms')
+      .select([
+        'contract.id',
+        'contract.status',
+        'contract.signatureDate',
+        'contract.term',
+        'contract.vat',
+        'contract.paymentDelay',
+        'contract.term',
+        'contract.transportPlace',
+        'contract.orderPrefix',
+        'seller.name',
+        'buyer.name',
+        'currency.name',
+        'incoterms.name',
+      ])
+      .leftJoin('contract.contractLines', 'contractLine')
+      .leftJoin('contractLine.product', 'product')
+      .leftJoin('contractLine.package', 'package')
+      .addSelect([
+        'contractLine.id',
+        'contractLine.shipQty',
+        'contractLine.price',
+        'product.id',
+        'product.name',
+        'package.name',
+      ])
+      .getOne();
+
+    return contract;
   }
 }
