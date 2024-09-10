@@ -17,23 +17,71 @@ export class ContractsService {
       .createQueryBuilder('actualContract')
       .where('actualContract.isArchived = false')
       .andWhere('actualContract.parent IS NULL')
-      .leftJoinAndSelect('actualContract.children', 'children')
+      .leftJoin('actualContract.seller', 'seller')
+      .leftJoin('actualContract.buyer', 'buyer')
+      .leftJoin('actualContract.children', 'children')
       .andWhere('children.isArchived = false')
+      .leftJoin('children.seller', 'childSeller')
+      .leftJoin('children.buyer', 'childBuyer')
+      .select([
+        'actualContract.name',
+        'seller.name',
+        'buyer.name',
+        'actualContract.signatureDate',
+        'actualContract.term',
+        'children.name',
+        'childSeller.name',
+        'childBuyer.name',
+        'children.signatureDate',
+        'children.term',
+      ])
       .getMany();
 
     let archivedContracts: Contract[] = await this.contractsRepository
       .createQueryBuilder('archivedContract')
       .where('archivedContract.isArchived = true')
       .andWhere('archivedContract.parent IS NULL')
-      .leftJoinAndSelect('archivedContract.children', 'children')
+      .leftJoin('archivedContract.seller', 'seller')
+      .leftJoin('archivedContract.buyer', 'buyer')
+      .leftJoin('archivedContract.children', 'children')
+      .leftJoin('children.seller', 'childSeller')
+      .leftJoin('children.buyer', 'childBuyer')
+      .select([
+        'archivedContract.name',
+        'seller.name',
+        'buyer.name',
+        'archivedContract.signatureDate',
+        'archivedContract.term',
+        'children.name',
+        'childSeller.name',
+        'childBuyer.name',
+        'children.signatureDate',
+        'children.term',
+      ])
       .getMany();
 
     const archivedChildContracts: Contract[] = await this.contractsRepository
       .createQueryBuilder('archivedChildContract')
       .where('archivedChildContract.isArchived = false')
       .andWhere('archivedChildContract.parent IS NULL')
-      .leftJoinAndSelect('archivedChildContract.children', 'children')
+      .leftJoin('archivedChildContract.seller', 'seller')
+      .leftJoin('archivedChildContract.buyer', 'buyer')
+      .leftJoin('archivedChildContract.children', 'children')
       .andWhere('children.isArchived = true')
+      .leftJoin('children.seller', 'childSeller')
+      .leftJoin('children.buyer', 'childBuyer')
+      .select([
+        'archivedChildContract.name',
+        'seller.name',
+        'buyer.name',
+        'archivedChildContract.signatureDate',
+        'archivedChildContract.term',
+        'children.name',
+        'childSeller.name',
+        'childBuyer.name',
+        'children.signatureDate',
+        'children.term',
+      ])
       .getMany();
 
     archivedContracts = archivedContracts.concat(archivedChildContracts);
