@@ -40,11 +40,11 @@ export class AbstractDocumentEntity<T> extends AbstractEntity {
     type: 'timestamp',
     nullable: false,
     default: () => 'CURRENT_TIMESTAMP',
-    name: 'createdAt',
+    name: 'created_at',
   })
-  created_at: Date;
+  createdAt: Date;
 
-  //created_by
+  // created_by
 
   constructor(entity: Partial<T>) {
     super();

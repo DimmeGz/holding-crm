@@ -5,6 +5,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractDocumentRecipientEntity } from '../../entities';
@@ -82,7 +83,18 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   })
   expectedDate: Date;
 
-  // parent
+  @ManyToOne(() => Invoice, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'parent_id' })
+  parent: Invoice;
+
+  @Column({ name: 'parent_id' })
+  parentId: number;
+
+  @OneToMany(() => Invoice, (invoice) => invoice.parent)
+  children: Invoice[];
 
   @Column({
     name: 'separation',

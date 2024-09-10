@@ -48,7 +48,7 @@ export class ProductTransport extends AbstractEntity {
   })
   created_at: Date;
 
-  //created_by
+  // created_by
 
   @Column({
     name: 'expected_date',

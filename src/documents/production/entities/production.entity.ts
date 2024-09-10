@@ -48,7 +48,7 @@ export class Production extends AbstractEntity {
   })
   created_at: Date;
 
-  //created_by
+  // created_by
 
   @Column({
     type: 'varchar',

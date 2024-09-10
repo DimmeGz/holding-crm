@@ -5,6 +5,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractDocumentEntity } from '../../entities';
@@ -61,7 +62,18 @@ export class Contract extends AbstractDocumentEntity<Contract> {
   })
   term: Date;
 
-  // parent
+  @ManyToOne(() => Contract, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'parent_id' })
+  parent: Contract;
+
+  @Column({ name: 'parent_id' })
+  parentId: number;
+
+  @OneToMany(() => Contract, (contract) => contract.parent)
+  children: Contract[];
 
   @ManyToOne(() => Incoterms, {
     onDelete: 'RESTRICT',
