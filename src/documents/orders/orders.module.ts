@@ -5,10 +5,9 @@ import { Order } from './entities';
 
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
-import { OrderConfirmation } from '../orders-confirmation/entities';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderConfirmation])],
+  imports: [TypeOrmModule.forFeature([Order])],
   providers: [OrdersService],
   controllers: [OrdersController],
 })
