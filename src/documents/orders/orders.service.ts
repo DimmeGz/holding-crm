@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Order } from './entities';
-import { OrderConfirmation } from '../orders-confirmation/entities';
 
 @Injectable()
 export class OrdersService {
