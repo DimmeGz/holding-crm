@@ -37,4 +37,59 @@ export class InvoiceService {
 
     return invoices;
   }
+
+  async getInvoiceById(invoiceId: number) {
+    const invoice = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .leftJoin('invoice.seller', 'seller')
+      .leftJoin('invoice.sellerWarehouse', 'sellerWarehouse')
+      .leftJoin('invoice.buyer', 'buyer')
+      .leftJoin('invoice.buyerWarehouse', 'buyerWarehouse')
+      .leftJoin('invoice.recipient', 'recipient')
+      .leftJoin('invoice.recipientWarehouse', 'recipientWarehouse')
+      .leftJoin('invoice.parent', 'parent')
+      .leftJoin('invoice.currency', 'currency')
+      .leftJoin('invoice.invoiceLines', 'invoiceLine')
+      .leftJoin('invoiceLine.product', 'product')
+      .leftJoin('invoiceLine.batch', 'batch')
+      .leftJoin('invoiceLine.countryOfOrigin', 'countryOfOrigin')
+      .leftJoin('invoiceLine.package', 'package')
+      .where('invoice.id = :invoiceId', { invoiceId })
+      .select([
+        'invoice.invoiceNumber',
+        'invoice.status',
+        'invoice.expectedDate',
+        'invoice.paymentBalance',
+        'parent.id',
+        'parent.invoiceNumber',
+        'seller.name',
+        'sellerWarehouse.name',
+        'buyer.name',
+        'buyerWarehouse.name',
+        'recipient.name',
+        'recipientWarehouse.name',
+        'currency.name',
+        'invoice.vat',
+        'invoice.paymentDelay',
+        'invoice.incoterms',
+        'invoice.transportPlace',
+        'invoice.ponz',
+        'invoice.grossWeight',
+        'invoice.transportAmount',
+        'invoice.comment',
+        'invoice.separation',
+        'invoice.reportPeriod',
+        'invoice.contractInfo',
+        'invoiceLine',
+        'product.name',
+        'batch.id',
+        'batch.name',
+        'countryOfOrigin.name',
+        'package.name',
+        'package.capacity',
+      ])
+      .getOne();
+
+    return invoice;
+  }
 }

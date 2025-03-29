@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 
 import { InvoiceService } from './invoice.service';
 
@@ -9,5 +9,10 @@ export class InvoiceController {
   @Get()
   getInvoices() {
     return this.invoiceService.getInvoices();
+  }
+
+  @Get(':invoiceId')
+  getInvoiceById(@Param('invoiceId') invoiceId: number) {
+    return this.invoiceService.getInvoiceById(invoiceId);
   }
 }
