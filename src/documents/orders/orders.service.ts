@@ -78,19 +78,13 @@ export class OrdersService {
   async getOrderById(orderId: number) {
     const order = await this.ordersRepository
       .createQueryBuilder('order')
-      .leftJoinAndSelect(
-        (qb) =>
-          qb
-            .from('documents_orderconfirmation', 'confirmation')
-            .select('MAX(id)', 'id'),
-        // .addSelect('')
-        // .addSelect('orderConfirmation.orderId', 'orderId')
-        // .addSelect('orderConfirmation.createdAt', 'createdAt') // Assuming you have a createdAt field
-        // .from('documents_orderconfirmation', 'orderConfirmation'),
-        // .orderBy('orderConfirmation.createdAt', 'DESC')
-        // .distinctOn(['orderConfirmation.orderId']),
-        'documents_orderconfirmation',
-        'documents_orderconfirmation.order_id = order.id',
+      .leftJoinAndMapOne(
+        'order.confirmation',
+        'order.orderConfirmations',
+        'confirmation',
+        `confirmation.orderId = order.id AND NOT EXISTS 
+        (SELECT 1 FROM documents_orderconfirmation oc1 WHERE 
+        oc1.order_id = order.id AND oc1.id > confirmation.id)`,
       )
       .where('order.id = :orderId', { orderId })
       .getOne();
