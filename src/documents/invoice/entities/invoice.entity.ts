@@ -10,6 +10,7 @@ import {
 
 import { AbstractDocumentRecipientEntity } from '../../entities';
 import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
+import { InvoiceLine } from './invoice-line.entity';
 
 @Entity({ name: 'documents_invoice' })
 export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
@@ -166,4 +167,11 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     length: 200,
   })
   contractInfo: string;
+
+  @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.invoice)
+  invoiceLines: InvoiceLine[];
+
+  // files
+
+  //created_by
 }
