@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 
 import { PaymentService } from './payment.service';
 
@@ -9,5 +9,10 @@ export class PaymentController {
   @Get()
   getPayments() {
     return this.paymentService.getPayments();
+  }
+
+  @Get(':paymentId')
+  getPaymentById(@Param('paymentId') paymentId: number) {
+    return this.paymentService.getPaymentById(paymentId);
   }
 }
