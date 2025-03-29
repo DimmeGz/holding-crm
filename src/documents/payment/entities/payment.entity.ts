@@ -1,7 +1,8 @@
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 
 import { AbstractDocumentEntity } from '../../entities';
 import { TechnicalProcess } from '../../../libs/entities';
+import { PaymentLine } from './payment-line.entity';
 
 @Entity({ name: 'documents_payment' })
 export class Payment extends AbstractDocumentEntity<Payment> {
@@ -14,6 +15,11 @@ export class Payment extends AbstractDocumentEntity<Payment> {
     default: 0,
   })
   documentSum: number;
+
+  @Column({
+    default: false,
+  })
+  status: boolean;
 
   @Column({
     name: 'expected_date',
@@ -35,4 +41,7 @@ export class Payment extends AbstractDocumentEntity<Payment> {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(() => PaymentLine, (paymentLine) => paymentLine.payment)
+  paymentLines: PaymentLine[];
 }
