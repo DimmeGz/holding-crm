@@ -34,4 +34,30 @@ export class PaymentService {
 
     return payments;
   }
+
+  async getPaymentById(paymentId: number) {
+    const payment = await this.paymentsRepository
+      .createQueryBuilder('payment')
+      .leftJoin('payment.seller', 'seller')
+      .leftJoin('payment.buyer', 'buyer')
+      .leftJoin('payment.paymentLines', 'paymentLine')
+      .leftJoin('paymentLine.invoice', 'invoice')
+      .where('payment.id = :paymentId', { paymentId })
+      .select([
+        'payment.id',
+        'payment.status',
+        'payment.documentSum',
+        'payment.expected_date',
+        'seller.name',
+        'buyer.name',
+        'paymentLine.id',
+        'paymentLine.amount',
+        'invoice.id',
+        'invoice.invoiceNumber',
+      ])
+      .orderBy('payment.id', 'DESC')
+      .getMany();
+
+    return payment;
+  }
 }
