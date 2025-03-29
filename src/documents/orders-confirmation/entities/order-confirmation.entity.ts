@@ -89,6 +89,9 @@ export class OrderConfirmation extends AbstractEntity {
   @JoinColumn({ name: 'order_id' })
   order: Order;
 
+  @Column({ name: 'order_id' })
+  orderId: number;
+
   @Column({
     name: 'number',
     type: 'varchar',

@@ -12,7 +12,7 @@ export class ContractsController {
   }
 
   @Get('/:contractId')
-  getContract(@Param('contractId') contractId: number) {
-    return this.contractsService.getContract(+contractId);
+  getContractById(@Param('contractId') contractId: number) {
+    return this.contractsService.getContractById(+contractId);
   }
 }
