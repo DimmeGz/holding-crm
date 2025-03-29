@@ -95,7 +95,7 @@ export class ContractsService {
     };
   }
 
-  async getContract(contractId: number): Promise<Contract> {
+  async getContractById(contractId: number): Promise<Contract> {
     const contract = await this.contractsRepository
       .createQueryBuilder('contract')
       .where('contract.id = :contractId', { contractId })

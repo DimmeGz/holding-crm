@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Order } from './entities';
+import { OrderConfirmation } from '../orders-confirmation/entities';
 
 @Injectable()
 export class OrdersService {
@@ -71,6 +72,29 @@ export class OrdersService {
       }
       delete order.orderConfirmations;
     }
+
+    return order;
+  }
+
+  async getOrderById(orderId: number) {
+    const order = await this.ordersRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect(
+        (qb) =>
+          qb
+            .from('documents_orderconfirmation', 'confirmation')
+            .select('MAX(id)', 'id'),
+        // .addSelect('')
+        // .addSelect('orderConfirmation.orderId', 'orderId')
+        // .addSelect('orderConfirmation.createdAt', 'createdAt') // Assuming you have a createdAt field
+        // .from('documents_orderconfirmation', 'orderConfirmation'),
+        // .orderBy('orderConfirmation.createdAt', 'DESC')
+        // .distinctOn(['orderConfirmation.orderId']),
+        'documents_orderconfirmation',
+        'documents_orderconfirmation.order_id = order.id',
+      )
+      .where('order.id = :orderId', { orderId })
+      .getOne();
 
     return order;
   }
