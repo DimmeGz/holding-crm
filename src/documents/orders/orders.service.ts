@@ -82,9 +82,9 @@ export class OrdersService {
         'order.confirmation',
         'order.orderConfirmations',
         'confirmation',
-        `confirmation.orderId = order.id AND NOT EXISTS 
-        (SELECT 1 FROM documents_orderconfirmation oc1 WHERE 
-        oc1.order_id = order.id AND oc1.id > confirmation.id)`,
+        `confirmation.orderId = order.id AND NOT EXISTS
+        (SELECT 1 FROM documents_orderconfirmation oc WHERE
+        oc.order_id = order.id AND oc.id > confirmation.id)`,
       )
       .where('order.id = :orderId', { orderId })
       .getOne();
