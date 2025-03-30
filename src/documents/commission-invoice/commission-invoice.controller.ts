@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 
 import { CommissionInvoiceService } from './commission-invoice.service';
 
@@ -11,5 +11,10 @@ export class CommissionInvoiceController {
   @Get()
   getCommissions() {
     return this.commissionInvoiceService.getCommissions();
+  }
+
+  @Get(':commissionId')
+  getCommissionById(@Param('commissionId') commissionId: number) {
+    return this.commissionInvoiceService.getCommissionById(commissionId);
   }
 }
