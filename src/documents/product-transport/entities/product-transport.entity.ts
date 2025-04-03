@@ -6,18 +6,20 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { AbstractEntity } from '../../../common/entities';
 import { Company } from '../../../companies/entities';
 import { Warehouse } from '../../../warehouse/entities';
 import { TechnicalProcess } from '../../../libs/entities';
+import { ProductTransportLine } from './product-transport-line.entity';
 
 @Entity({ name: 'documents_producttransport' })
 export class ProductTransport extends AbstractEntity {
   @ManyToOne(() => Company, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'currency_id' })
+  @JoinColumn({ name: 'company_id' })
   company: Company;
 
   @ManyToOne(() => Warehouse, {
@@ -44,9 +46,9 @@ export class ProductTransport extends AbstractEntity {
     type: 'timestamp',
     nullable: false,
     default: () => 'CURRENT_TIMESTAMP',
-    name: 'createdAt',
+    name: 'created_at',
   })
-  created_at: Date;
+  createdAt: Date;
 
   // created_by
 
@@ -75,4 +77,10 @@ export class ProductTransport extends AbstractEntity {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(
+    () => ProductTransportLine,
+    (productTransportLine) => productTransportLine.productTransport,
+  )
+  productTransportLines: ProductTransportLine[];
 }
