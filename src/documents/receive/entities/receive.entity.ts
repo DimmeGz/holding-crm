@@ -5,12 +5,14 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Warehouse } from '../../../warehouse/entities';
-import { Invoice } from '../../invoice/entities';
+import { ReceiveLine } from './receive-line.entity';
+import { Shipment } from '../../shipment/entities';
 
 @Entity({ name: 'documents_receive' })
 export class Receive extends AbstractDocumentEntity<Receive> {
@@ -60,11 +62,11 @@ export class Receive extends AbstractDocumentEntity<Receive> {
   })
   documentSum: number;
 
-  @ManyToOne(() => Invoice, {
+  @ManyToOne(() => Shipment, {
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'invoice_id' })
-  invoice: Invoice;
+  @JoinColumn({ name: 'shipment_id' })
+  shipment: Shipment;
 
   @ManyToMany(() => TechnicalProcess)
   @JoinTable({
@@ -79,4 +81,7 @@ export class Receive extends AbstractDocumentEntity<Receive> {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(() => ReceiveLine, (receiveLine) => receiveLine.receive)
+  receiveLines: ReceiveLine[];
 }
