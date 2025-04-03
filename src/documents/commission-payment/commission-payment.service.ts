@@ -11,7 +11,7 @@ export class CommissionPaymentService {
   ) {}
 
   async getCommisionPayments() {
-    const commissionPayment = await this.commissionPaymentsRepository
+    const commissionPayments = await this.commissionPaymentsRepository
       .createQueryBuilder('commissionPayment')
       .leftJoin('commissionPayment.seller', 'seller')
       .leftJoin('commissionPayment.buyer', 'buyer')
@@ -28,6 +28,31 @@ export class CommissionPaymentService {
         'currency.name',
       ])
       .orderBy('commissionPayment.id', 'DESC')
+      .getMany();
+
+    return commissionPayments;
+  }
+
+  async getCommisionPaymentById(commissionPaymentId: number) {
+    const commissionPayment = await this.commissionPaymentsRepository
+      .createQueryBuilder('commissionPayment')
+      .leftJoin('commissionPayment.seller', 'seller')
+      .leftJoin('commissionPayment.buyer', 'buyer')
+      .leftJoin('commissionPayment.commissionInvoice', 'commissionInvoice')
+      .leftJoin('commissionPayment.currency', 'currency')
+      .select([
+        'commissionPayment.id',
+        'commissionPayment.status',
+        'commissionPayment.amount',
+        'commissionPayment.expectedDate',
+        'seller.name',
+        'buyer.name',
+        'commissionInvoice.id',
+        'currency.name',
+      ])
+      .where('commissionPayment.id = :commissionPaymentId', {
+        commissionPaymentId,
+      })
       .getMany();
 
     return commissionPayment;
