@@ -2,7 +2,7 @@ import { Controller, Get, Param } from '@nestjs/common';
 
 import { CommissionInvoiceService } from './commission-invoice.service';
 
-@Controller('commissions')
+@Controller('commission')
 export class CommissionInvoiceController {
   constructor(
     private readonly commissionInvoiceService: CommissionInvoiceService,
