@@ -5,11 +5,14 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractDocumentRecipientEntity } from '../../entities';
 import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Contract } from '../../contracts/entities';
+import { OrderLine } from './order-line.entity';
+import { OrderConfirmation } from '../../orders-confirmation/entities';
 
 @Entity({ name: 'documents_order' })
 export class Order extends AbstractDocumentRecipientEntity<Order> {
@@ -138,4 +141,13 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(() => OrderLine, (orderLine) => orderLine.order)
+  orderLines: OrderLine[];
+
+  @OneToMany(
+    () => OrderConfirmation,
+    (orderConfirmation) => orderConfirmation.order,
+  )
+  orderConfirmations: OrderConfirmation[];
 }

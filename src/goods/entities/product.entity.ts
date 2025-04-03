@@ -33,6 +33,7 @@ export class Product extends AbstractEntity {
     type: 'varchar',
     length: 70,
     nullable: true,
+    name: 'description_2',
   })
   description2: string;
 

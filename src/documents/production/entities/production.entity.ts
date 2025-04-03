@@ -6,12 +6,15 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractEntity } from '../../../common/entities';
 import { Company } from '../../../companies/entities';
 import { Warehouse } from '../../../warehouse/entities';
 import { TechnicalProcess } from '../../../libs/entities';
+import { ProductionInLine } from './production-in-line.entity';
+import { ProductionOutLine } from './production-out-line.entity';
 
 @Entity({ name: 'documents_production' })
 export class Production extends AbstractEntity {
@@ -44,11 +47,11 @@ export class Production extends AbstractEntity {
     type: 'timestamp',
     nullable: false,
     default: () => 'CURRENT_TIMESTAMP',
-    name: 'createdAt',
+    name: 'created_at',
   })
-  created_at: Date;
+  createdAt: Date;
 
-  //created_by
+  // created_by
 
   @Column({
     type: 'varchar',
@@ -70,4 +73,16 @@ export class Production extends AbstractEntity {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(
+    () => ProductionInLine,
+    (productionInLine) => productionInLine.production,
+  )
+  productionInLines: ProductionInLine[];
+
+  @OneToMany(
+    () => ProductionOutLine,
+    (productionOutLine) => productionOutLine.production,
+  )
+  productionOutLines: ProductionOutLine[];
 }

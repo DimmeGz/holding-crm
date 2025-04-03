@@ -5,10 +5,12 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractDocumentRecipientEntity } from '../../entities';
 import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
+import { InvoiceLine } from './invoice-line.entity';
 
 @Entity({ name: 'documents_invoice' })
 export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
@@ -82,7 +84,18 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   })
   expectedDate: Date;
 
-  // parent
+  @ManyToOne(() => Invoice, {
+    nullable: true,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'parent_id' })
+  parent: Invoice;
+
+  @Column({ name: 'parent_id' })
+  parentId: number;
+
+  @OneToMany(() => Invoice, (invoice) => invoice.parent)
+  children: Invoice[];
 
   @Column({
     name: 'separation',
@@ -154,4 +167,11 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     length: 200,
   })
   contractInfo: string;
+
+  @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.invoice)
+  invoiceLines: InvoiceLine[];
+
+  // files
+
+  //created_by
 }
