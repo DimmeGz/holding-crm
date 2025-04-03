@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ReceiveService } from './receive.service';
 
 @Controller('receive')
@@ -8,5 +8,10 @@ export class ReceiveController {
   @Get()
   getReceives() {
     return this.receiveService.getReceives();
+  }
+
+  @Get(':receiveId')
+  getReceiveById(@Param('receiveId') receiveId: number) {
+    return this.receiveService.getReceiveById(receiveId);
   }
 }

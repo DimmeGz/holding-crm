@@ -18,12 +18,14 @@ export class ShipmentService {
       .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('shipment.invoice', 'invoice')
       .leftJoin('shipment.currency', 'currency')
+      .leftJoin('shipment.sellerWarehouse', 'sellerWarehouse')
       .select([
         'shipment.id',
         'shipment.status',
         'shipment.documentSum',
         'shipment.expectedDate',
         'seller.name',
+        'sellerWarehouse.name',
         'buyer.name',
         'invoice.invoiceNumber',
         'currency.name',
