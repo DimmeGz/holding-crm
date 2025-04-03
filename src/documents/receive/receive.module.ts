@@ -1,4 +1,14 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-@Module({})
+import { ReceiveService } from './receive.service';
+import { ReceiveController } from './receive.controller';
+
+import { Receive } from './entities';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Receive])],
+  providers: [ReceiveService],
+  controllers: [ReceiveController],
+})
 export class ReceiveModule {}

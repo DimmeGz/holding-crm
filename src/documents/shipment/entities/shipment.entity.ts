@@ -5,12 +5,14 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Warehouse } from '../../../warehouse/entities';
 import { Invoice } from '../../invoice/entities';
+import { ShipmentLine } from './shipment-line.entity';
 
 @Entity({ name: 'documents_shipment' })
 export class Shipment extends AbstractDocumentEntity<Shipment> {
@@ -79,4 +81,7 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(() => ShipmentLine, (shipmentLine) => shipmentLine.shipment)
+  shipmentLines: ShipmentLine[];
 }

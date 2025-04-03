@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractLineEntity } from '../../entities';
 import { Invoice } from './invoice.entity';
-import { Batch, Product } from '../../../goods/entities';
+import { Batch, Package, Product } from '../../../goods/entities';
 import { CountryOfOrigin } from '../../../libs/entities';
 import { Order } from '../../orders/entities';
 
@@ -34,10 +34,16 @@ export class InvoiceLine extends AbstractLineEntity {
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
 
+  @ManyToOne(() => Package, {
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'package_id' })
+  package: Package;
+
   @ManyToOne(() => CountryOfOrigin, {
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'country_of_origin' })
+  @JoinColumn({ name: 'country_of_origin_id' })
   countryOfOrigin: CountryOfOrigin;
 
   @ManyToOne(() => Order, {
