@@ -142,12 +142,9 @@ export class ContractsService {
       await this.shipmentService.getShippedProductsByContract(contractId);
 
     for (const contractLine of contract.contractLines) {
-      if (shippedProducts[contractLine.product.id]) {
-        contractLine['shipLeft'] =
-          contractLine.qty - shippedProducts[contractLine.product.id];
-      } else {
-        contractLine['shipLeft'] = contractLine.qty;
-      }
+      contractLine['shipLeft'] = shippedProducts[contractLine.product.id]
+        ? contractLine.qty - shippedProducts[contractLine.product.id]
+        : contractLine.qty;
     }
 
     return contract;
