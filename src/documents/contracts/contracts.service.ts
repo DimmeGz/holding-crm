@@ -146,7 +146,7 @@ export class ContractsService {
         contractLine['shipLeft'] =
           contractLine.qty - shippedProducts[contractLine.product.id];
       } else {
-        contractLine['shipLeft'] = shippedProducts[contractLine.product.id];
+        contractLine['shipLeft'] = contractLine.qty;
       }
     }
 
