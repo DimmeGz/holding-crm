@@ -68,6 +68,9 @@ export class Receive extends AbstractDocumentEntity<Receive> {
   @JoinColumn({ name: 'shipment_id' })
   shipment: Shipment;
 
+  @Column({ name: 'shipment_id' })
+  shipmentId: number;
+
   @ManyToMany(() => TechnicalProcess)
   @JoinTable({
     name: 'documents_receive_technical_process',

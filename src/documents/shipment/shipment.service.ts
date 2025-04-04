@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Shipment, ShipmentLine } from './entities';
+import { ReceiveService } from '../receive/receive.service';
 
 @Injectable()
 export class ShipmentService {
@@ -11,6 +12,7 @@ export class ShipmentService {
     private readonly shipmentsRepository: Repository<Shipment>,
     @InjectRepository(ShipmentLine)
     private readonly shipmentLinessRepository: Repository<ShipmentLine>,
+    private readonly receiveService: ReceiveService,
   ) {}
 
   async getShipments() {
@@ -73,7 +75,10 @@ export class ShipmentService {
       .where('shipment.id = :shipmentId', { shipmentId })
       .getOne();
 
-    return shipment;
+    const receives =
+      await this.receiveService.getReceivesByShipmentId(shipmentId);
+
+    return { shipment, receives };
   }
 
   async getShippedProductsByContract(
@@ -98,5 +103,22 @@ export class ShipmentService {
     }, {});
 
     return res;
+  }
+
+  async getShipmentsByInvoiceId(invoiceId: number) {
+    const shipments = await this.shipmentsRepository
+      .createQueryBuilder('shipment')
+      .where('shipment.invoiceId = :invoiceId', { invoiceId })
+      .select(['shipment.id', 'shipment.status'])
+      .orderBy('shipment.id', 'ASC')
+      .getMany();
+
+    for await (const shipment of shipments) {
+      shipment['receives'] = await this.receiveService.getReceivesByShipmentId(
+        shipment.id,
+      );
+    }
+
+    return shipments;
   }
 }

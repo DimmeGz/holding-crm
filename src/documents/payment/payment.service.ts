@@ -60,4 +60,16 @@ export class PaymentService {
 
     return payment;
   }
+
+  async getPaymentsByInvoiceId(invoiceId: number) {
+    const payments = await this.paymentsRepository
+      .createQueryBuilder('payment')
+      .leftJoin('payment.paymentLines', 'paymentLine')
+      .where('paymentLine.invoiceId = :invoiceId', { invoiceId })
+      .select(['payment.id', 'payment.status'])
+      .orderBy('payment.id', 'ASC')
+      .getMany();
+
+    return payments;
+  }
 }
