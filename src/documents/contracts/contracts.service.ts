@@ -5,13 +5,15 @@ import { Repository } from 'typeorm';
 import { Contract } from './entities';
 import { ContractsResponseDTO } from './dto';
 import { ShipmentService } from '../shipment';
+import { OrdersService } from '../orders/orders.service';
 
 @Injectable()
 export class ContractsService {
   constructor(
     @InjectRepository(Contract)
     private readonly contractsRepository: Repository<Contract>,
-    private readonly shipmentService: ShipmentService,
+    private readonly shipmentsService: ShipmentService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   async getContracts(): Promise<ContractsResponseDTO> {
@@ -100,7 +102,7 @@ export class ContractsService {
     };
   }
 
-  async getContractById(contractId: number): Promise<Contract> {
+  async getContractById(contractId: number) {
     const contract = await this.contractsRepository
       .createQueryBuilder('contract')
       .where('contract.id = :contractId', { contractId })
@@ -139,7 +141,7 @@ export class ContractsService {
       .getOne();
 
     const shippedProducts =
-      await this.shipmentService.getShippedProductsByContract(contractId);
+      await this.shipmentsService.getShippedProductsByContract(contractId);
 
     for (const contractLine of contract.contractLines) {
       contractLine['shipLeft'] = shippedProducts[contractLine.product.id]
@@ -147,6 +149,8 @@ export class ContractsService {
         : contractLine.qty;
     }
 
-    return contract;
+    const orders = await this.ordersService.getOrdersByContractId(contractId);
+
+    return { contract, orders };
   }
 }

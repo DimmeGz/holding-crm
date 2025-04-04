@@ -109,6 +109,9 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
   @JoinColumn({ name: 'contract_id' })
   contract: Contract;
 
+  @Column({ name: 'contract_id' })
+  contractId: number;
+
   @ManyToOne(() => Incoterms, {
     onDelete: 'RESTRICT',
   })

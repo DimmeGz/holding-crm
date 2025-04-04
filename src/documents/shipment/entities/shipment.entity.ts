@@ -68,6 +68,9 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
 
+  @Column({ name: 'invoice_id' })
+  invoiceId: number;
+
   @ManyToMany(() => TechnicalProcess)
   @JoinTable({
     name: 'documents_shipment_technical_process',
