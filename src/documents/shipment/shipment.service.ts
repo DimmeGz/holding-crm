@@ -76,7 +76,9 @@ export class ShipmentService {
     return shipment;
   }
 
-  async getShippedProductsByContract(contractId: number) {
+  async getShippedProductsByContract(
+    contractId: number,
+  ): Promise<{ number?: number }> {
     const shippedLines = await this.shipmentLinessRepository
       .createQueryBuilder('shipmentLine')
       .leftJoin('shipmentLine.shipment', 'shipment')
