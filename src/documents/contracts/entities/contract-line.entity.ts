@@ -19,4 +19,7 @@ export class ContractLine extends AbstractLineEntity {
 
   @Column({ name: 'ship_qty', type: 'smallint', unsigned: true, default: 1 })
   shipQty: number;
+
+  @Column({ type: 'smallint', unsigned: true, default: 1 })
+  qty: number;
 }
