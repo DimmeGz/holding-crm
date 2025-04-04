@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 
 import { Contract } from './entities';
 import { ContractsResponseDTO } from './dto';
+import { ShipmentService } from '../shipment';
 
 @Injectable()
 export class ContractsService {
   constructor(
     @InjectRepository(Contract)
     private readonly contractsRepository: Repository<Contract>,
+    private readonly shipmentService: ShipmentService,
   ) {}
 
   async getContracts(): Promise<ContractsResponseDTO> {
@@ -30,6 +32,7 @@ export class ContractsService {
         'buyer.name',
         'actualContract.signatureDate',
         'actualContract.term',
+        'children.id',
         'children.name',
         'childSeller.name',
         'childBuyer.name',
@@ -54,6 +57,7 @@ export class ContractsService {
         'buyer.name',
         'archivedContract.signatureDate',
         'archivedContract.term',
+        'children.id',
         'children.name',
         'childSeller.name',
         'childBuyer.name',
@@ -79,6 +83,7 @@ export class ContractsService {
         'buyer.name',
         'archivedChildContract.signatureDate',
         'archivedChildContract.term',
+        'children.id',
         'children.name',
         'childSeller.name',
         'childBuyer.name',
@@ -105,6 +110,7 @@ export class ContractsService {
       .leftJoin('contract.incoterms', 'incoterms')
       .select([
         'contract.id',
+        'contract.name',
         'contract.status',
         'contract.signatureDate',
         'contract.term',
@@ -123,6 +129,7 @@ export class ContractsService {
       .leftJoin('contractLine.package', 'package')
       .addSelect([
         'contractLine.id',
+        'contractLine.qty',
         'contractLine.shipQty',
         'contractLine.price',
         'product.id',
@@ -130,6 +137,18 @@ export class ContractsService {
         'package.name',
       ])
       .getOne();
+
+    const shippedProducts =
+      await this.shipmentService.getShippedProductsByContract(contractId);
+
+    for (const contractLine of contract.contractLines) {
+      if (shippedProducts[contractLine.product.id]) {
+        contractLine['shipLeft'] =
+          contractLine.qty - shippedProducts[contractLine.product.id];
+      } else {
+        contractLine['shipLeft'] = shippedProducts[contractLine.product.id];
+      }
+    }
 
     return contract;
   }

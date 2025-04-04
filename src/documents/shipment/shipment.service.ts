@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Shipment } from './entities';
+import { Shipment, ShipmentLine } from './entities';
 
 @Injectable()
 export class ShipmentService {
   constructor(
     @InjectRepository(Shipment)
     private readonly shipmentsRepository: Repository<Shipment>,
+    @InjectRepository(ShipmentLine)
+    private readonly shipmentLinessRepository: Repository<ShipmentLine>,
   ) {}
 
   async getShipments() {
@@ -72,5 +74,27 @@ export class ShipmentService {
       .getOne();
 
     return shipment;
+  }
+
+  async getShippedProductsByContract(contractId: number) {
+    const shippedLines = await this.shipmentLinessRepository
+      .createQueryBuilder('shipmentLine')
+      .leftJoin('shipmentLine.shipment', 'shipment')
+      .where('shipment.status = TRUE')
+      .leftJoin('shipment.invoice', 'invoice')
+      .leftJoin('invoice.invoiceLines', 'invoiceLine')
+      .leftJoin('invoiceLine.order', 'order')
+      .leftJoin('order.contract', 'contract')
+      .andWhere('contract.id = :contractId', { contractId })
+      .leftJoin('shipmentLine.product', 'product')
+      .select(['shipmentLine.id', 'shipmentLine.qty', 'product.id'])
+      .getMany();
+
+    const res = shippedLines.reduce((acc, { product: { id }, qty }) => {
+      acc[id] = (acc[id] || 0) + qty;
+      return acc;
+    }, {});
+
+    return res;
   }
 }
