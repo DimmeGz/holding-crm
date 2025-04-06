@@ -11,6 +11,7 @@ import {
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { ContractLine } from './contract-line.entity';
+import { ContractServiceLine } from './contract-service-line.entity';
 
 @Entity({ name: 'documents_contract' })
 export class Contract extends AbstractDocumentEntity<Contract> {
@@ -108,4 +109,13 @@ export class Contract extends AbstractDocumentEntity<Contract> {
     cascade: true,
   })
   contractLines: Partial<ContractLine>[];
+
+  @OneToMany(
+    () => ContractServiceLine,
+    (contractServiceLine) => contractServiceLine.contract,
+    {
+      cascade: true,
+    },
+  )
+  contractServiceLines: Partial<ContractServiceLine>[];
 }
