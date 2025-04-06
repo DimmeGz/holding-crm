@@ -139,7 +139,7 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })

@@ -79,7 +79,7 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
