@@ -168,7 +168,9 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   })
   contractInfo: string;
 
-  @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.invoice)
+  @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.invoice, {
+    cascade: true,
+  })
   invoiceLines: InvoiceLine[];
 
   // files

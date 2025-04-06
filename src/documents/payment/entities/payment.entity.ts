@@ -42,6 +42,8 @@ export class Payment extends AbstractDocumentEntity<Payment> {
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => PaymentLine, (paymentLine) => paymentLine.payment)
+  @OneToMany(() => PaymentLine, (paymentLine) => paymentLine.payment, {
+    cascade: true,
+  })
   paymentLines: PaymentLine[];
 }

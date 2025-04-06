@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { Package } from '../../goods/entities';
 import { AbstractServiceLineEntity } from './abstract-service-line.entity';
@@ -10,4 +10,10 @@ export class AbstractLineEntity extends AbstractServiceLineEntity {
   })
   @JoinColumn({ name: 'package_id' })
   package: Package;
+
+  @Column({ name: 'package_id' })
+  packageId: number;
+
+  @Column({ name: 'price' })
+  price: number;
 }

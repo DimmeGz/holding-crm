@@ -81,6 +81,7 @@ export class ProductTransport extends AbstractEntity {
   @OneToMany(
     () => ProductTransportLine,
     (productTransportLine) => productTransportLine.productTransport,
+    { cascade: true },
   )
   productTransportLines: ProductTransportLine[];
 }

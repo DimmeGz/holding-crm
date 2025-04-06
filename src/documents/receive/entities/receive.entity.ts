@@ -85,6 +85,8 @@ export class Receive extends AbstractDocumentEntity<Receive> {
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => ReceiveLine, (receiveLine) => receiveLine.receive)
+  @OneToMany(() => ReceiveLine, (receiveLine) => receiveLine.receive, {
+    cascade: true,
+  })
   receiveLines: ReceiveLine[];
 }
