@@ -141,6 +141,14 @@ export class ContractsService {
         'product.name',
         'package.name',
       ])
+      .leftJoin('contract.contractServiceLines', 'contractServiceLine')
+      .leftJoin('contractServiceLine.service', 'service')
+      .addSelect([
+        'contractServiceLine.id',
+        'contractServiceLine.price',
+        'contractServiceLine.qty',
+        'service.name',
+      ])
       .getOne();
 
     const shippedProducts =
