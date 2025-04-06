@@ -79,7 +79,7 @@ export class Receive extends AbstractDocumentEntity<Receive> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })

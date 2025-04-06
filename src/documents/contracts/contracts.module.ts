@@ -7,9 +7,15 @@ import { ShipmentModule } from '../shipment';
 
 import { ContractsController } from './contracts.controller';
 import { ContractsService } from './contracts.service';
+import { GoodsModule } from '../../goods';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Contract]), OrdersModule, ShipmentModule],
+  imports: [
+    TypeOrmModule.forFeature([Contract]),
+    GoodsModule,
+    OrdersModule,
+    ShipmentModule,
+  ],
   controllers: [ContractsController],
   providers: [ContractsService],
 })

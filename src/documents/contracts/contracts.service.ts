@@ -4,8 +4,10 @@ import { Repository } from 'typeorm';
 
 import { Contract } from './entities';
 import { ContractsResponseDTO, CreateContractDTO } from './dto';
+
+import { GoodsService } from '../../goods';
+import { OrdersService } from '../orders';
 import { ShipmentService } from '../shipment';
-import { OrdersService } from '../orders/orders.service';
 
 @Injectable()
 export class ContractsService {
@@ -14,6 +16,7 @@ export class ContractsService {
     private readonly contractsRepository: Repository<Contract>,
     private readonly shipmentsService: ShipmentService,
     private readonly ordersService: OrdersService,
+    private readonly goodsService: GoodsService,
   ) {}
 
   async getContracts(): Promise<ContractsResponseDTO> {
@@ -165,8 +168,31 @@ export class ContractsService {
     createContractDTO.paymentDelay = createContractDTO.paymentDelay || 0;
     createContractDTO.vat = createContractDTO.vat || 0;
 
+    createContractDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createContractDTO);
+
     const newContract = new Contract(createContractDTO);
 
     return await this.contractsRepository.save(newContract);
+  }
+
+  private async getTechnicalProcesses(createContractDTO: CreateContractDTO) {
+    const productIds = createContractDTO.contractLines.map(
+      (line) => line.productId,
+    );
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = createContractDTO.contractServiceLines.map(
+      (line) => line.serviceId,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
   }
 }

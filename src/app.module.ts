@@ -7,7 +7,6 @@ import { AppService } from './app.service';
 
 import { CompaniesModule } from './companies/';
 import { DocumentsModule } from './documents';
-import { GoodsModule } from './goods';
 import { LibsModule } from './libs';
 import { WarehouseModule } from './warehouse';
 
@@ -19,7 +18,6 @@ import { DB_CONFIG, VALIDATION_SCHEMA } from './config';
     TypeOrmModule.forRoot(DB_CONFIG),
     CompaniesModule,
     DocumentsModule,
-    GoodsModule,
     LibsModule,
     WarehouseModule,
   ],
