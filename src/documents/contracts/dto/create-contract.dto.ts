@@ -8,8 +8,10 @@ import {
   Length,
   ValidateNested,
 } from 'class-validator';
-import { CreateContractLineDto } from './create-contract-line.dto';
 import { Type } from 'class-transformer';
+
+import { CreateContractLineDto } from './create-contract-line.dto';
+import { CreateContractServiceLineDto } from './create-contract-service-line.dto';
 
 export class CreateContractDTO {
   @IsString()
@@ -74,4 +76,9 @@ export class CreateContractDTO {
   @ValidateNested({ each: true })
   @Type(() => CreateContractLineDto)
   contractLines: CreateContractLineDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateContractServiceLineDto)
+  contractServiceLines: CreateContractServiceLineDto[];
 }
