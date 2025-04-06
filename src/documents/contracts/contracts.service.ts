@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Contract } from './entities';
-import { ContractsResponseDTO } from './dto';
+import { ContractsResponseDTO, CreateContractDTO } from './dto';
 import { ShipmentService } from '../shipment';
 import { OrdersService } from '../orders/orders.service';
 
@@ -152,5 +152,21 @@ export class ContractsService {
     const orders = await this.ordersService.getOrdersByContractId(contractId);
 
     return { contract, orders };
+  }
+
+  async createContract(createContractDTO: CreateContractDTO) {
+    createContractDTO['status'] = true;
+    createContractDTO['isArchived'] = false;
+    createContractDTO['createdAt'] = new Date();
+    createContractDTO['created_by_id'] = 1;
+    createContractDTO.signatureDate =
+      createContractDTO.signatureDate || createContractDTO['createdAt'];
+    createContractDTO.comment = createContractDTO.comment || '';
+    createContractDTO.paymentDelay = createContractDTO.paymentDelay || 0;
+    createContractDTO.vat = createContractDTO.vat || 0;
+
+    const newContract = new Contract(createContractDTO);
+
+    return await this.contractsRepository.save(newContract);
   }
 }

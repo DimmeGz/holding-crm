@@ -85,6 +85,8 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => ShipmentLine, (shipmentLine) => shipmentLine.shipment)
+  @OneToMany(() => ShipmentLine, (shipmentLine) => shipmentLine.shipment, {
+    cascade: true,
+  })
   shipmentLines: ShipmentLine[];
 }

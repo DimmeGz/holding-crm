@@ -145,7 +145,7 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => OrderLine, (orderLine) => orderLine.order)
+  @OneToMany(() => OrderLine, (orderLine) => orderLine.order, { cascade: true })
   orderLines: OrderLine[];
 
   @OneToMany(
