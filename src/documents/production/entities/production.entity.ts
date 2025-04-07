@@ -68,7 +68,7 @@ export class Production extends AbstractEntity {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
@@ -77,12 +77,14 @@ export class Production extends AbstractEntity {
   @OneToMany(
     () => ProductionInLine,
     (productionInLine) => productionInLine.production,
+    { cascade: true },
   )
   productionInLines: ProductionInLine[];
 
   @OneToMany(
     () => ProductionOutLine,
     (productionOutLine) => productionOutLine.production,
+    { cascade: true },
   )
   productionOutLines: ProductionOutLine[];
 }

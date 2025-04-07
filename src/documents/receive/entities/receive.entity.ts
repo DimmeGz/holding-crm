@@ -68,6 +68,9 @@ export class Receive extends AbstractDocumentEntity<Receive> {
   @JoinColumn({ name: 'shipment_id' })
   shipment: Shipment;
 
+  @Column({ name: 'shipment_id' })
+  shipmentId: number;
+
   @ManyToMany(() => TechnicalProcess)
   @JoinTable({
     name: 'documents_receive_technical_process',
@@ -76,12 +79,14 @@ export class Receive extends AbstractDocumentEntity<Receive> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => ReceiveLine, (receiveLine) => receiveLine.receive)
+  @OneToMany(() => ReceiveLine, (receiveLine) => receiveLine.receive, {
+    cascade: true,
+  })
   receiveLines: ReceiveLine[];
 }

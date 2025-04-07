@@ -11,7 +11,7 @@ import {
 import { CustomField } from './custom-field.entity';
 import { Batch } from './batch.entity';
 import { AbstractEntity } from '../../common/entities';
-import { CountryOfOrigin } from '../../libs/entities';
+import { CountryOfOrigin, TechnicalProcess } from '../../libs/entities';
 
 @Entity({ name: 'warehouse_product' })
 export class Product extends AbstractEntity {
@@ -74,4 +74,18 @@ export class Product extends AbstractEntity {
 
   @OneToMany(() => Batch, (batch) => batch.product)
   batches: Batch[];
+
+  @ManyToMany(() => TechnicalProcess)
+  @JoinTable({
+    name: 'warehouse_technicalprocess_product',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'technicalprocess_id',
+      referencedColumnName: 'id',
+    },
+  })
+  technicalProcesses: TechnicalProcess[];
 }

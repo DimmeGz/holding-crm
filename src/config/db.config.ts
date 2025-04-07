@@ -18,7 +18,11 @@ import {
 } from '../libs/entities';
 import { Warehouse, WarehouseAccounting } from '../warehouse/entities';
 
-import { Contract, ContractLine } from '../documents/contracts/entities';
+import {
+  Contract,
+  ContractLine,
+  ContractServiceLine,
+} from '../documents/contracts/entities';
 import {
   Order,
   OrderLine,
@@ -74,6 +78,7 @@ export const DB_CONFIG: TypeOrmModuleOptions = {
     Company,
     Contract,
     ContractLine,
+    ContractServiceLine,
     CountryOfOrigin,
     Currency,
     CurrencyRate,

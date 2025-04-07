@@ -11,6 +11,7 @@ import {
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { ContractLine } from './contract-line.entity';
+import { ContractServiceLine } from './contract-service-line.entity';
 
 @Entity({ name: 'documents_contract' })
 export class Contract extends AbstractDocumentEntity<Contract> {
@@ -22,7 +23,7 @@ export class Contract extends AbstractDocumentEntity<Contract> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
@@ -82,6 +83,9 @@ export class Contract extends AbstractDocumentEntity<Contract> {
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
 
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
+
   @Column({
     name: 'transport_place',
     type: 'varchar',
@@ -101,6 +105,17 @@ export class Contract extends AbstractDocumentEntity<Contract> {
   @Column({ name: 'is_archived', default: false })
   isArchived: boolean;
 
-  @OneToMany(() => ContractLine, (contractLine) => contractLine.contract)
-  contractLines: ContractLine[];
+  @OneToMany(() => ContractLine, (contractLine) => contractLine.contract, {
+    cascade: true,
+  })
+  contractLines: Partial<ContractLine>[];
+
+  @OneToMany(
+    () => ContractServiceLine,
+    (contractServiceLine) => contractServiceLine.contract,
+    {
+      cascade: true,
+    },
+  )
+  contractServiceLines: Partial<ContractServiceLine>[];
 }

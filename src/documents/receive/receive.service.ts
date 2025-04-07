@@ -74,4 +74,15 @@ export class ReceiveService {
 
     return receive;
   }
+
+  async getReceivesByShipmentId(shipmentId: number) {
+    const receives = await this.receivesRepository
+      .createQueryBuilder('receive')
+      .where('receive.shipmentId = :shipmentId', { shipmentId })
+      .select(['receive.id', 'receive.status'])
+      .orderBy('receive.id', 'ASC')
+      .getMany();
+
+    return receives;
+  }
 }

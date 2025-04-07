@@ -18,6 +18,9 @@ export class PaymentLine extends AbstractEntity {
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
 
+  @Column({ name: 'invoice_id' })
+  invoiceId: number;
+
   @Column({
     type: 'decimal',
     unsigned: true,
