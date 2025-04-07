@@ -280,4 +280,14 @@ export class ContractsService {
     });
     await this.contractsRepository.remove(contract);
   }
+
+  async changeContractStatus(contractId: number) {
+    const contract = await this.contractsRepository.findOne({
+      where: { id: contractId },
+    });
+
+    contract.status = contract.status ? false : true;
+
+    return await this.contractsRepository.save(contract);
+  }
 }
