@@ -43,4 +43,9 @@ export class ContractsController {
   removeContract(@Param('contractId') contractId: number) {
     return this.contractsService.removeContract(contractId);
   }
+
+  @Patch('change-status/:contractId')
+  changeContractStatus(@Param('contractId') contractId: number) {
+    return this.contractsService.changeContractStatus(contractId);
+  }
 }
