@@ -13,7 +13,4 @@ export class AbstractLineEntity extends AbstractServiceLineEntity {
 
   @Column({ name: 'package_id' })
   packageId: number;
-
-  @Column({ name: 'price' })
-  price: number;
 }
