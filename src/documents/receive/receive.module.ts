@@ -10,5 +10,6 @@ import { Receive } from './entities';
   imports: [TypeOrmModule.forFeature([Receive])],
   providers: [ReceiveService],
   controllers: [ReceiveController],
+  exports: [ReceiveService],
 })
 export class ReceiveModule {}

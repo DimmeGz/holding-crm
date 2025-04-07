@@ -11,17 +11,26 @@ export class AbstractDocumentEntity<T> extends AbstractEntity {
   @JoinColumn({ name: 'seller_id' })
   seller: Company;
 
+  @Column({ name: 'seller_id' })
+  sellerId: number;
+
   @ManyToOne(() => Company, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'buyer_id' })
   buyer: Company;
 
+  @Column({ name: 'buyer_id' })
+  buyerId: number;
+
   @ManyToOne(() => Currency, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'currency_id' })
   currency: Currency;
+
+  @Column({ name: 'currency_id' })
+  currencyId: number;
 
   @Column({
     type: 'varchar',
@@ -44,10 +53,13 @@ export class AbstractDocumentEntity<T> extends AbstractEntity {
   })
   createdAt: Date;
 
-  // created_by
+  // TODO: created_by
+  @Column({ name: 'created_by_id' })
+  createdById: number;
 
   constructor(entity: Partial<T>) {
     super();
-    Object.assign(this, entity);
+    // TODO: created_by
+    Object.assign(this, { ...entity, createdById: 1 });
   }
 }

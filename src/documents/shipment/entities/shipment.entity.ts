@@ -68,6 +68,9 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
 
+  @Column({ name: 'invoice_id' })
+  invoiceId: number;
+
   @ManyToMany(() => TechnicalProcess)
   @JoinTable({
     name: 'documents_shipment_technical_process',
@@ -76,12 +79,14 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => ShipmentLine, (shipmentLine) => shipmentLine.shipment)
+  @OneToMany(() => ShipmentLine, (shipmentLine) => shipmentLine.shipment, {
+    cascade: true,
+  })
   shipmentLines: ShipmentLine[];
 }

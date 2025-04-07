@@ -72,7 +72,7 @@ export class ProductTransport extends AbstractEntity {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
@@ -81,6 +81,7 @@ export class ProductTransport extends AbstractEntity {
   @OneToMany(
     () => ProductTransportLine,
     (productTransportLine) => productTransportLine.productTransport,
+    { cascade: true },
   )
   productTransportLines: ProductTransportLine[];
 }

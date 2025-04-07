@@ -46,7 +46,7 @@ export class TransitLine extends AbstractEntity {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })

@@ -36,12 +36,14 @@ export class Payment extends AbstractDocumentEntity<Payment> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => PaymentLine, (paymentLine) => paymentLine.payment)
+  @OneToMany(() => PaymentLine, (paymentLine) => paymentLine.payment, {
+    cascade: true,
+  })
   paymentLines: PaymentLine[];
 }

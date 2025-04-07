@@ -3,12 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Invoice } from './entities';
+import { ShipmentService } from '../shipment';
+import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
+    private readonly shipmentsService: ShipmentService,
+    private readonly paymentsService: PaymentService,
   ) {}
 
   async getInvoices() {
@@ -90,6 +94,31 @@ export class InvoiceService {
       ])
       .getOne();
 
-    return invoice;
+    const shipments =
+      await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
+    const payments =
+      await this.paymentsService.getPaymentsByInvoiceId(invoiceId);
+
+    return { invoice, shipments, payments };
+  }
+
+  async getInvoicesByOrderId(orderId: number) {
+    const invoices = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .leftJoin('invoice.invoiceLines', 'invoiceLine')
+      .where('invoiceLine.orderId = :orderId', { orderId })
+      .orderBy('invoice.id', 'ASC')
+      .select(['invoice.id', 'invoice.status', 'invoice.invoiceNumber'])
+      .getMany();
+
+    for await (const invoice of invoices) {
+      invoice['shipments'] =
+        await this.shipmentsService.getShipmentsByInvoiceId(invoice.id);
+      invoice['payments'] = await this.paymentsService.getPaymentsByInvoiceId(
+        invoice.id,
+      );
+    }
+
+    return invoices;
   }
 }

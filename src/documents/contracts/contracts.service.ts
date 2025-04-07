@@ -1,15 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { Contract } from './entities';
-import { ContractsResponseDTO } from './dto';
+import {
+  ContractsResponseDTO,
+  CreateContractDTO,
+  UpdateContractDTO,
+} from './dto';
+
+import { GoodsService } from '../../goods';
+import { OrdersService } from '../orders';
+import { ShipmentService } from '../shipment';
 
 @Injectable()
 export class ContractsService {
   constructor(
     @InjectRepository(Contract)
     private readonly contractsRepository: Repository<Contract>,
+    private readonly shipmentsService: ShipmentService,
+    private readonly ordersService: OrdersService,
+    private readonly goodsService: GoodsService,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async getContracts(): Promise<ContractsResponseDTO> {
@@ -30,6 +42,7 @@ export class ContractsService {
         'buyer.name',
         'actualContract.signatureDate',
         'actualContract.term',
+        'children.id',
         'children.name',
         'childSeller.name',
         'childBuyer.name',
@@ -54,6 +67,7 @@ export class ContractsService {
         'buyer.name',
         'archivedContract.signatureDate',
         'archivedContract.term',
+        'children.id',
         'children.name',
         'childSeller.name',
         'childBuyer.name',
@@ -79,6 +93,7 @@ export class ContractsService {
         'buyer.name',
         'archivedChildContract.signatureDate',
         'archivedChildContract.term',
+        'children.id',
         'children.name',
         'childSeller.name',
         'childBuyer.name',
@@ -95,7 +110,7 @@ export class ContractsService {
     };
   }
 
-  async getContractById(contractId: number): Promise<Contract> {
+  async getContractById(contractId: number) {
     const contract = await this.contractsRepository
       .createQueryBuilder('contract')
       .where('contract.id = :contractId', { contractId })
@@ -105,6 +120,7 @@ export class ContractsService {
       .leftJoin('contract.incoterms', 'incoterms')
       .select([
         'contract.id',
+        'contract.name',
         'contract.status',
         'contract.signatureDate',
         'contract.term',
@@ -123,14 +139,157 @@ export class ContractsService {
       .leftJoin('contractLine.package', 'package')
       .addSelect([
         'contractLine.id',
+        'contractLine.qty',
         'contractLine.shipQty',
         'contractLine.price',
         'product.id',
         'product.name',
         'package.name',
       ])
+      .leftJoin('contract.contractServiceLines', 'contractServiceLine')
+      .leftJoin('contractServiceLine.service', 'service')
+      .addSelect([
+        'contractServiceLine.id',
+        'contractServiceLine.price',
+        'contractServiceLine.qty',
+        'service.name',
+      ])
       .getOne();
 
-    return contract;
+    const shippedProducts =
+      await this.shipmentsService.getShippedProductsByContract(contractId);
+
+    for (const contractLine of contract.contractLines) {
+      contractLine['shipLeft'] = shippedProducts[contractLine.product.id]
+        ? contractLine.qty - shippedProducts[contractLine.product.id]
+        : contractLine.qty;
+    }
+
+    const orders = await this.ordersService.getOrdersByContractId(contractId);
+
+    return { contract, orders };
+  }
+
+  async createContract(createContractDTO: CreateContractDTO) {
+    createContractDTO['status'] = false;
+    createContractDTO['isArchived'] = false;
+    createContractDTO['createdAt'] = new Date();
+    createContractDTO['created_by_id'] = 1;
+    createContractDTO.signatureDate =
+      createContractDTO.signatureDate || createContractDTO['createdAt'];
+    createContractDTO.comment = createContractDTO.comment || '';
+    createContractDTO.paymentDelay = createContractDTO.paymentDelay || 0;
+    createContractDTO.vat = createContractDTO.vat || 0;
+
+    createContractDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createContractDTO);
+
+    const newContract = new Contract(createContractDTO);
+
+    return await this.contractsRepository.save(newContract);
+  }
+
+  private async getTechnicalProcesses(createContractDTO: CreateContractDTO) {
+    const productIds = createContractDTO.contractLines.map(
+      (line) => line.productId,
+    );
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = createContractDTO.contractServiceLines.map(
+      (line) => line.serviceId,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateContract(
+    contractId: number,
+    updateContractDTO: UpdateContractDTO,
+  ) {
+    const contract = await this.contractsRepository
+      .createQueryBuilder('contract')
+      .where('contract.id = :contractId', { contractId })
+      .andWhere('contract.status = FALSE')
+      .leftJoinAndSelect('contract.contractLines', 'contractLines')
+      .leftJoinAndSelect(
+        'contract.contractServiceLines',
+        'contractServiceLines',
+      )
+      .leftJoinAndSelect('contract.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedContractLinesIds = [];
+    for (const line of updateContractDTO.contractLines) {
+      if (line['id']) {
+        updatedContractLinesIds.push(line['id']);
+      }
+    }
+    const contractLinesToDelete = contract.contractLines.filter(
+      (line) => !updatedContractLinesIds.includes(line.id),
+    );
+
+    const updatedContractServiceLinesIds = [];
+    for (const line of updateContractDTO.contractServiceLines) {
+      if (line['id']) {
+        updatedContractServiceLinesIds.push(line['id']);
+      }
+    }
+    const contractServiceLinesToDelete = contract.contractServiceLines.filter(
+      (line) => !updatedContractServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(contract, updateContractDTO);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    // TODO: update technical processes
+
+    try {
+      if (contractLinesToDelete.length) {
+        await queryRunner.manager.remove(contractLinesToDelete);
+      }
+
+      if (contractServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(contractServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async removeContract(contractId: number) {
+    const contract = await this.contractsRepository.findOne({
+      where: { id: contractId },
+      relations: ['contractLines', 'contractServiceLines'],
+    });
+    await this.contractsRepository.remove(contract);
+  }
+
+  async changeContractStatus(contractId: number) {
+    const contract = await this.contractsRepository.findOne({
+      where: { id: contractId },
+    });
+
+    contract.status = contract.status ? false : true;
+
+    return await this.contractsRepository.save(contract);
   }
 }

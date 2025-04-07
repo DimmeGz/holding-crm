@@ -52,6 +52,9 @@ export class InvoiceLine extends AbstractLineEntity {
   @JoinColumn({ name: 'order_id' })
   order: Order;
 
+  @Column({ name: 'order_id' })
+  orderId: number;
+
   @Column({
     name: 'pallets_qty',
     type: 'smallint',

@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Order } from './entities';
+import { InvoiceService } from '../invoice/invoice.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
+    private readonly invoiceService: InvoiceService,
   ) {}
 
   async getOrders() {
@@ -33,6 +35,7 @@ export class OrdersService {
         'orderConfirmation.id',
         'orderConfirmation.expectedDate',
       ])
+      .orderBy('order.id', 'DESC')
       .getMany();
 
     for (let order of orders) {
@@ -89,6 +92,25 @@ export class OrdersService {
       .where('order.id = :orderId', { orderId })
       .getOne();
 
-    return order;
+    const invoices = await this.invoiceService.getInvoicesByOrderId(orderId);
+
+    return { order, invoices };
+  }
+
+  async getOrdersByContractId(contractId: number) {
+    const orders = await this.ordersRepository
+      .createQueryBuilder('order')
+      .where('order.contractId = :contractId', { contractId })
+      .select(['order.id', 'order.status'])
+      .orderBy('order.id', 'ASC')
+      .getMany();
+
+    for await (const order of orders) {
+      order['invoices'] = await this.invoiceService.getInvoicesByOrderId(
+        order.id,
+      );
+    }
+
+    return orders;
   }
 }

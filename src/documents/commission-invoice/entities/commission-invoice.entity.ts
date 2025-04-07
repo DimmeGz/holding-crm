@@ -62,7 +62,7 @@ export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice>
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })

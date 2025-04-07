@@ -109,6 +109,9 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
   @JoinColumn({ name: 'contract_id' })
   contract: Contract;
 
+  @Column({ name: 'contract_id' })
+  contractId: number;
+
   @ManyToOne(() => Incoterms, {
     onDelete: 'RESTRICT',
   })
@@ -136,13 +139,13 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: 'technical_process_id',
+      name: 'technicalprocess_id',
       referencedColumnName: 'id',
     },
   })
   technicalProcesses: TechnicalProcess[];
 
-  @OneToMany(() => OrderLine, (orderLine) => orderLine.order)
+  @OneToMany(() => OrderLine, (orderLine) => orderLine.order, { cascade: true })
   orderLines: OrderLine[];
 
   @OneToMany(
