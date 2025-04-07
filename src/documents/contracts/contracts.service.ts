@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { Contract } from './entities';
-import { ContractsResponseDTO, CreateContractDTO } from './dto';
+import {
+  ContractsResponseDTO,
+  CreateContractDTO,
+  UpdateContractDTO,
+} from './dto';
 
 import { GoodsService } from '../../goods';
 import { OrdersService } from '../orders';
@@ -17,6 +21,7 @@ export class ContractsService {
     private readonly shipmentsService: ShipmentService,
     private readonly ordersService: OrdersService,
     private readonly goodsService: GoodsService,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async getContracts(): Promise<ContractsResponseDTO> {
@@ -166,7 +171,7 @@ export class ContractsService {
   }
 
   async createContract(createContractDTO: CreateContractDTO) {
-    createContractDTO['status'] = true;
+    createContractDTO['status'] = false;
     createContractDTO['isArchived'] = false;
     createContractDTO['createdAt'] = new Date();
     createContractDTO['created_by_id'] = 1;
@@ -202,5 +207,69 @@ export class ContractsService {
     ];
 
     return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateContract(
+    contractId: number,
+    updateContractDTO: UpdateContractDTO,
+  ) {
+    const contract = await this.contractsRepository
+      .createQueryBuilder('contract')
+      .where('contract.id = :contractId', { contractId })
+      .andWhere('contract.status = FALSE')
+      .leftJoinAndSelect('contract.contractLines', 'contractLines')
+      .leftJoinAndSelect(
+        'contract.contractServiceLines',
+        'contractServiceLines',
+      )
+      .leftJoinAndSelect('contract.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedContractLinesIds = [];
+    for (const line of updateContractDTO.contractLines) {
+      if (line['id']) {
+        updatedContractLinesIds.push(line['id']);
+      }
+    }
+    const contractLinesToDelete = contract.contractLines.filter(
+      (line) => !updatedContractLinesIds.includes(line.id),
+    );
+
+    const updatedContractServiceLinesIds = [];
+    for (const line of updateContractDTO.contractServiceLines) {
+      if (line['id']) {
+        updatedContractServiceLinesIds.push(line['id']);
+      }
+    }
+    const contractServiceLinesToDelete = contract.contractServiceLines.filter(
+      (line) => !updatedContractServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(contract, updateContractDTO);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (contractLinesToDelete.length) {
+        await queryRunner.manager.remove(contractLinesToDelete);
+      }
+
+      if (contractServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(contractServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
