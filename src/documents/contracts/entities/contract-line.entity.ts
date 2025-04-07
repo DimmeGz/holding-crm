@@ -6,7 +6,7 @@ import { Product } from '../../../goods/entities';
 @Entity({ name: 'documents_contractline' })
 export class ContractLine extends AbstractLineEntity {
   @ManyToOne(() => Contract, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'contract_id' })
   contract: Contract;

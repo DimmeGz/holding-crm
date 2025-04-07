@@ -272,4 +272,12 @@ export class ContractsService {
       await queryRunner.release();
     }
   }
+
+  async removeContract(contractId: number) {
+    const contract = await this.contractsRepository.findOne({
+      where: { id: contractId },
+      relations: ['contractLines', 'contractServiceLines'],
+    });
+    await this.contractsRepository.remove(contract);
+  }
 }
