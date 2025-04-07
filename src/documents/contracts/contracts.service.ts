@@ -251,6 +251,8 @@ export class ContractsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+    // TODO: update technical processes
+
     try {
       if (contractLinesToDelete.length) {
         await queryRunner.manager.remove(contractLinesToDelete);
