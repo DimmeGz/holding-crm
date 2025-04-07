@@ -19,7 +19,7 @@ export class IsOneOfDtosConstraint implements ValidatorConstraintInterface {
 
         if (errors.length === 0) {
           isOk = true;
-          continue;
+          break;
         }
       }
 
