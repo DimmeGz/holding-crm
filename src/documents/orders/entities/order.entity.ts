@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 import { AbstractDocumentRecipientEntity } from '../../entities';
-import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
+import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Contract } from '../../contracts/entities';
 import { OrderLine } from './order-line.entity';
 import { OrderConfirmation } from '../../orders-confirmation/entities';
@@ -22,12 +22,6 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
     default: 0,
   })
   paymentDelay: number;
-
-  @ManyToOne(() => Currency, {
-    onDelete: 'RESTRICT',
-  })
-  @JoinColumn({ name: 'currency_id' })
-  currency: Currency;
 
   @Column({
     default: false,
@@ -117,6 +111,9 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
   })
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
+
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
 
   @Column({
     name: 'transport_place',

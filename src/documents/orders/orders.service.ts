@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { Order } from './entities';
 import { InvoiceService } from '../invoice/invoice.service';
+import { CreateOrderDTO } from './dto';
 
 @Injectable()
 export class OrdersService {
@@ -112,5 +113,9 @@ export class OrdersService {
     }
 
     return orders;
+  }
+
+  createOrder(createOrderDTO: CreateOrderDTO) {
+    return createOrderDTO;
   }
 }

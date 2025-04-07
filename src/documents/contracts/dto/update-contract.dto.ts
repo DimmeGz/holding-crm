@@ -1,4 +1,4 @@
-import { IsArray, IsOptional } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 import { BaseContractDTO } from './base-contract-dto';
@@ -11,6 +11,7 @@ import { CreateContractLineDto } from './create-contract-line.dto';
 export class UpdateContractDTO extends BaseContractDTO {
   @IsOptional()
   @IsArray()
+  @ArrayNotEmpty()
   @Type(() => Object)
   @IsOneOfDtos(CreateContractLineDto, UpdateContractLineDto)
   contractLines: (CreateContractLineDto | UpdateContractLineDto)[];
