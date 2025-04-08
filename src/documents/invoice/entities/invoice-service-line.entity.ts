@@ -7,7 +7,7 @@ import { Service } from '../../../goods/entities';
 @Entity({ name: 'documents_invoiceserviceline' })
 export class InvoiceServiceLine extends AbstractServiceLineEntity {
   @ManyToOne(() => Invoice, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;

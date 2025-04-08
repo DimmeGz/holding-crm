@@ -3,7 +3,7 @@ import { IsBoolean, IsInt, IsOptional, IsPositive } from 'class-validator';
 
 import { CreateOrderLineDTO } from './create-order-line.dto';
 
-export class UpdateOrderLineDto extends PartialType(CreateOrderLineDTO) {
+export class UpdateOrderLineDTO extends PartialType(CreateOrderLineDTO) {
   @IsPositive()
   @IsInt()
   id: number;
