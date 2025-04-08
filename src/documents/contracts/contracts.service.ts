@@ -12,6 +12,10 @@ import {
 import { GoodsService } from '../../goods';
 import { OrdersService } from '../orders';
 import { ShipmentService } from '../shipment';
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils/get-ids-from-lines';
 
 @Injectable()
 export class ContractsService {
@@ -190,14 +194,14 @@ export class ContractsService {
   }
 
   private async getTechnicalProcesses(createContractDTO: CreateContractDTO) {
-    const productIds = createContractDTO.contractLines.map(
-      (line) => line.productId,
+    const productIds = getProductIdsFromProductLines(
+      createContractDTO.contractLines,
     );
     const productProcesses =
       await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
 
-    const serviceIds = createContractDTO.contractServiceLines.map(
-      (line) => line.serviceId,
+    const serviceIds = getServiceIdsFromServiceLines(
+      createContractDTO.contractServiceLines,
     );
     const serviceProcesses =
       await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
