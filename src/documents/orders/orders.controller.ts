@@ -42,4 +42,9 @@ export class OrdersController {
   removeOrder(@Param('orderId') orderId: number) {
     return this.ordersService.removeOrder(orderId);
   }
+
+  @Patch('change-status/:orderId')
+  changeContractStatus(@Param('orderId') orderId: number) {
+    return this.ordersService.changeOrderStatus(orderId);
+  }
 }

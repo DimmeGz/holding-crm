@@ -239,4 +239,14 @@ export class OrdersService {
     });
     return await this.ordersRepository.remove(order);
   }
+
+  async changeOrderStatus(orderId: number) {
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId },
+    });
+
+    order.status = order.status ? false : true;
+
+    return await this.ordersRepository.save(order);
+  }
 }
