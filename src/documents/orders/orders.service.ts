@@ -11,7 +11,7 @@ import { OrdersConfirmationService } from '../orders-confirmation';
 import {
   getProductIdsFromOrderProductLines,
   getServiceIdsFromServiceLines,
-} from '../../common/utils/get-ids-from-lines';
+} from '../../common/utils';
 
 @Injectable()
 export class OrdersService {

@@ -106,4 +106,11 @@ export class BaseInvoiceDTO {
   @IsOptional()
   @IsBoolean()
   separation?: boolean;
+
+  @IsString()
+  @Length(0, 15)
+  invoiceNumber: string;
+
+  @IsBoolean()
+  reportDuplicating: boolean;
 }

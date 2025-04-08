@@ -2,18 +2,25 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Invoice } from './entities';
 import { ShipmentService } from '../shipment';
 import { PaymentService } from '../payment/payment.service';
+import { GoodsService } from '../../goods';
+
+import { Invoice } from './entities';
 import { CreateInvoiceDTO } from './dto';
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
-    private readonly shipmentsService: ShipmentService,
+    private readonly goodsService: GoodsService,
     private readonly paymentsService: PaymentService,
+    private readonly shipmentsService: ShipmentService,
   ) {}
 
   async getInvoices() {
@@ -124,6 +131,52 @@ export class InvoiceService {
   }
 
   async createInvoice(createInvoiceDTO: CreateInvoiceDTO) {
-    return createInvoiceDTO;
+    createInvoiceDTO['status'] = false;
+    createInvoiceDTO['createdAt'] = new Date();
+    createInvoiceDTO.reportPeriod =
+      createInvoiceDTO.reportPeriod || createInvoiceDTO['createdAt'];
+    createInvoiceDTO.comment = createInvoiceDTO.comment || '';
+    createInvoiceDTO.transportPlace = createInvoiceDTO.transportPlace || '';
+    createInvoiceDTO.paymentDelay = createInvoiceDTO.paymentDelay || 0;
+    createInvoiceDTO.vat = createInvoiceDTO.vat || 0;
+    createInvoiceDTO.separation = createInvoiceDTO.separation || false;
+
+    createInvoiceDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createInvoiceDTO);
+
+    createInvoiceDTO['documentSum'] =
+      createInvoiceDTO.invoiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      createInvoiceDTO.invoiceServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+    createInvoiceDTO['paymentBalance'] = createInvoiceDTO['documentSum'];
+
+    const newInvoice = new Invoice(createInvoiceDTO);
+
+    return await this.invoiceRepository.save(newInvoice);
+  }
+
+  private async getTechnicalProcesses(createInvoiceDTO: CreateInvoiceDTO) {
+    const productIds = getProductIdsFromProductLines(
+      createInvoiceDTO.invoiceLines,
+    );
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = getServiceIdsFromServiceLines(
+      createInvoiceDTO.invoiceServiceLines,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
   }
 }

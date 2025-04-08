@@ -130,6 +130,9 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
 
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
+
   @Column({
     name: 'transport_place',
     type: 'varchar',
@@ -168,10 +171,13 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   })
   contractInfo: string;
 
+  @Column({ name: 'report_duplicating', default: false })
+  reportDuplicating: boolean;
+
   @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.invoice, {
     cascade: true,
   })
-  invoiceLines: InvoiceLine[];
+  invoiceLines: Partial<InvoiceLine>[];
 
   // files
 
