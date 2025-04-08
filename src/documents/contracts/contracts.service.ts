@@ -15,7 +15,7 @@ import { ShipmentService } from '../shipment';
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
-} from '../../common/utils/get-ids-from-lines';
+} from '../../common/utils';
 
 @Injectable()
 export class ContractsService {
@@ -178,7 +178,6 @@ export class ContractsService {
     createContractDTO['status'] = false;
     createContractDTO['isArchived'] = false;
     createContractDTO['createdAt'] = new Date();
-    createContractDTO['created_by_id'] = 1;
     createContractDTO.signatureDate =
       createContractDTO.signatureDate || createContractDTO['createdAt'];
     createContractDTO.comment = createContractDTO.comment || '';

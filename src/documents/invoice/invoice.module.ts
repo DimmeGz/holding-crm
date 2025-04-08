@@ -7,9 +7,15 @@ import { PaymentModule } from '../payment';
 
 import { InvoiceService } from './invoice.service';
 import { InvoiceController } from './invoice.controller';
+import { GoodsModule } from '../../goods';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invoice]), ShipmentModule, PaymentModule],
+  imports: [
+    TypeOrmModule.forFeature([Invoice]),
+    GoodsModule,
+    PaymentModule,
+    ShipmentModule,
+  ],
   providers: [InvoiceService],
   controllers: [InvoiceController],
   exports: [InvoiceService],
