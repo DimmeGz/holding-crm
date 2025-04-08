@@ -48,7 +48,7 @@ export class AbstractDocumentEntity<T> extends AbstractEntity {
     precision: 0,
     type: 'timestamp',
     nullable: false,
-    default: () => 'CURRENT_TIMESTAMP',
+    default: () => 'CURRENT_TIMESTAMP(6)',
     name: 'created_at',
   })
   createdAt: Date;

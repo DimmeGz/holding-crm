@@ -1,16 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { Order } from './entities';
+import { CreateOrderDTO, UpdateOrderDTO } from './dto';
+
 import { InvoiceService } from '../invoice/invoice.service';
+import { GoodsService } from '../../goods';
+import { OrdersConfirmationService } from '../orders-confirmation';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
+    @InjectDataSource() private dataSource: DataSource,
     private readonly invoiceService: InvoiceService,
+    private readonly goodsService: GoodsService,
+    private readonly orderConfirmationsService: OrdersConfirmationService,
   ) {}
 
   async getOrders() {
@@ -93,8 +100,10 @@ export class OrdersService {
       .getOne();
 
     const invoices = await this.invoiceService.getInvoicesByOrderId(orderId);
+    const orderConfirmations =
+      await this.orderConfirmationsService.getConfirmationsByOrderId(orderId);
 
-    return { order, invoices };
+    return { order, invoices, orderConfirmations };
   }
 
   async getOrdersByContractId(contractId: number) {
@@ -112,5 +121,136 @@ export class OrdersService {
     }
 
     return orders;
+  }
+
+  async createOrder(createOrderDTO: CreateOrderDTO) {
+    createOrderDTO['isHidden'] = false;
+    createOrderDTO['createdAt'] = new Date();
+    createOrderDTO.signatureDate =
+      createOrderDTO.signatureDate || createOrderDTO['createdAt'];
+    createOrderDTO.comment = createOrderDTO.comment || '';
+    createOrderDTO.transportPlace = createOrderDTO.transportPlace || '';
+    createOrderDTO['status'] = false;
+    createOrderDTO.paymentDelay = createOrderDTO.paymentDelay || 0;
+    createOrderDTO.vat = createOrderDTO.vat || 0;
+
+    createOrderDTO['documentSum'] =
+      createOrderDTO.orderLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      createOrderDTO.orderServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+
+    createOrderDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createOrderDTO);
+
+    const newOrder = new Order(createOrderDTO);
+
+    return await this.ordersRepository.save(newOrder);
+  }
+
+  private async getTechnicalProcesses(createOrderDTO: CreateOrderDTO) {
+    const productManIds = createOrderDTO.orderLines.map(
+      (line) => line.productManId,
+    );
+    const productBuyIds = createOrderDTO.orderLines.map(
+      (line) => line.productBuyId,
+    );
+    const productIds = [...new Set([...productManIds, ...productBuyIds])];
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = createOrderDTO.orderServiceLines.map(
+      (line) => line.serviceId,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateOrder(orderId: number, updateOrderDTO: UpdateOrderDTO) {
+    const order = await this.ordersRepository
+      .createQueryBuilder('order')
+      .where('order.id = :orderId', { orderId })
+      .andWhere('order.status = FALSE')
+      .leftJoinAndSelect('order.orderLines', 'orderLines')
+      .leftJoinAndSelect('order.orderServiceLines', 'orderServiceLines')
+      .leftJoinAndSelect('order.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedOrderLinesIds = [];
+    for (const line of updateOrderDTO.orderLines) {
+      if (line['id']) {
+        updatedOrderLinesIds.push(line['id']);
+      }
+    }
+    const orderLinesToDelete = order.orderLines.filter(
+      (line) => !updatedOrderLinesIds.includes(line.id),
+    );
+
+    const updatedOrderServiceLinesIds = [];
+    for (const line of updateOrderDTO.orderServiceLines) {
+      if (line['id']) {
+        updatedOrderServiceLinesIds.push(line['id']);
+      }
+    }
+    const orderServiceLinesToDelete = order.orderServiceLines.filter(
+      (line) => !updatedOrderServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(order, updateOrderDTO);
+
+    // TODO: update technical processes
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (orderLinesToDelete.length) {
+        await queryRunner.manager.remove(orderLinesToDelete);
+      }
+
+      if (orderServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(orderServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async removeOrder(orderId: number) {
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId },
+      relations: ['orderLines', 'orderServiceLines'],
+    });
+    return await this.ordersRepository.remove(order);
+  }
+
+  async changeOrderStatus(orderId: number) {
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId },
+    });
+
+    order.status = order.status ? false : true;
+
+    return await this.ordersRepository.save(order);
   }
 }

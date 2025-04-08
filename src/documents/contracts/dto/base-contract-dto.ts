@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsInt,
@@ -27,10 +28,12 @@ export class BaseContractDTO {
 
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   signatureDate: Date;
 
   @IsOptional()
   @IsDate()
+  @Type(() => Date)
   term?: Date;
 
   @IsPositive()
