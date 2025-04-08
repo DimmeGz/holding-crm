@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { ShipmentService } from '../shipment';
 import { PaymentService } from '../payment/payment.service';
 import { GoodsService } from '../../goods';
 
 import { Invoice } from './entities';
-import { CreateInvoiceDTO } from './dto';
+import { CreateInvoiceDTO, UpdateInvoiceDTO } from './dto';
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
@@ -18,6 +18,7 @@ export class InvoiceService {
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
+    @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
     private readonly paymentsService: PaymentService,
     private readonly shipmentsService: ShipmentService,
@@ -178,5 +179,65 @@ export class InvoiceService {
     ];
 
     return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateInvoice(invoiceId: number, updateInvoiceDTO: UpdateInvoiceDTO) {
+    const invoice = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.id = :invoiceId', { invoiceId })
+      .andWhere('invoice.status = FALSE')
+      .leftJoinAndSelect('invoice.invoiceLines', 'invoiceLines')
+      .leftJoinAndSelect('invoice.invoiceServiceLines', 'invoiceServiceLines')
+      .leftJoinAndSelect('invoice.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedInvoiceLinesIds = [];
+    for (const line of updateInvoiceDTO.invoiceLines) {
+      if (line['id']) {
+        updatedInvoiceLinesIds.push(line['id']);
+      }
+    }
+    const invoiceLinesToDelete = invoice.invoiceLines.filter(
+      (line) => !updatedInvoiceLinesIds.includes(line.id),
+    );
+
+    const updatedInvoiceServiceLinesIds = [];
+    for (const line of updateInvoiceDTO.invoiceServiceLines) {
+      if (line['id']) {
+        updatedInvoiceServiceLinesIds.push(line['id']);
+      }
+    }
+    const invoiceServiceLinesToDelete = invoice.invoiceServiceLines.filter(
+      (line) => !updatedInvoiceServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(invoice, updateInvoiceDTO);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    // TODO: update technical processes
+
+    try {
+      if (invoiceLinesToDelete.length) {
+        await queryRunner.manager.remove(invoiceLinesToDelete);
+      }
+
+      if (invoiceServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(invoiceServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

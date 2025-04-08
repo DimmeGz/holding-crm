@@ -11,5 +11,5 @@ export class UpdateInvoiceLineDTO extends PartialType(CreateInvoiceLineDTO) {
 
   @IsOptional()
   @IsBoolean()
-  remove: boolean;
+  remove?: boolean;
 }
