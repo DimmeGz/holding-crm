@@ -248,4 +248,16 @@ export class InvoiceService {
     });
     return await this.invoiceRepository.remove(invoice);
   }
+
+  async changeInvoiceStatus(invoiceId: number) {
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoiceId },
+    });
+
+    invoice.status = invoice.status ? false : true;
+
+    // TODO: make finanshial changes in companies
+
+    return await this.invoiceRepository.save(invoice);
+  }
 }

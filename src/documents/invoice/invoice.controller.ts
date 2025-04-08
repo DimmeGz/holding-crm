@@ -42,4 +42,9 @@ export class InvoiceController {
   removeInvoice(@Param('invoiceId') invoiceId: number) {
     return this.invoiceService.removeInvoice(invoiceId);
   }
+
+  @Patch('change-status/:invoiceId')
+  changeInvoiceStatus(@Param('invoiceId') invoiceId: number) {
+    return this.invoiceService.changeInvoiceStatus(invoiceId);
+  }
 }
