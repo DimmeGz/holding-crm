@@ -46,6 +46,9 @@ export class Company extends AbstractEntity {
   @JoinColumn({ name: 'default_warehouse_id' })
   defaultWarehouse: Warehouse;
 
+  @Column({ name: 'default_warehouse_id' })
+  defaultWarehouseId: number;
+
   @Column({
     name: 'invoice_prefix',
     type: 'varchar',
