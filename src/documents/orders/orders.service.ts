@@ -231,4 +231,12 @@ export class OrdersService {
       await queryRunner.release();
     }
   }
+
+  async removeOrder(orderId: number) {
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId },
+      relations: ['orderLines', 'orderServiceLines'],
+    });
+    return await this.ordersRepository.remove(order);
+  }
 }

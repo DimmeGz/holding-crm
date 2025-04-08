@@ -158,6 +158,7 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
   @OneToMany(
     () => OrderConfirmation,
     (orderConfirmation) => orderConfirmation.order,
+    { cascade: true },
   )
   orderConfirmations: OrderConfirmation[];
 }
