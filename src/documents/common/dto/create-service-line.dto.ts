@@ -1,6 +1,6 @@
 import { IsInt, IsNumber, IsPositive } from 'class-validator';
 
-export class CreateContractServiceLineDto {
+export class CreateServiceLineDTO {
   @IsPositive()
   @IsInt()
   serviceId: number;

@@ -1,6 +1,6 @@
 import { IsInt, IsNumber, IsPositive } from 'class-validator';
 
-export class CreateContractLineDto {
+export class CreateContractLineDTO {
   @IsPositive()
   @IsInt()
   productId: number;
