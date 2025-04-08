@@ -8,9 +8,15 @@ import { OrdersController } from './orders.controller';
 
 import { InvoiceModule } from '../invoice';
 import { GoodsModule } from '../../goods';
+import { OrdersConfirmationModule } from '../orders-confirmation';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order]), GoodsModule, InvoiceModule],
+  imports: [
+    TypeOrmModule.forFeature([Order]),
+    GoodsModule,
+    InvoiceModule,
+    OrdersConfirmationModule,
+  ],
   providers: [OrdersService],
   controllers: [OrdersController],
   exports: [OrdersService],

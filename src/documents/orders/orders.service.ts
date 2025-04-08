@@ -7,6 +7,7 @@ import { CreateOrderDTO, UpdateOrderDTO } from './dto';
 
 import { InvoiceService } from '../invoice/invoice.service';
 import { GoodsService } from '../../goods';
+import { OrdersConfirmationService } from '../orders-confirmation';
 
 @Injectable()
 export class OrdersService {
@@ -16,6 +17,7 @@ export class OrdersService {
     @InjectDataSource() private dataSource: DataSource,
     private readonly invoiceService: InvoiceService,
     private readonly goodsService: GoodsService,
+    private readonly orderConfirmationsService: OrdersConfirmationService,
   ) {}
 
   async getOrders() {
@@ -98,8 +100,10 @@ export class OrdersService {
       .getOne();
 
     const invoices = await this.invoiceService.getInvoicesByOrderId(orderId);
+    const orderConfirmations =
+      await this.orderConfirmationsService.getConfirmationsByOrderId(orderId);
 
-    return { order, invoices };
+    return { order, invoices, orderConfirmations };
   }
 
   async getOrdersByContractId(contractId: number) {
