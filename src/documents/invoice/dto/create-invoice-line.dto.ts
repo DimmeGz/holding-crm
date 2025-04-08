@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsPositive } from 'class-validator';
+import { IsInt, IsNumber, IsOptional, IsPositive } from 'class-validator';
 
 export class CreateInvoiceLineDTO {
   @IsPositive()
@@ -29,14 +29,17 @@ export class CreateInvoiceLineDTO {
   @IsNumber({ maxDecimalPlaces: 3 })
   price: number;
 
+  @IsOptional()
   @IsPositive()
   @IsNumber({ maxDecimalPlaces: 3 })
   cost: number;
 
+  @IsOptional()
   @IsPositive()
   @IsInt()
   countryOfOriginId: number;
 
+  @IsOptional()
   @IsPositive()
   @IsNumber({ maxDecimalPlaces: 2 })
   grossWeight: number;

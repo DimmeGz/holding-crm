@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Invoice } from './entities';
 import { ShipmentService } from '../shipment';
 import { PaymentService } from '../payment/payment.service';
+import { CreateInvoiceDTO } from './dto';
 
 @Injectable()
 export class InvoiceService {
@@ -120,5 +121,9 @@ export class InvoiceService {
     }
 
     return invoices;
+  }
+
+  async createInvoice(createInvoiceDTO: CreateInvoiceDTO) {
+    return createInvoiceDTO;
   }
 }
