@@ -240,4 +240,12 @@ export class InvoiceService {
       await queryRunner.release();
     }
   }
+
+  async removeInvoice(invoiceId: number) {
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoiceId },
+      relations: ['invoiceLines', 'invoiceServiceLines'],
+    });
+    return await this.invoiceRepository.remove(invoice);
+  }
 }
