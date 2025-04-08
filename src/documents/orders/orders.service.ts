@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { Order } from './entities';
+import { CreateOrderDTO, UpdateOrderDTO } from './dto';
+
 import { InvoiceService } from '../invoice/invoice.service';
-import { CreateOrderDTO } from './dto';
 import { GoodsService } from '../../goods';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class OrdersService {
   constructor(
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
+    @InjectDataSource() private dataSource: DataSource,
     private readonly invoiceService: InvoiceService,
     private readonly goodsService: GoodsService,
   ) {}
@@ -168,5 +170,65 @@ export class OrdersService {
     ];
 
     return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateOrder(orderId: number, updateOrderDTO: UpdateOrderDTO) {
+    const order = await this.ordersRepository
+      .createQueryBuilder('order')
+      .where('order.id = :orderId', { orderId })
+      .andWhere('order.status = FALSE')
+      .leftJoinAndSelect('order.orderLines', 'orderLines')
+      .leftJoinAndSelect('order.orderServiceLines', 'orderServiceLines')
+      .leftJoinAndSelect('order.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedOrderLinesIds = [];
+    for (const line of updateOrderDTO.orderLines) {
+      if (line['id']) {
+        updatedOrderLinesIds.push(line['id']);
+      }
+    }
+    const orderLinesToDelete = order.orderLines.filter(
+      (line) => !updatedOrderLinesIds.includes(line.id),
+    );
+
+    const updatedOrderServiceLinesIds = [];
+    for (const line of updateOrderDTO.orderServiceLines) {
+      if (line['id']) {
+        updatedOrderServiceLinesIds.push(line['id']);
+      }
+    }
+    const orderServiceLinesToDelete = order.orderServiceLines.filter(
+      (line) => !updatedOrderServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(order, updateOrderDTO);
+
+    // TODO: update technical processes
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (orderLinesToDelete.length) {
+        await queryRunner.manager.remove(orderLinesToDelete);
+      }
+
+      if (orderServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(orderServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
