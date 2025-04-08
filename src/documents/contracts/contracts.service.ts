@@ -283,7 +283,7 @@ export class ContractsService {
       where: { id: contractId },
       relations: ['contractLines', 'contractServiceLines'],
     });
-    await this.contractsRepository.remove(contract);
+    return await this.contractsRepository.remove(contract);
   }
 
   async changeContractStatus(contractId: number) {
