@@ -9,10 +9,11 @@ import {
 } from 'typeorm';
 
 import { AbstractDocumentRecipientEntity } from '../../entities';
-import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
+import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Contract } from '../../contracts/entities';
 import { OrderLine } from './order-line.entity';
 import { OrderConfirmation } from '../../orders-confirmation/entities';
+import { OrderServiceLine } from './order-service-line.entity';
 
 @Entity({ name: 'documents_order' })
 export class Order extends AbstractDocumentRecipientEntity<Order> {
@@ -22,12 +23,6 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
     default: 0,
   })
   paymentDelay: number;
-
-  @ManyToOne(() => Currency, {
-    onDelete: 'RESTRICT',
-  })
-  @JoinColumn({ name: 'currency_id' })
-  currency: Currency;
 
   @Column({
     default: false,
@@ -118,6 +113,9 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
 
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
+
   @Column({
     name: 'transport_place',
     type: 'varchar',
@@ -146,11 +144,21 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
   technicalProcesses: TechnicalProcess[];
 
   @OneToMany(() => OrderLine, (orderLine) => orderLine.order, { cascade: true })
-  orderLines: OrderLine[];
+  orderLines: Partial<OrderLine>[];
+
+  @OneToMany(
+    () => OrderServiceLine,
+    (orderServiceLine) => orderServiceLine.order,
+    {
+      cascade: true,
+    },
+  )
+  orderServiceLines: Partial<OrderServiceLine>[];
 
   @OneToMany(
     () => OrderConfirmation,
     (orderConfirmation) => orderConfirmation.order,
+    { cascade: true },
   )
   orderConfirmations: OrderConfirmation[];
 }

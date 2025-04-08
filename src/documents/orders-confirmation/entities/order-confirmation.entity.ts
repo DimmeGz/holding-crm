@@ -98,7 +98,7 @@ export class OrderConfirmation extends AbstractEntity {
     length: 15,
     unique: true,
   })
-  orderNumber: string;
+  confirmationNumber: string;
 
   @Column({
     name: 'expected_date',

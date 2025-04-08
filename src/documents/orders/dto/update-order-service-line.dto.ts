@@ -1,10 +1,11 @@
 import { PartialType } from '@nestjs/mapped-types';
-
 import { IsBoolean, IsInt, IsOptional, IsPositive } from 'class-validator';
 
-import { CreateContractLineDto } from './create-contract-line.dto';
+import { CreateOrderServiceLineDTO } from './create-order-service-line.dto';
 
-export class UpdateContractLineDto extends PartialType(CreateContractLineDto) {
+export class UpdateOrderServiceLineDto extends PartialType(
+  CreateOrderServiceLineDTO,
+) {
   @IsPositive()
   @IsInt()
   id: number;
