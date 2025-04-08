@@ -7,7 +7,7 @@ import { Product } from '../../../goods/entities';
 @Entity({ name: 'documents_orderline' })
 export class OrderLine extends AbstractLineEntity {
   @ManyToOne(() => Order, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'order_id' })
   order: Order;
