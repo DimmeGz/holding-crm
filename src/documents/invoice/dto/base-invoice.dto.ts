@@ -54,9 +54,10 @@ export class BaseInvoiceDTO {
   @IsInt()
   paymentDelay?: number;
 
+  @IsOptional()
   @IsPositive()
   @IsInt()
-  invoiceId: number;
+  invoiceId?: number;
 
   @IsPositive()
   @IsInt()
