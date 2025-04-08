@@ -5,10 +5,12 @@ import { Order } from './entities';
 
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
+
 import { InvoiceModule } from '../invoice';
+import { GoodsModule } from '../../goods';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order]), InvoiceModule],
+  imports: [TypeOrmModule.forFeature([Order]), GoodsModule, InvoiceModule],
   providers: [OrdersService],
   controllers: [OrdersController],
   exports: [OrdersService],

@@ -17,35 +17,43 @@ export class GoodsService {
   async getTechnicalProcessesFromProductIds(
     productIds: number[],
   ): Promise<Set<Partial<TechnicalProcess>>> {
-    const products = await this.productsRepository
-      .createQueryBuilder('product')
-      .leftJoin('product.technicalProcesses', 'technicalProcess')
-      .where('product.id IN (:...productIds)', { productIds })
-      .select(['product.id', 'technicalProcess.id'])
-      .getMany();
+    if (productIds.length) {
+      const products = await this.productsRepository
+        .createQueryBuilder('product')
+        .leftJoin('product.technicalProcesses', 'technicalProcess')
+        .where('product.id IN (:...productIds)', { productIds })
+        .select(['product.id', 'technicalProcess.id'])
+        .getMany();
 
-    const processes = [];
-    for (const product of products) {
-      processes.push([...product.technicalProcesses]);
+      const processes = [];
+      for (const product of products) {
+        processes.push([...product.technicalProcesses]);
+      }
+      return new Set(...processes);
+    } else {
+      return new Set();
     }
-    return new Set(...processes);
   }
 
   async getTechnicalProcessesFromServiceIds(
     serviceIds: number[],
   ): Promise<Set<Partial<TechnicalProcess>>> {
-    const services = await this.servicesRepository
-      .createQueryBuilder('service')
-      .leftJoin('service.technicalProcesses', 'technicalProcess')
-      .where('service.id IN (:...serviceIds)', { serviceIds })
-      .select(['service.id', 'technicalProcess.id'])
-      .getMany();
+    if (serviceIds.length) {
+      const services = await this.servicesRepository
+        .createQueryBuilder('service')
+        .leftJoin('service.technicalProcesses', 'technicalProcess')
+        .where('service.id IN (:...serviceIds)', { serviceIds })
+        .select(['service.id', 'technicalProcess.id'])
+        .getMany();
 
-    const processes = [];
-    for (const service of services) {
-      processes.push([...service.technicalProcesses]);
+      const processes = [];
+      for (const service of services) {
+        processes.push([...service.technicalProcesses]);
+      }
+
+      return new Set(...processes);
+    } else {
+      return new Set();
     }
-
-    return new Set(...processes);
   }
 }

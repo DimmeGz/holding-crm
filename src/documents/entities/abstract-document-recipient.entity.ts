@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractDocumentWarehouseEntity } from './abstract-document-warehouse.entity';
 import { Company } from '../../companies/entities';
@@ -19,4 +19,7 @@ export class AbstractDocumentRecipientEntity<
   })
   @JoinColumn({ name: 'recipient_warehouse_id' })
   recipientWarehouse: Warehouse;
+
+  @Column({ name: 'recipient_warehouse_id' })
+  recipientWarehouseId: number;
 }

@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Order } from './entities';
 import { InvoiceService } from '../invoice/invoice.service';
 import { CreateOrderDTO } from './dto';
+import { GoodsService } from '../../goods';
 
 @Injectable()
 export class OrdersService {
@@ -12,6 +13,7 @@ export class OrdersService {
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
     private readonly invoiceService: InvoiceService,
+    private readonly goodsService: GoodsService,
   ) {}
 
   async getOrders() {
@@ -115,7 +117,56 @@ export class OrdersService {
     return orders;
   }
 
-  createOrder(createOrderDTO: CreateOrderDTO) {
-    return createOrderDTO;
+  async createOrder(createOrderDTO: CreateOrderDTO) {
+    createOrderDTO['isHidden'] = false;
+    createOrderDTO['createdAt'] = new Date();
+    createOrderDTO.signatureDate =
+      createOrderDTO.signatureDate || createOrderDTO['createdAt'];
+    createOrderDTO.comment = createOrderDTO.comment || '';
+    createOrderDTO.transportPlace = createOrderDTO.transportPlace || '';
+    createOrderDTO['status'] = false;
+    createOrderDTO.paymentDelay = createOrderDTO.paymentDelay || 0;
+    createOrderDTO.vat = createOrderDTO.vat || 0;
+
+    createOrderDTO['documentSum'] =
+      createOrderDTO.orderLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      createOrderDTO.orderServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+
+    createOrderDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createOrderDTO);
+
+    const newOrder = new Order(createOrderDTO);
+
+    return await this.ordersRepository.save(newOrder);
+  }
+
+  private async getTechnicalProcesses(createOrderDTO: CreateOrderDTO) {
+    const productManIds = createOrderDTO.orderLines.map(
+      (line) => line.productManId,
+    );
+    const productBuyIds = createOrderDTO.orderLines.map(
+      (line) => line.productBuyId,
+    );
+    const productIds = [...new Set([...productManIds, ...productBuyIds])];
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = createOrderDTO.orderServiceLines.map(
+      (line) => line.serviceId,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
   }
 }
