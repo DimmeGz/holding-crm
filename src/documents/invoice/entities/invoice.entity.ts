@@ -11,6 +11,7 @@ import {
 import { AbstractDocumentRecipientEntity } from '../../entities';
 import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { InvoiceLine } from './invoice-line.entity';
+import { InvoiceServiceLine } from './invoice-service-line.entity';
 
 @Entity({ name: 'documents_invoice' })
 export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
@@ -178,6 +179,15 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     cascade: true,
   })
   invoiceLines: Partial<InvoiceLine>[];
+
+  @OneToMany(
+    () => InvoiceServiceLine,
+    (invoiceServiceLine) => invoiceServiceLine.invoice,
+    {
+      cascade: true,
+    },
+  )
+  invoiceServiceLines: Partial<InvoiceServiceLine>[];
 
   // files
 
