@@ -199,4 +199,24 @@ export class ReceiveService {
       await queryRunner.release();
     }
   }
+
+  async removeReceive(receiveId: number) {
+    const invoice = await this.receivesRepository.findOne({
+      where: { id: receiveId, status: false },
+      relations: ['receiveLines', 'receiveServiceLines'],
+    });
+    return await this.receivesRepository.remove(invoice);
+  }
+
+  async changeReceiveStatus(receiveId: number) {
+    const receive = await this.receivesRepository.findOne({
+      where: { id: receiveId },
+    });
+
+    receive.status = receive.status ? false : true;
+
+    // TODO: make changes in warehouseAccounting
+
+    return await this.receivesRepository.save(receive);
+  }
 }

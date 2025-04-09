@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 
 import { ReceiveService } from './receive.service';
 
@@ -29,5 +37,15 @@ export class ReceiveController {
     @Body() updateReceiveDTO: UpdateReceiveDTO,
   ) {
     return this.receiveService.updateReceive(receiveId, updateReceiveDTO);
+  }
+
+  @Delete(':receiveId')
+  removeReceive(@Param('receiveId') receiveId: number) {
+    return this.receiveService.removeReceive(receiveId);
+  }
+
+  @Patch('change-status/:receiveId')
+  changeShipmentStatus(@Param('receiveId') receiveId: number) {
+    return this.receiveService.changeReceiveStatus(receiveId);
   }
 }

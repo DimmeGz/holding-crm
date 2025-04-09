@@ -243,7 +243,7 @@ export class ShipmentService {
 
   async removeShipment(shipmentId: number) {
     const invoice = await this.shipmentsRepository.findOne({
-      where: { id: shipmentId },
+      where: { id: shipmentId, status: false },
       relations: ['shipmentLines', 'shipmentServiceLines'],
     });
     return await this.shipmentsRepository.remove(invoice);

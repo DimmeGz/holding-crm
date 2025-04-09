@@ -237,7 +237,7 @@ export class OrdersService {
 
   async removeOrder(orderId: number) {
     const order = await this.ordersRepository.findOne({
-      where: { id: orderId },
+      where: { id: orderId, status: false },
       relations: ['orderLines', 'orderServiceLines'],
     });
     return await this.ordersRepository.remove(order);
