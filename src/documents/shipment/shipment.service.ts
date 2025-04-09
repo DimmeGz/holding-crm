@@ -147,7 +147,7 @@ export class ShipmentService {
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
       ) +
-      newShipment.shipmentLines.reduce(
+      newShipment.shipmentServiceLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
       );

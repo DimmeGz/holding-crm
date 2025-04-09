@@ -1,13 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Receive } from './entities';
 import { Repository } from 'typeorm';
+
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
+
+import { GoodsService } from '../../goods';
+
+import { Receive } from './entities';
+import { CreateReveiveDTO } from './dto';
 
 @Injectable()
 export class ReceiveService {
   constructor(
     @InjectRepository(Receive)
     private readonly receivesRepository: Repository<Receive>,
+    private readonly goodsService: GoodsService,
   ) {}
 
   async getReceives() {
@@ -84,5 +94,48 @@ export class ReceiveService {
       .getMany();
 
     return receives;
+  }
+
+  async createReceive(createReveiveDTO: CreateReveiveDTO) {
+    createReveiveDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createReveiveDTO);
+
+    const newReceive = new Receive(createReveiveDTO);
+    newReceive.status = false;
+    newReceive.createdAt = new Date();
+    newReceive.comment = newReceive.comment || '';
+    newReceive.transportPlace = newReceive.transportPlace || '';
+
+    newReceive.documentSum =
+      newReceive.receiveLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      newReceive.receiveServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+
+    return await this.receivesRepository.save(newReceive);
+  }
+
+  private async getTechnicalProcesses(createReveiveDTO: CreateReveiveDTO) {
+    const productIds = getProductIdsFromProductLines(
+      createReveiveDTO.receiveLines,
+    );
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = getServiceIdsFromServiceLines(
+      createReveiveDTO.receiveServiceLines,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
   }
 }
