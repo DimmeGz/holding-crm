@@ -1,18 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
-import { Invoice } from './entities';
 import { ShipmentService } from '../shipment';
 import { PaymentService } from '../payment/payment.service';
+import { GoodsService } from '../../goods';
+
+import { Invoice } from './entities';
+import { CreateInvoiceDTO, UpdateInvoiceDTO } from './dto';
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
-    private readonly shipmentsService: ShipmentService,
+    @InjectDataSource() private dataSource: DataSource,
+    private readonly goodsService: GoodsService,
     private readonly paymentsService: PaymentService,
+    private readonly shipmentsService: ShipmentService,
   ) {}
 
   async getInvoices() {
@@ -120,5 +129,135 @@ export class InvoiceService {
     }
 
     return invoices;
+  }
+
+  async createInvoice(createInvoiceDTO: CreateInvoiceDTO) {
+    createInvoiceDTO['status'] = false;
+    createInvoiceDTO['createdAt'] = new Date();
+    createInvoiceDTO.reportPeriod =
+      createInvoiceDTO.reportPeriod || createInvoiceDTO['createdAt'];
+    createInvoiceDTO.comment = createInvoiceDTO.comment || '';
+    createInvoiceDTO.transportPlace = createInvoiceDTO.transportPlace || '';
+    createInvoiceDTO.paymentDelay = createInvoiceDTO.paymentDelay || 0;
+    createInvoiceDTO.vat = createInvoiceDTO.vat || 0;
+    createInvoiceDTO.separation = createInvoiceDTO.separation || false;
+
+    createInvoiceDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createInvoiceDTO);
+
+    createInvoiceDTO['documentSum'] =
+      createInvoiceDTO.invoiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      createInvoiceDTO.invoiceServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+    createInvoiceDTO['paymentBalance'] = createInvoiceDTO['documentSum'];
+
+    const newInvoice = new Invoice(createInvoiceDTO);
+
+    return await this.invoiceRepository.save(newInvoice);
+  }
+
+  private async getTechnicalProcesses(createInvoiceDTO: CreateInvoiceDTO) {
+    const productIds = getProductIdsFromProductLines(
+      createInvoiceDTO.invoiceLines,
+    );
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = getServiceIdsFromServiceLines(
+      createInvoiceDTO.invoiceServiceLines,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateInvoice(invoiceId: number, updateInvoiceDTO: UpdateInvoiceDTO) {
+    const invoice = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.id = :invoiceId', { invoiceId })
+      .andWhere('invoice.status = FALSE')
+      .leftJoinAndSelect('invoice.invoiceLines', 'invoiceLines')
+      .leftJoinAndSelect('invoice.invoiceServiceLines', 'invoiceServiceLines')
+      .leftJoinAndSelect('invoice.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedInvoiceLinesIds = [];
+    for (const line of updateInvoiceDTO.invoiceLines) {
+      if (line['id']) {
+        updatedInvoiceLinesIds.push(line['id']);
+      }
+    }
+    const invoiceLinesToDelete = invoice.invoiceLines.filter(
+      (line) => !updatedInvoiceLinesIds.includes(line.id),
+    );
+
+    const updatedInvoiceServiceLinesIds = [];
+    for (const line of updateInvoiceDTO.invoiceServiceLines) {
+      if (line['id']) {
+        updatedInvoiceServiceLinesIds.push(line['id']);
+      }
+    }
+    const invoiceServiceLinesToDelete = invoice.invoiceServiceLines.filter(
+      (line) => !updatedInvoiceServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(invoice, updateInvoiceDTO);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    // TODO: update technical processes
+
+    try {
+      if (invoiceLinesToDelete.length) {
+        await queryRunner.manager.remove(invoiceLinesToDelete);
+      }
+
+      if (invoiceServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(invoiceServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async removeInvoice(invoiceId: number) {
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoiceId },
+      relations: ['invoiceLines', 'invoiceServiceLines'],
+    });
+    return await this.invoiceRepository.remove(invoice);
+  }
+
+  async changeInvoiceStatus(invoiceId: number) {
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoiceId },
+    });
+
+    invoice.status = invoice.status ? false : true;
+
+    // TODO: make finanshial changes in companies
+
+    return await this.invoiceRepository.save(invoice);
   }
 }

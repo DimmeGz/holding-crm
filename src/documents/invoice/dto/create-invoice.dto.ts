@@ -1,19 +1,19 @@
 import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { CreateContractLineDTO } from './create-contract-line.dto';
-import { BaseContractDTO } from './base-contract-dto';
+import { BaseInvoiceDTO } from './base-invoice.dto';
+import { CreateInvoiceLineDTO } from './create-invoice-line.dto';
 import { CreateServiceLineDTO } from '../../common/dto';
 
-export class CreateContractDTO extends BaseContractDTO {
+export class CreateInvoiceDTO extends BaseInvoiceDTO {
   @IsArray()
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
-  @Type(() => CreateContractLineDTO)
-  contractLines: CreateContractLineDTO[];
+  @Type(() => CreateInvoiceLineDTO)
+  invoiceLines: CreateInvoiceLineDTO[];
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateServiceLineDTO)
-  contractServiceLines: CreateServiceLineDTO[];
+  invoiceServiceLines: CreateServiceLineDTO[];
 }
