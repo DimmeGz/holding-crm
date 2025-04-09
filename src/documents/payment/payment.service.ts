@@ -149,4 +149,24 @@ export class PaymentService {
       await queryRunner.release();
     }
   }
+
+  async removePayment(paymentId: number) {
+    const invoice = await this.paymentsRepository.findOne({
+      where: { id: paymentId, status: false },
+      relations: ['paymentLines'],
+    });
+    return await this.paymentsRepository.remove(invoice);
+  }
+
+  async changePaymentStatus(paymentId: number) {
+    const payment = await this.paymentsRepository.findOne({
+      where: { id: paymentId },
+    });
+
+    payment.status = payment.status ? false : true;
+
+    // TODO: make finanshial changes in companies
+
+    return await this.paymentsRepository.save(payment);
+  }
 }
