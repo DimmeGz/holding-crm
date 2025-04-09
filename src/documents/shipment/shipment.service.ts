@@ -248,4 +248,16 @@ export class ShipmentService {
     });
     return await this.shipmentsRepository.remove(invoice);
   }
+
+  async changeShipmentStatus(shipmentId: number) {
+    const shipment = await this.shipmentsRepository.findOne({
+      where: { id: shipmentId },
+    });
+
+    shipment.status = shipment.status ? false : true;
+
+    // TODO: make changes in warehouseAccounting
+
+    return await this.shipmentsRepository.save(shipment);
+  }
 }
