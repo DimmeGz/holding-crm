@@ -175,19 +175,18 @@ export class ContractsService {
   }
 
   async createContract(createContractDTO: CreateContractDTO) {
-    createContractDTO['status'] = false;
-    createContractDTO['isArchived'] = false;
-    createContractDTO['createdAt'] = new Date();
-    createContractDTO.signatureDate =
-      createContractDTO.signatureDate || createContractDTO['createdAt'];
-    createContractDTO.comment = createContractDTO.comment || '';
-    createContractDTO.paymentDelay = createContractDTO.paymentDelay || 0;
-    createContractDTO.vat = createContractDTO.vat || 0;
-
     createContractDTO['technicalProcesses'] =
       await this.getTechnicalProcesses(createContractDTO);
-
     const newContract = new Contract(createContractDTO);
+
+    newContract.status = false;
+    newContract.isArchived = false;
+    newContract.createdAt = new Date();
+    newContract.signatureDate =
+      newContract.signatureDate || newContract.createdAt;
+    newContract.comment = newContract.comment || '';
+    newContract.paymentDelay = newContract.paymentDelay || 0;
+    newContract.vat = newContract.vat || 0;
 
     return await this.contractsRepository.save(newContract);
   }

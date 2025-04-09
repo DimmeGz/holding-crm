@@ -19,7 +19,4 @@ export class ContractServiceLine extends AbstractServiceLineEntity {
 
   @Column({ name: 'service_id' })
   serviceId: number;
-
-  @Column({ type: 'smallint', unsigned: true, default: 1 })
-  qty: number;
 }
