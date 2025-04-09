@@ -43,4 +43,9 @@ export class ShipmentController {
   removeShipment(@Param('shipmentId') shipmentId: number) {
     return this.shipmentService.removeShipment(shipmentId);
   }
+
+  @Patch('change-status/:shipmentId')
+  changeShipmentStatus(@Param('shipmentId') shipmentId: number) {
+    return this.shipmentService.changeShipmentStatus(shipmentId);
+  }
 }
