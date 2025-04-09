@@ -147,7 +147,7 @@ export class ShipmentService {
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
       ) +
-      newShipment.shipmentLines.reduce(
+      newShipment.shipmentServiceLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
       );
@@ -243,7 +243,7 @@ export class ShipmentService {
 
   async removeShipment(shipmentId: number) {
     const invoice = await this.shipmentsRepository.findOne({
-      where: { id: shipmentId },
+      where: { id: shipmentId, status: false },
       relations: ['shipmentLines', 'shipmentServiceLines'],
     });
     return await this.shipmentsRepository.remove(invoice);

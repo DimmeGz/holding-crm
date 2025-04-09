@@ -13,6 +13,7 @@ import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Warehouse } from '../../../warehouse/entities';
 import { ReceiveLine } from './receive-line.entity';
 import { Shipment } from '../../shipment/entities';
+import { ReceiveServiceLine } from './receive-service-line.entity';
 
 @Entity({ name: 'documents_receive' })
 export class Receive extends AbstractDocumentEntity<Receive> {
@@ -21,6 +22,9 @@ export class Receive extends AbstractDocumentEntity<Receive> {
   })
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
+
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
 
   @Column({
     name: 'transport_place',
@@ -44,6 +48,9 @@ export class Receive extends AbstractDocumentEntity<Receive> {
   })
   @JoinColumn({ name: 'buyer_warehouse_id' })
   buyerWarehouse: Warehouse;
+
+  @Column({ name: 'buyer_warehouse_id' })
+  buyerWarehouseId: number;
 
   @Column({
     name: 'expected_date',
@@ -88,5 +95,14 @@ export class Receive extends AbstractDocumentEntity<Receive> {
   @OneToMany(() => ReceiveLine, (receiveLine) => receiveLine.receive, {
     cascade: true,
   })
-  receiveLines: ReceiveLine[];
+  receiveLines: Partial<ReceiveLine>[];
+
+  @OneToMany(
+    () => ReceiveServiceLine,
+    (receiveServiceLine) => receiveServiceLine.receive,
+    {
+      cascade: true,
+    },
+  )
+  receiveServiceLines: Partial<ReceiveServiceLine>[];
 }
