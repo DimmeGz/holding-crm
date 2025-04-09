@@ -132,20 +132,20 @@ export class InvoiceService {
   }
 
   async createInvoice(createInvoiceDTO: CreateInvoiceDTO) {
-    createInvoiceDTO['status'] = false;
-    createInvoiceDTO['createdAt'] = new Date();
-    createInvoiceDTO.reportPeriod =
-      createInvoiceDTO.reportPeriod || createInvoiceDTO['createdAt'];
-    createInvoiceDTO.comment = createInvoiceDTO.comment || '';
-    createInvoiceDTO.transportPlace = createInvoiceDTO.transportPlace || '';
-    createInvoiceDTO.paymentDelay = createInvoiceDTO.paymentDelay || 0;
-    createInvoiceDTO.vat = createInvoiceDTO.vat || 0;
-    createInvoiceDTO.separation = createInvoiceDTO.separation || false;
-
     createInvoiceDTO['technicalProcesses'] =
       await this.getTechnicalProcesses(createInvoiceDTO);
+    const newInvoice = new Invoice(createInvoiceDTO);
 
-    createInvoiceDTO['documentSum'] =
+    newInvoice.status = false;
+    newInvoice.createdAt = new Date();
+    newInvoice.reportPeriod = newInvoice.reportPeriod || newInvoice.createdAt;
+    newInvoice.comment = newInvoice.comment || '';
+    newInvoice.transportPlace = newInvoice.transportPlace || '';
+    newInvoice.paymentDelay = newInvoice.paymentDelay || 0;
+    newInvoice.vat = newInvoice.vat || 0;
+    newInvoice.separation = newInvoice.separation || false;
+
+    newInvoice.documentSum =
       createInvoiceDTO.invoiceLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
@@ -154,9 +154,7 @@ export class InvoiceService {
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
       );
-    createInvoiceDTO['paymentBalance'] = createInvoiceDTO['documentSum'];
-
-    const newInvoice = new Invoice(createInvoiceDTO);
+    newInvoice.paymentBalance = newInvoice.documentSum;
 
     return await this.invoiceRepository.save(newInvoice);
   }

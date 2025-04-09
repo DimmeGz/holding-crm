@@ -1,9 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+
+import { GoodsService } from '../../goods';
+import { ReceiveService } from '../receive/receive.service';
 
 import { Shipment, ShipmentLine } from './entities';
-import { ReceiveService } from '../receive/receive.service';
+
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
+import { CreateShipmentDTO, UpdateShipmentDTO } from './dto';
 
 @Injectable()
 export class ShipmentService {
@@ -12,6 +20,8 @@ export class ShipmentService {
     private readonly shipmentsRepository: Repository<Shipment>,
     @InjectRepository(ShipmentLine)
     private readonly shipmentLinessRepository: Repository<ShipmentLine>,
+    @InjectDataSource() private dataSource: DataSource,
+    private readonly goodsService: GoodsService,
     private readonly receiveService: ReceiveService,
   ) {}
 
@@ -120,5 +130,134 @@ export class ShipmentService {
     }
 
     return shipments;
+  }
+
+  async createShipment(createShipmentDTO: CreateShipmentDTO) {
+    createShipmentDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createShipmentDTO);
+
+    const newShipment = new Shipment(createShipmentDTO);
+    newShipment.createdAt = new Date();
+    newShipment.comment = newShipment.comment || '';
+    newShipment.transportPlace = newShipment.transportPlace || '';
+    newShipment.status = false;
+
+    newShipment.documentSum =
+      newShipment.shipmentLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      newShipment.shipmentLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+
+    return await this.shipmentsRepository.save(newShipment);
+  }
+
+  private async getTechnicalProcesses(createShipmentDTO: CreateShipmentDTO) {
+    const productIds = getProductIdsFromProductLines(
+      createShipmentDTO.shipmentLines,
+    );
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = getServiceIdsFromServiceLines(
+      createShipmentDTO.shipmentServiceLines,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateShipment(
+    shipmentId: number,
+    updateShipmentDTO: UpdateShipmentDTO,
+  ) {
+    const shipment = await this.shipmentsRepository
+      .createQueryBuilder('shipment')
+      .where('shipment.id = :shipmentId', { shipmentId })
+      .andWhere('shipment.status = FALSE')
+      .leftJoinAndSelect('shipment.shipmentLines', 'shipmentLines')
+      .leftJoinAndSelect(
+        'shipment.shipmentServiceLines',
+        'shipmentServiceLines',
+      )
+      .leftJoinAndSelect('shipment.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedShipmentLinesIds = [];
+    for (const line of updateShipmentDTO.shipmentLines) {
+      if (line['id']) {
+        updatedShipmentLinesIds.push(line['id']);
+      }
+    }
+    const shipmentLinesToDelete = shipment.shipmentLines.filter(
+      (line) => !updatedShipmentLinesIds.includes(line.id),
+    );
+
+    const updatedShipmentServiceLinesIds = [];
+    for (const line of updateShipmentDTO.shipmentServiceLines) {
+      if (line['id']) {
+        updatedShipmentServiceLinesIds.push(line['id']);
+      }
+    }
+    const shipmentServiceLinesToDelete = shipment.shipmentServiceLines.filter(
+      (line) => !updatedShipmentServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(shipment, updateShipmentDTO);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    // TODO: update technical processes
+
+    try {
+      if (shipmentLinesToDelete.length) {
+        await queryRunner.manager.remove(shipmentLinesToDelete);
+      }
+
+      if (shipmentServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(shipmentServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async removeShipment(shipmentId: number) {
+    const invoice = await this.shipmentsRepository.findOne({
+      where: { id: shipmentId },
+      relations: ['shipmentLines', 'shipmentServiceLines'],
+    });
+    return await this.shipmentsRepository.remove(invoice);
+  }
+
+  async changeShipmentStatus(shipmentId: number) {
+    const shipment = await this.shipmentsRepository.findOne({
+      where: { id: shipmentId },
+    });
+
+    shipment.status = shipment.status ? false : true;
+
+    // TODO: make changes in warehouseAccounting
+
+    return await this.shipmentsRepository.save(shipment);
   }
 }

@@ -128,17 +128,21 @@ export class OrdersService {
   }
 
   async createOrder(createOrderDTO: CreateOrderDTO) {
-    createOrderDTO['isHidden'] = false;
-    createOrderDTO['createdAt'] = new Date();
-    createOrderDTO.signatureDate =
-      createOrderDTO.signatureDate || createOrderDTO['createdAt'];
-    createOrderDTO.comment = createOrderDTO.comment || '';
-    createOrderDTO.transportPlace = createOrderDTO.transportPlace || '';
-    createOrderDTO['status'] = false;
-    createOrderDTO.paymentDelay = createOrderDTO.paymentDelay || 0;
-    createOrderDTO.vat = createOrderDTO.vat || 0;
+    createOrderDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createOrderDTO);
 
-    createOrderDTO['documentSum'] =
+    const newOrder = new Order(createOrderDTO);
+
+    newOrder.isHidden = false;
+    newOrder.createdAt = new Date();
+    newOrder.signatureDate = newOrder.signatureDate || newOrder.createdAt;
+    newOrder.comment = newOrder.comment || '';
+    newOrder.transportPlace = newOrder.transportPlace || '';
+    newOrder.status = false;
+    newOrder.paymentDelay = newOrder.paymentDelay || 0;
+    newOrder.vat = newOrder.vat || 0;
+
+    newOrder.documentSum =
       createOrderDTO.orderLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
@@ -147,11 +151,6 @@ export class OrdersService {
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
       );
-
-    createOrderDTO['technicalProcesses'] =
-      await this.getTechnicalProcesses(createOrderDTO);
-
-    const newOrder = new Order(createOrderDTO);
 
     return await this.ordersRepository.save(newOrder);
   }
