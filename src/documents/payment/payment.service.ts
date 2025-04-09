@@ -3,13 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 
+import { LibsService } from '../../libs/libs.service';
+
 import { Payment } from './entities';
+import { CreatePaymentDTO } from './dto';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectRepository(Payment)
     private readonly paymentsRepository: Repository<Payment>,
+    private readonly libsService: LibsService,
   ) {}
 
   async getPayments() {
@@ -71,5 +75,29 @@ export class PaymentService {
       .getMany();
 
     return payments;
+  }
+
+  async createPayment(createPaymentDTO: CreatePaymentDTO) {
+    const newPayment = new Payment(createPaymentDTO);
+    newPayment.createdAt = new Date();
+    newPayment.comment = newPayment.comment || '';
+    newPayment.status = false;
+
+    const paymentLinesData = newPayment.paymentLines.reduce(
+      (acc, cur) => {
+        acc.invoiceIds.push(cur.invoiceId);
+        acc.documentSum += cur.amount;
+        return acc;
+      },
+      { invoiceIds: [], documentSum: 0 },
+    );
+
+    newPayment.documentSum = paymentLinesData.documentSum;
+    newPayment.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByInvoiceIds(
+        paymentLinesData.invoiceIds,
+      );
+
+    return await this.paymentsRepository.save(newPayment);
   }
 }

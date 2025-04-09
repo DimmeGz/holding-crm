@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Currency } from './entities';
+
+import { TechnicalProcess } from './entities';
+import { LibsService } from './libs.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Currency])],
+  imports: [TypeOrmModule.forFeature([TechnicalProcess])],
+  providers: [LibsService],
+  exports: [LibsService],
 })
 export class LibsModule {}
