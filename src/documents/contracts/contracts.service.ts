@@ -12,6 +12,10 @@ import {
 import { GoodsService } from '../../goods';
 import { OrdersService } from '../orders';
 import { ShipmentService } from '../shipment';
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
 
 @Injectable()
 export class ContractsService {
@@ -174,7 +178,6 @@ export class ContractsService {
     createContractDTO['status'] = false;
     createContractDTO['isArchived'] = false;
     createContractDTO['createdAt'] = new Date();
-    createContractDTO['created_by_id'] = 1;
     createContractDTO.signatureDate =
       createContractDTO.signatureDate || createContractDTO['createdAt'];
     createContractDTO.comment = createContractDTO.comment || '';
@@ -190,14 +193,14 @@ export class ContractsService {
   }
 
   private async getTechnicalProcesses(createContractDTO: CreateContractDTO) {
-    const productIds = createContractDTO.contractLines.map(
-      (line) => line.productId,
+    const productIds = getProductIdsFromProductLines(
+      createContractDTO.contractLines,
     );
     const productProcesses =
       await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
 
-    const serviceIds = createContractDTO.contractServiceLines.map(
-      (line) => line.serviceId,
+    const serviceIds = getServiceIdsFromServiceLines(
+      createContractDTO.contractServiceLines,
     );
     const serviceProcesses =
       await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
@@ -280,7 +283,7 @@ export class ContractsService {
       where: { id: contractId },
       relations: ['contractLines', 'contractServiceLines'],
     });
-    await this.contractsRepository.remove(contract);
+    return await this.contractsRepository.remove(contract);
   }
 
   async changeContractStatus(contractId: number) {

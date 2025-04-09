@@ -11,6 +11,7 @@ import {
 import { AbstractDocumentRecipientEntity } from '../../entities';
 import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { InvoiceLine } from './invoice-line.entity';
+import { InvoiceServiceLine } from './invoice-service-line.entity';
 
 @Entity({ name: 'documents_invoice' })
 export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
@@ -130,6 +131,9 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
 
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
+
   @Column({
     name: 'transport_place',
     type: 'varchar',
@@ -168,10 +172,22 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   })
   contractInfo: string;
 
+  @Column({ name: 'report_duplicating', default: false })
+  reportDuplicating: boolean;
+
   @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.invoice, {
     cascade: true,
   })
-  invoiceLines: InvoiceLine[];
+  invoiceLines: Partial<InvoiceLine>[];
+
+  @OneToMany(
+    () => InvoiceServiceLine,
+    (invoiceServiceLine) => invoiceServiceLine.invoice,
+    {
+      cascade: true,
+    },
+  )
+  invoiceServiceLines: Partial<InvoiceServiceLine>[];
 
   // files
 

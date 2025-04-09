@@ -8,6 +8,10 @@ import { CreateOrderDTO, UpdateOrderDTO } from './dto';
 import { InvoiceService } from '../invoice/invoice.service';
 import { GoodsService } from '../../goods';
 import { OrdersConfirmationService } from '../orders-confirmation';
+import {
+  getProductIdsFromOrderProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
 
 @Injectable()
 export class OrdersService {
@@ -153,18 +157,14 @@ export class OrdersService {
   }
 
   private async getTechnicalProcesses(createOrderDTO: CreateOrderDTO) {
-    const productManIds = createOrderDTO.orderLines.map(
-      (line) => line.productManId,
+    const productIds = getProductIdsFromOrderProductLines(
+      createOrderDTO.orderLines,
     );
-    const productBuyIds = createOrderDTO.orderLines.map(
-      (line) => line.productBuyId,
-    );
-    const productIds = [...new Set([...productManIds, ...productBuyIds])];
     const productProcesses =
       await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
 
-    const serviceIds = createOrderDTO.orderServiceLines.map(
-      (line) => line.serviceId,
+    const serviceIds = getServiceIdsFromServiceLines(
+      createOrderDTO.orderServiceLines,
     );
     const serviceProcesses =
       await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);

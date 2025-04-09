@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractServiceLineEntity } from '../../entities';
 import { Invoice } from './invoice.entity';
@@ -7,7 +7,7 @@ import { Service } from '../../../goods/entities';
 @Entity({ name: 'documents_invoiceserviceline' })
 export class InvoiceServiceLine extends AbstractServiceLineEntity {
   @ManyToOne(() => Invoice, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
@@ -17,4 +17,7 @@ export class InvoiceServiceLine extends AbstractServiceLineEntity {
   })
   @JoinColumn({ name: 'service_id' })
   service: Service;
+
+  @Column({ name: 'service_id' })
+  serviceId: number;
 }

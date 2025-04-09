@@ -9,10 +9,13 @@ import { Order } from '../../orders/entities';
 @Entity({ name: 'documents_invoiceline' })
 export class InvoiceLine extends AbstractLineEntity {
   @ManyToOne(() => Invoice, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
+
+  @JoinColumn({ name: 'invoice_id' })
+  invoiceId: number;
 
   @Column({
     type: 'decimal',
@@ -28,11 +31,17 @@ export class InvoiceLine extends AbstractLineEntity {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
+  @Column({ name: 'product_id' })
+  productId: number;
+
   @ManyToOne(() => Batch, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
+
+  @Column({ name: 'batch_id' })
+  batchId: number;
 
   @ManyToOne(() => Package, {
     onDelete: 'RESTRICT',
@@ -40,11 +49,17 @@ export class InvoiceLine extends AbstractLineEntity {
   @JoinColumn({ name: 'package_id' })
   package: Package;
 
+  @JoinColumn({ name: 'package_id' })
+  packageId: number;
+
   @ManyToOne(() => CountryOfOrigin, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'country_of_origin_id' })
   countryOfOrigin: CountryOfOrigin;
+
+  @Column({ name: 'country_of_origin_id' })
+  countryOfOriginId: number;
 
   @ManyToOne(() => Order, {
     onDelete: 'RESTRICT',
