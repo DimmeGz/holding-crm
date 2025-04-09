@@ -45,5 +45,5 @@ export class Payment extends AbstractDocumentEntity<Payment> {
   @OneToMany(() => PaymentLine, (paymentLine) => paymentLine.payment, {
     cascade: true,
   })
-  paymentLines: PaymentLine[];
+  paymentLines: Partial<PaymentLine>[];
 }
