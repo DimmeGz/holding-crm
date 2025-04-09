@@ -4,6 +4,12 @@ import { Repository } from 'typeorm';
 
 import { Shipment, ShipmentLine } from './entities';
 import { ReceiveService } from '../receive/receive.service';
+import { CreateShipmentDTO } from './dto/create-shipment.dto';
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
+import { GoodsService } from '../../goods';
 
 @Injectable()
 export class ShipmentService {
@@ -12,6 +18,7 @@ export class ShipmentService {
     private readonly shipmentsRepository: Repository<Shipment>,
     @InjectRepository(ShipmentLine)
     private readonly shipmentLinessRepository: Repository<ShipmentLine>,
+    private readonly goodsService: GoodsService,
     private readonly receiveService: ReceiveService,
   ) {}
 
@@ -120,5 +127,48 @@ export class ShipmentService {
     }
 
     return shipments;
+  }
+
+  async createShipment(createShipmentDTO: CreateShipmentDTO) {
+    createShipmentDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createShipmentDTO);
+
+    const newShipment = new Shipment(createShipmentDTO);
+    newShipment.createdAt = new Date();
+    newShipment.comment = newShipment.comment || '';
+    newShipment.transportPlace = newShipment.transportPlace || '';
+    newShipment.status = false;
+
+    newShipment.documentSum =
+      newShipment.shipmentLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      newShipment.shipmentLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+
+    return await this.shipmentsRepository.save(newShipment);
+  }
+
+  private async getTechnicalProcesses(createShipmentDTO: CreateShipmentDTO) {
+    const productIds = getProductIdsFromProductLines(
+      createShipmentDTO.shipmentLines,
+    );
+    const productProcesses =
+      await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
+
+    const serviceIds = getServiceIdsFromServiceLines(
+      createShipmentDTO.shipmentServiceLines,
+    );
+    const serviceProcesses =
+      await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
+
+    const technicalProcesses = [
+      ...new Set([...productProcesses, ...serviceProcesses]),
+    ];
+
+    return technicalProcesses.map((process) => ({ id: process.id }));
   }
 }

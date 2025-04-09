@@ -13,6 +13,7 @@ import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Warehouse } from '../../../warehouse/entities';
 import { Invoice } from '../../invoice/entities';
 import { ShipmentLine } from './shipment-line.entity';
+import { ShipmentServiceLine } from './shipment-service-line.entity';
 
 @Entity({ name: 'documents_shipment' })
 export class Shipment extends AbstractDocumentEntity<Shipment> {
@@ -21,6 +22,9 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
   })
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
+
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
 
   @Column({
     name: 'transport_place',
@@ -44,6 +48,9 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
   })
   @JoinColumn({ name: 'seller_warehouse_id' })
   sellerWarehouse: Warehouse;
+
+  @Column({ name: 'seller_warehouse_id' })
+  sellerWarehouseId: number;
 
   @Column({
     name: 'expected_date',
@@ -88,5 +95,14 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
   @OneToMany(() => ShipmentLine, (shipmentLine) => shipmentLine.shipment, {
     cascade: true,
   })
-  shipmentLines: ShipmentLine[];
+  shipmentLines: Partial<ShipmentLine>[];
+
+  @OneToMany(
+    () => ShipmentServiceLine,
+    (shipmentServiceLine) => shipmentServiceLine.shipment,
+    {
+      cascade: true,
+    },
+  )
+  shipmentServiceLines: Partial<ShipmentServiceLine>[];
 }

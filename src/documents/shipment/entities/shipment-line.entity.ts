@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractLineEntity } from '../../entities';
 import { Batch, Product } from '../../../goods/entities';
@@ -18,9 +18,15 @@ export class ShipmentLine extends AbstractLineEntity {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
+  @Column({ name: 'product_id' })
+  productId: number;
+
   @ManyToOne(() => Batch, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
+
+  @Column({ name: 'batch_id' })
+  batchId: number;
 }
