@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 
 import { ShipmentService } from './shipment.service';
 import { CreateShipmentDTO } from './dto/create-shipment.dto';
+import { UpdateShipmentDTO } from './dto';
 
 @Controller('shipment')
 export class ShipmentController {
@@ -20,5 +21,13 @@ export class ShipmentController {
   @Post()
   createShipment(@Body() createShipmentDTO: CreateShipmentDTO) {
     return this.shipmentService.createShipment(createShipmentDTO);
+  }
+
+  @Patch(':shipmentId')
+  updateShipment(
+    @Param('shipmentId') shipmentId: number,
+    @Body() updateShipmentDTO: UpdateShipmentDTO,
+  ) {
+    return this.shipmentService.updateShipment(shipmentId, updateShipmentDTO);
   }
 }

@@ -1,1 +1,2 @@
-export * from './create-shipment-line.dto';
+export * from './create-shipment.dto';
+export * from './update-shipment.dto';

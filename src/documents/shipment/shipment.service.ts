@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+
+import { GoodsService } from '../../goods';
+import { ReceiveService } from '../receive/receive.service';
 
 import { Shipment, ShipmentLine } from './entities';
-import { ReceiveService } from '../receive/receive.service';
-import { CreateShipmentDTO } from './dto/create-shipment.dto';
+
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
-import { GoodsService } from '../../goods';
+import { CreateShipmentDTO, UpdateShipmentDTO } from './dto';
 
 @Injectable()
 export class ShipmentService {
@@ -18,6 +20,7 @@ export class ShipmentService {
     private readonly shipmentsRepository: Repository<Shipment>,
     @InjectRepository(ShipmentLine)
     private readonly shipmentLinessRepository: Repository<ShipmentLine>,
+    @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
     private readonly receiveService: ReceiveService,
   ) {}
@@ -170,5 +173,71 @@ export class ShipmentService {
     ];
 
     return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateShipment(
+    shipmentId: number,
+    updateShipmentDTO: UpdateShipmentDTO,
+  ) {
+    const shipment = await this.shipmentsRepository
+      .createQueryBuilder('shipment')
+      .where('shipment.id = :shipmentId', { shipmentId })
+      .andWhere('shipment.status = FALSE')
+      .leftJoinAndSelect('shipment.shipmentLines', 'shipmentLines')
+      .leftJoinAndSelect(
+        'shipment.shipmentServiceLines',
+        'shipmentServiceLines',
+      )
+      .leftJoinAndSelect('shipment.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedShipmentLinesIds = [];
+    for (const line of updateShipmentDTO.shipmentLines) {
+      if (line['id']) {
+        updatedShipmentLinesIds.push(line['id']);
+      }
+    }
+    const shipmentLinesToDelete = shipment.shipmentLines.filter(
+      (line) => !updatedShipmentLinesIds.includes(line.id),
+    );
+
+    const updatedShipmentServiceLinesIds = [];
+    for (const line of updateShipmentDTO.shipmentServiceLines) {
+      if (line['id']) {
+        updatedShipmentServiceLinesIds.push(line['id']);
+      }
+    }
+    const shipmentServiceLinesToDelete = shipment.shipmentServiceLines.filter(
+      (line) => !updatedShipmentServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(shipment, updateShipmentDTO);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    // TODO: update technical processes
+
+    try {
+      if (shipmentLinesToDelete.length) {
+        await queryRunner.manager.remove(shipmentLinesToDelete);
+      }
+
+      if (shipmentServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(shipmentServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
