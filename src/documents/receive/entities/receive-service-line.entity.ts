@@ -1,11 +1,11 @@
-import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractLineEntity } from '../../entities';
+import { AbstractServiceLineEntity } from '../../entities';
 import { Service } from '../../../goods/entities';
 import { Receive } from './receive.entity';
 
 @Entity({ name: 'documents_receiveserviceline' })
-export class ReceiveServiceLine extends AbstractLineEntity {
+export class ReceiveServiceLine extends AbstractServiceLineEntity {
   @ManyToOne(() => Receive, {
     onDelete: 'RESTRICT',
   })
@@ -17,4 +17,7 @@ export class ReceiveServiceLine extends AbstractLineEntity {
   })
   @JoinColumn({ name: 'service_id' })
   service: Service;
+
+  @Column({ name: 'service_id' })
+  serviceId: number;
 }

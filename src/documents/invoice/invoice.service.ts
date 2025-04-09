@@ -241,7 +241,7 @@ export class InvoiceService {
 
   async removeInvoice(invoiceId: number) {
     const invoice = await this.invoiceRepository.findOne({
-      where: { id: invoiceId },
+      where: { id: invoiceId, status: false },
       relations: ['invoiceLines', 'invoiceServiceLines'],
     });
     return await this.invoiceRepository.remove(invoice);
