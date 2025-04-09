@@ -240,4 +240,12 @@ export class ShipmentService {
       await queryRunner.release();
     }
   }
+
+  async removeShipment(shipmentId: number) {
+    const invoice = await this.shipmentsRepository.findOne({
+      where: { id: shipmentId },
+      relations: ['shipmentLines', 'shipmentServiceLines'],
+    });
+    return await this.shipmentsRepository.remove(invoice);
+  }
 }

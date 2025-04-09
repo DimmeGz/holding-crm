@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 
 import { ShipmentService } from './shipment.service';
 import { CreateShipmentDTO } from './dto/create-shipment.dto';
@@ -29,5 +37,10 @@ export class ShipmentController {
     @Body() updateShipmentDTO: UpdateShipmentDTO,
   ) {
     return this.shipmentService.updateShipment(shipmentId, updateShipmentDTO);
+  }
+
+  @Delete(':shipmentId')
+  removeShipment(@Param('shipmentId') shipmentId: number) {
+    return this.shipmentService.removeShipment(shipmentId);
   }
 }
