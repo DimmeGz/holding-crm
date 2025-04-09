@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import {
   getProductIdsFromProductLines,
@@ -10,13 +10,14 @@ import {
 import { GoodsService } from '../../goods';
 
 import { Receive } from './entities';
-import { CreateReveiveDTO } from './dto';
+import { CreateReveiveDTO, UpdateReceiveDTO } from './dto';
 
 @Injectable()
 export class ReceiveService {
   constructor(
     @InjectRepository(Receive)
     private readonly receivesRepository: Repository<Receive>,
+    @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
   ) {}
 
@@ -137,5 +138,65 @@ export class ReceiveService {
     ];
 
     return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  async updateReceive(receiveId: number, updateReceiveDTO: UpdateReceiveDTO) {
+    const receive = await this.receivesRepository
+      .createQueryBuilder('receive')
+      .where('receive.id = :receiveId', { receiveId })
+      .andWhere('receive.status = FALSE')
+      .leftJoinAndSelect('receive.receiveLines', 'receiveLines')
+      .leftJoinAndSelect('receive.receiveServiceLines', 'receiveServiceLines')
+      .leftJoinAndSelect('receive.technicalProcesses', 'technicalProcesses')
+      .getOne();
+
+    const updatedReceiveLinesIds = [];
+    for (const line of updateReceiveDTO.receiveLines) {
+      if (line['id']) {
+        updatedReceiveLinesIds.push(line['id']);
+      }
+    }
+    const receiveLinesToDelete = receive.receiveLines.filter(
+      (line) => !updatedReceiveLinesIds.includes(line.id),
+    );
+
+    const updatedReceiveServiceLinesIds = [];
+    for (const line of updateReceiveDTO.receiveServiceLines) {
+      if (line['id']) {
+        updatedReceiveServiceLinesIds.push(line['id']);
+      }
+    }
+    const receiveServiceLinesToDelete = receive.receiveServiceLines.filter(
+      (line) => !updatedReceiveServiceLinesIds.includes(line.id),
+    );
+
+    const updated = Object.assign(receive, updateReceiveDTO);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    // TODO: update technical processes
+
+    try {
+      if (receiveLinesToDelete.length) {
+        await queryRunner.manager.remove(receiveLinesToDelete);
+      }
+
+      if (receiveServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(receiveServiceLinesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

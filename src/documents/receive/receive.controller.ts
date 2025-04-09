@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 
 import { ReceiveService } from './receive.service';
 
-import { CreateReveiveDTO } from './dto';
+import { CreateReveiveDTO, UpdateReceiveDTO } from './dto';
 
 @Controller('receive')
 export class ReceiveController {
@@ -21,5 +21,13 @@ export class ReceiveController {
   @Post()
   createReceive(@Body() createReveiveDTO: CreateReveiveDTO) {
     return this.receiveService.createReceive(createReveiveDTO);
+  }
+
+  @Patch(':receiveId')
+  updateReceive(
+    @Param('receiveId') receiveId: number,
+    @Body() updateReceiveDTO: UpdateReceiveDTO,
+  ) {
+    return this.receiveService.updateReceive(receiveId, updateReceiveDTO);
   }
 }
