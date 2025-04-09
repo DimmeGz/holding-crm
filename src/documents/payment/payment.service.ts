@@ -3,7 +3,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { DataSource, Repository } from 'typeorm';
 
-import { LibsService } from '../../libs/libs.service';
+import { LibsService } from '../../libs';
 
 import { Payment } from './entities';
 import { CreatePaymentDTO, UpdatePaymentDTO } from './dto';
