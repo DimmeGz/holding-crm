@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { DataSource, Repository } from 'typeorm';
@@ -158,5 +162,30 @@ export class ProductTransportService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async removeProductTransport(productTransportId: number) {
+    try {
+      const transport = await this.productTransportRepository.findOneByOrFail({
+        id: productTransportId,
+        status: false,
+      });
+
+      return await this.productTransportRepository.remove(transport);
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
+  }
+
+  async changeProductTransportStatus(productTransportId: number) {
+    const transport = await this.productTransportRepository.findOneBy({
+      id: productTransportId,
+    });
+
+    transport.status = !transport.status;
+
+    // TODO: change qty in warehouseaccounting
+
+    return await this.productTransportRepository.save(transport);
   }
 }
