@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CommissionPaymentService } from './commission-payment.service';
+import { CreateCommissionPaymentDTO } from './dto';
 
 @Controller('commission_payment')
 export class CommissionPaymentController {
@@ -18,6 +19,16 @@ export class CommissionPaymentController {
   ) {
     return this.commissionPaymentService.getCommisionPaymentById(
       commissionPaymentId,
+    );
+  }
+
+  @Post()
+  createCommissionPayment(
+    @Body()
+    createCommissionPaymentDTO: CreateCommissionPaymentDTO,
+  ) {
+    return this.commissionPaymentService.createCommissionPayment(
+      createCommissionPaymentDTO,
     );
   }
 }
