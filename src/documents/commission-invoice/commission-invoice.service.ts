@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -128,12 +128,16 @@ export class CommissionInvoiceService {
   }
 
   async removeCommission(commissionId: number) {
-    const commission = await this.commissionRepository.findOneBy({
-      id: commissionId,
-      status: false,
-    });
+    try {
+      const commission = await this.commissionRepository.findOneBy({
+        id: commissionId,
+        status: false,
+      });
 
-    return this.commissionRepository.remove(commission);
+      return this.commissionRepository.remove(commission);
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
   }
 
   async changeCommissionStatus(commissionId: number) {

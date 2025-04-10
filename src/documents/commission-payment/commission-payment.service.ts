@@ -121,6 +121,8 @@ export class CommissionPaymentService {
 
     commissionPayment.status = !commissionPayment.status;
 
+    // TODO: make financial changes
+
     return await this.commissionPaymentsRepository.save(commissionPayment);
   }
 }
