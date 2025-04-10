@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Production } from './entities';
 import { Repository } from 'typeorm';
+
+import { LibsService } from '../../libs';
+
+import { Production } from './entities';
+import { CreateProductionDTO } from './dto';
 
 @Injectable()
 export class ProductionService {
   constructor(
     @InjectRepository(Production)
     private readonly productionsRepository: Repository<Production>,
+    private readonly libsService: LibsService,
   ) {}
 
   async getProductions() {
@@ -69,5 +74,24 @@ export class ProductionService {
       .getOne();
 
     return production;
+  }
+
+  async createProduction(createProductionDTO: CreateProductionDTO) {
+    createProductionDTO['createdAt'] = new Date();
+    const newProduction = new Production(createProductionDTO);
+    newProduction.status = false;
+    newProduction.expectedDate =
+      newProduction.expectedDate || newProduction.createdAt;
+    newProduction.comment = newProduction.comment || '';
+
+    const productIds = new Set([
+      ...newProduction.productionInLines.map((line) => line.productId),
+      ...newProduction.productionOutLines.map((line) => line.productId),
+    ]);
+
+    newProduction.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByProductIds([...productIds]);
+
+    return await this.productionsRepository.save(newProduction);
   }
 }

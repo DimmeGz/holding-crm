@@ -1,6 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
 import { ProductionService } from './production.service';
+import { CreateProductionDTO } from './dto';
 
 @Controller('production')
 export class ProductionController {
@@ -14,5 +15,10 @@ export class ProductionController {
   @Get(':productionId')
   async getProductionById(@Param('productionId') productionId: number) {
     return this.productionService.getProductionById(productionId);
+  }
+
+  @Post()
+  createProduction(@Body() createProductionDTO: CreateProductionDTO) {
+    return this.productionService.createProduction(createProductionDTO);
   }
 }
