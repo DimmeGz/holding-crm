@@ -24,11 +24,17 @@ export class Production extends AbstractEntity {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
+  @Column({ name: 'company_id' })
+  companyId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'warehouse_id' })
   warehouse: Warehouse;
+
+  @Column({ name: 'warehouse_id' })
+  warehouseId: number;
 
   @Column({
     name: 'expected_date',
@@ -87,4 +93,13 @@ export class Production extends AbstractEntity {
     { cascade: true },
   )
   productionOutLines: ProductionOutLine[];
+
+  @Column({ name: 'created_by_id' })
+  createdById: number;
+
+  constructor(entity) {
+    super();
+    // TODO: created_by
+    Object.assign(this, { ...entity, createdById: 1 });
+  }
 }

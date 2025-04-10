@@ -31,4 +31,15 @@ export class LibsService {
       .select('technicalProcess.id')
       .getMany();
   }
+
+  async getTechnicalProcessesByProductIds(productIds: number[]) {
+    return await this.technicalProcessesRepository
+      .createQueryBuilder('technicalProcess')
+      .leftJoin('technicalProcess.products', 'product')
+      .where('product.id IN (:...productIds)', {
+        productIds,
+      })
+      .select('technicalProcess.id')
+      .getMany();
+  }
 }
