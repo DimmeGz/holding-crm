@@ -22,17 +22,26 @@ export class ProductTransport extends AbstractEntity {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
+  @Column({ name: 'company_id' })
+  companyId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'warehouse_sender_id' })
   warehouseSender: Warehouse;
 
+  @Column({ name: 'warehouse_sender_id' })
+  warehouseSenderId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'warehouse_receive_id' })
   warehouseReceive: Warehouse;
+
+  @Column({ name: 'warehouse_receive_id' })
+  warehouseReceiveId: number;
 
   @Column({
     type: 'varchar',
@@ -84,4 +93,13 @@ export class ProductTransport extends AbstractEntity {
     { cascade: true },
   )
   productTransportLines: ProductTransportLine[];
+
+  @Column({ name: 'created_by_id' })
+  createdById: number;
+
+  constructor(entity) {
+    super();
+    // TODO: created_by
+    Object.assign(this, { ...entity, createdById: 1 });
+  }
 }

@@ -3,13 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 
+import { LibsService } from '../../libs';
 import { ProductTransport } from './entities';
+import { CreateProductTransportDTO } from './dto';
 
 @Injectable()
 export class ProductTransportService {
   constructor(
     @InjectRepository(ProductTransport)
     private readonly productTransportRepository: Repository<ProductTransport>,
+    private readonly libsService: LibsService,
   ) {}
 
   async getProductTransports() {
@@ -64,5 +67,25 @@ export class ProductTransportService {
       .getOne();
 
     return productTransport;
+  }
+
+  async createProductTransport(
+    createProductTransportDTO: CreateProductTransportDTO,
+  ) {
+    const newProductTransport = new ProductTransport(createProductTransportDTO);
+    newProductTransport.status = false;
+    newProductTransport.createdAt = new Date();
+    newProductTransport.expectedDate =
+      newProductTransport.expectedDate || newProductTransport.createdAt;
+    newProductTransport.comment = newProductTransport.comment || '';
+
+    const productIds = newProductTransport.productTransportLines.map(
+      (line) => line.productId,
+    );
+
+    newProductTransport.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByProductIds([...productIds]);
+
+    return await this.productTransportRepository.save(newProductTransport);
   }
 }
