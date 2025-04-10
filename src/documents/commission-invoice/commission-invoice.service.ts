@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { InvoiceService } from '../invoice/invoice.service';
 
 import { CommissionInvoice } from './entities';
-import { CreateCommissionInvoiceDTO } from './dto';
+import { CreateCommissionInvoiceDTO, UpdateCommissionInvoiceDTO } from './dto';
 
 @Injectable()
 export class CommissionInvoiceService {
@@ -98,5 +98,29 @@ export class CommissionInvoiceService {
     newCommissionIvoice.paymentBalance = newCommissionIvoice.documentSum;
 
     return await this.commissionRepository.save(newCommissionIvoice);
+  }
+
+  async updateCommissionInvoice(
+    commissionId: number,
+    updateCommissionInvoiceDTO: UpdateCommissionInvoiceDTO,
+  ) {
+    const commission = await this.commissionRepository.findOneBy({
+      id: commissionId,
+      status: false,
+    });
+
+    const updated = Object.assign(commission, updateCommissionInvoiceDTO);
+
+    const invoiceData = await this.invoicesService.getInvoiceDataForCommission(
+      commission.invoiceId,
+    );
+    const childrenSum = invoiceData.children.reduce(
+      (acc, cur) => (acc += cur.documentSum),
+      0,
+    );
+
+    updated.documentSum = (childrenSum * updated.rate) / 100;
+
+    return await this.commissionRepository.save(updated);
   }
 }

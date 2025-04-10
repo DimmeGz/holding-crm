@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 
 import { CommissionInvoiceService } from './commission-invoice.service';
-import { CreateCommissionInvoiceDTO } from './dto';
+import { CreateCommissionInvoiceDTO, UpdateCommissionInvoiceDTO } from './dto';
 
 @Controller('commission')
 export class CommissionInvoiceController {
@@ -26,6 +26,18 @@ export class CommissionInvoiceController {
   ) {
     return this.commissionInvoiceService.createCommissionInvoice(
       createCommissionInvoiceDTO,
+    );
+  }
+
+  @Patch(':commissionId')
+  updateCommissionInvoice(
+    @Param('commissionId') commissionId: number,
+    @Body()
+    updateCommissionInvoiceDTO: UpdateCommissionInvoiceDTO,
+  ) {
+    return this.commissionInvoiceService.updateCommissionInvoice(
+      commissionId,
+      updateCommissionInvoiceDTO,
     );
   }
 }
