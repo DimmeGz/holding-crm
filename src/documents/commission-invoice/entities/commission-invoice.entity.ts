@@ -5,11 +5,13 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { AbstractDocumentEntity } from '../../entities';
 import { Invoice } from '../../invoice/entities';
 import { TechnicalProcess } from '../../../libs/entities';
+import { CommissionPayment } from '../../commission-payment/entities';
 
 @Entity({ name: 'documents_commissioninvoice' })
 export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice> {
@@ -46,6 +48,9 @@ export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice>
   @JoinColumn({ name: 'invoice_id' })
   invoice: Invoice;
 
+  @Column({ name: 'invoice_id' })
+  invoiceId: number;
+
   @Column({
     type: 'decimal',
     unsigned: true,
@@ -67,4 +72,13 @@ export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice>
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(
+    () => CommissionPayment,
+    (commissionPayment) => commissionPayment.commissionInvoice,
+    {
+      cascade: true,
+    },
+  )
+  commissionPayments: Partial<CommissionPayment>[];
 }

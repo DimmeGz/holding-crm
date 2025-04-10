@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
@@ -236,11 +240,15 @@ export class OrdersService {
   }
 
   async removeOrder(orderId: number) {
-    const order = await this.ordersRepository.findOne({
-      where: { id: orderId, status: false },
-      relations: ['orderLines', 'orderServiceLines'],
-    });
-    return await this.ordersRepository.remove(order);
+    try {
+      const order = await this.ordersRepository.findOne({
+        where: { id: orderId, status: false },
+        relations: ['orderLines', 'orderServiceLines'],
+      });
+      return await this.ordersRepository.remove(order);
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
   }
 
   async changeOrderStatus(orderId: number) {
@@ -248,7 +256,7 @@ export class OrdersService {
       where: { id: orderId },
     });
 
-    order.status = order.status ? false : true;
+    order.status = !order.status;
 
     return await this.ordersRepository.save(order);
   }

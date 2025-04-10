@@ -19,6 +19,9 @@ export class CommissionPayment extends AbstractDocumentEntity<CommissionPayment>
   @JoinColumn({ name: 'commission_invoice_id' })
   commissionInvoice: CommissionInvoice;
 
+  @Column({ name: 'commission_invoice_id' })
+  commissionInvoiceId: number;
+
   @Column({
     name: 'expected_date',
     type: 'date',
