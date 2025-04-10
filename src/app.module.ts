@@ -11,6 +11,8 @@ import { LibsModule } from './libs';
 import { WarehouseModule } from './warehouse';
 
 import { DB_CONFIG, VALIDATION_SCHEMA } from './config';
+import { CommissionInvoiceService } from './commission-invoice/commission-invoice.service';
+import { CommissionInvoiceController } from './commission-invoice/commission-invoice.controller';
 
 @Module({
   imports: [
@@ -21,7 +23,7 @@ import { DB_CONFIG, VALIDATION_SCHEMA } from './config';
     LibsModule,
     WarehouseModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, CommissionInvoiceController],
+  providers: [AppService, CommissionInvoiceService],
 })
 export class AppModule {}
