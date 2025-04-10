@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CommissionPayment } from './entities';
 import { Repository } from 'typeorm';
-import { CreateCommissionPaymentDTO } from './dto';
+
 import { LibsService } from '../../libs';
+
+import { CommissionPayment } from './entities';
+import { CreateCommissionPaymentDTO, UpdateCommissionPaymentDTO } from './dto';
 
 @Injectable()
 export class CommissionPaymentService {
@@ -80,5 +82,21 @@ export class CommissionPaymentService {
       );
 
     return await this.commissionPaymentsRepository.save(newCommissionPayment);
+  }
+
+  async updateCommissionPayment(
+    commissionPaymentId: number,
+    updateCommissionPaymentDTO: UpdateCommissionPaymentDTO,
+  ) {
+    const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
+      { id: commissionPaymentId, status: false },
+    );
+
+    const updated = Object.assign(
+      commissionPayment,
+      updateCommissionPaymentDTO,
+    );
+
+    return await this.commissionPaymentsRepository.save(updated);
   }
 }
