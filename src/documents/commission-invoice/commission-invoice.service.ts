@@ -123,4 +123,25 @@ export class CommissionInvoiceService {
 
     return await this.commissionRepository.save(updated);
   }
+
+  async removeCommission(commissionId: number) {
+    const commission = await this.commissionRepository.findOneBy({
+      id: commissionId,
+      status: false,
+    });
+
+    return this.commissionRepository.remove(commission);
+  }
+
+  async changeCommissionStatus(commissionId: number) {
+    const commission = await this.commissionRepository.findOneBy({
+      id: commissionId,
+    });
+
+    commission.status = commission.status ? false : true;
+
+    // make financial changes
+
+    return await this.commissionRepository.save(commission);
+  }
 }
