@@ -21,5 +21,5 @@ export class UpdateShipmentDTO extends PartialType(BaseShipmentDTO) {
   @IsArray()
   @Type(() => Object)
   @IsOneOfDtos(CreateServiceLineDTO, UpdateServiceLineDTO)
-  shipmentServiceLines: CreateServiceLineDTO[];
+  shipmentServiceLines: (CreateServiceLineDTO | UpdateServiceLineDTO)[];
 }

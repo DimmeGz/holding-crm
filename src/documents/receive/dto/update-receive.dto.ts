@@ -21,5 +21,5 @@ export class UpdateReceiveDTO extends PartialType(BaseReceiveDTO) {
   @IsArray()
   @Type(() => Object)
   @IsOneOfDtos(CreateServiceLineDTO, UpdateServiceLineDTO)
-  receiveServiceLines: CreateServiceLineDTO[];
+  receiveServiceLines: (CreateServiceLineDTO | UpdateServiceLineDTO)[];
 }

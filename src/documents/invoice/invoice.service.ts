@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
@@ -101,14 +105,29 @@ export class InvoiceService {
         'package.name',
         'package.capacity',
       ])
+      .leftJoin('invoice.commissionInvoices', 'commissionInvoice')
+      .leftJoin('commissionInvoice.commissionPayments', 'commissionPayment')
+      .leftJoin('invoice.children', 'children')
+      .addSelect([
+        'commissionInvoice.id',
+        'commissionInvoice.status',
+        'commissionPayment.id',
+        'commissionPayment.status',
+        'children.id',
+        'children.status',
+      ])
       .getOne();
 
     const shipments =
       await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
     const payments =
       await this.paymentsService.getPaymentsByInvoiceId(invoiceId);
+    const commission = invoice.commissionInvoices;
+    delete invoice.commissionInvoices;
+    const childInvoices = invoice.children;
+    delete invoice.children;
 
-    return { invoice, shipments, payments };
+    return { invoice, shipments, payments, commission, childInvoices };
   }
 
   async getInvoicesByOrderId(orderId: number) {
@@ -240,11 +259,15 @@ export class InvoiceService {
   }
 
   async removeInvoice(invoiceId: number) {
-    const invoice = await this.invoiceRepository.findOne({
-      where: { id: invoiceId, status: false },
-      relations: ['invoiceLines', 'invoiceServiceLines'],
-    });
-    return await this.invoiceRepository.remove(invoice);
+    try {
+      const invoice = await this.invoiceRepository.findOne({
+        where: { id: invoiceId, status: false },
+        relations: ['invoiceLines', 'invoiceServiceLines'],
+      });
+      return await this.invoiceRepository.remove(invoice);
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
   }
 
   async changeInvoiceStatus(invoiceId: number) {
@@ -252,10 +275,32 @@ export class InvoiceService {
       where: { id: invoiceId },
     });
 
-    invoice.status = invoice.status ? false : true;
+    invoice.status = !invoice.status;
 
     // TODO: make finanshial changes in companies
 
     return await this.invoiceRepository.save(invoice);
+  }
+
+  async getInvoiceDataForCommission(invoiceId: number) {
+    const invoice = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.id = :invoiceId', { invoiceId })
+      .andWhere('invoice.status = true')
+      .leftJoin('invoice.children', 'children')
+      .leftJoin('invoice.technicalProcesses', 'technicalProcess')
+      .andWhere('children.status = true')
+      .select([
+        'invoice.id',
+        'invoice.invoiceNumber',
+        'invoice.documentSum',
+        'children.id',
+        'children.invoiceNumber',
+        'children.documentSum',
+        'technicalProcess.id',
+      ])
+      .getOne();
+
+    return invoice;
   }
 }

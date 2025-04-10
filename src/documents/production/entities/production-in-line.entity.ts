@@ -7,7 +7,7 @@ import { Production } from './production.entity';
 @Entity({ name: 'documents_productioninline' })
 export class ProductionInLine extends AbstractEntity {
   @ManyToOne(() => Production, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'production_id' })
   production: Production;
@@ -18,17 +18,26 @@ export class ProductionInLine extends AbstractEntity {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
+  @Column({ name: 'product_id' })
+  productId: number;
+
   @ManyToOne(() => Batch, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
 
+  @Column({ name: 'batch_id' })
+  batchId: number;
+
   @ManyToOne(() => Package, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'package_id' })
   package: Package;
+
+  @Column({ name: 'package_id' })
+  packageId: number;
 
   @Column({
     type: 'int',

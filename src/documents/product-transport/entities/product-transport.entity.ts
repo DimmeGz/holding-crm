@@ -13,6 +13,7 @@ import { Company } from '../../../companies/entities';
 import { Warehouse } from '../../../warehouse/entities';
 import { TechnicalProcess } from '../../../libs/entities';
 import { ProductTransportLine } from './product-transport-line.entity';
+import { ProductTransportServiceLine } from './product-transport-service-line.entity';
 
 @Entity({ name: 'documents_producttransport' })
 export class ProductTransport extends AbstractEntity {
@@ -22,17 +23,26 @@ export class ProductTransport extends AbstractEntity {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
+  @Column({ name: 'company_id' })
+  companyId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'warehouse_sender_id' })
   warehouseSender: Warehouse;
 
+  @Column({ name: 'warehouse_sender_id' })
+  warehouseSenderId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'warehouse_receive_id' })
   warehouseReceive: Warehouse;
+
+  @Column({ name: 'warehouse_receive_id' })
+  warehouseReceiveId: number;
 
   @Column({
     type: 'varchar',
@@ -84,4 +94,21 @@ export class ProductTransport extends AbstractEntity {
     { cascade: true },
   )
   productTransportLines: ProductTransportLine[];
+
+  @OneToMany(
+    () => ProductTransportServiceLine,
+    (productTransportServiceLine) =>
+      productTransportServiceLine.productTransport,
+    { cascade: true },
+  )
+  productTransportServiceLines: ProductTransportServiceLine[];
+
+  @Column({ name: 'created_by_id' })
+  createdById: number;
+
+  constructor(entity) {
+    super();
+    // TODO: created_by
+    Object.assign(this, { ...entity, createdById: 1 });
+  }
 }
