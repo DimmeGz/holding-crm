@@ -19,5 +19,5 @@ export class UpdateInvoiceDTO extends BaseInvoiceDTO {
   @IsArray()
   @Type(() => Object)
   @IsOneOfDtos(CreateServiceLineDTO, UpdateServiceLineDTO)
-  invoiceServiceLines: CreateServiceLineDTO[];
+  invoiceServiceLines: (CreateServiceLineDTO | UpdateServiceLineDTO)[];
 }
