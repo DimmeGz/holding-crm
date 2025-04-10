@@ -273,4 +273,24 @@ export class InvoiceService {
 
     return await this.invoiceRepository.save(invoice);
   }
+
+  async getInvoiceDataForCommission(invoiceId: number) {
+    const invoice = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.id = :invoiceId', { invoiceId })
+      .andWhere('invoice.status = true')
+      .leftJoin('invoice.children', 'children')
+      .andWhere('children.status = true')
+      .select([
+        'invoice.id',
+        'invoice.invoiceNumber',
+        'invoice.documentSum',
+        'children.id',
+        'children.invoiceNumber',
+        'children.documentSum',
+      ])
+      .getOne();
+
+    return invoice;
+  }
 }

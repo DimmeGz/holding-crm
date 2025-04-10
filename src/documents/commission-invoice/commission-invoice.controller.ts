@@ -1,6 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 
 import { CommissionInvoiceService } from './commission-invoice.service';
+import { CreateCommissionInvoiceDTO } from './dto';
 
 @Controller('commission')
 export class CommissionInvoiceController {
@@ -9,12 +10,22 @@ export class CommissionInvoiceController {
   ) {}
 
   @Get()
-  getCommissions() {
-    return this.commissionInvoiceService.getCommissions();
+  getCommissionInvoicess() {
+    return this.commissionInvoiceService.getCommissionInvoicess();
   }
 
   @Get(':commissionId')
-  getCommissionById(@Param('commissionId') commissionId: number) {
-    return this.commissionInvoiceService.getCommissionById(commissionId);
+  getCommissionInvoiceById(@Param('commissionId') commissionId: number) {
+    return this.commissionInvoiceService.getCommissionInvoiceById(commissionId);
+  }
+
+  @Post()
+  createCommissionInvoice(
+    @Body()
+    createCommissionInvoiceDTO: CreateCommissionInvoiceDTO,
+  ) {
+    return this.commissionInvoiceService.createCommissionInvoice(
+      createCommissionInvoiceDTO,
+    );
   }
 }
