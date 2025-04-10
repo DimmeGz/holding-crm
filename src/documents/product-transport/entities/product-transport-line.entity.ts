@@ -7,7 +7,7 @@ import { Batch, Package, Product } from '../../../goods/entities';
 @Entity({ name: 'documents_producttransportline' })
 export class ProductTransportLine extends AbstractEntity {
   @ManyToOne(() => ProductTransport, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'goods_transport_id' })
   productTransport: ProductTransport;

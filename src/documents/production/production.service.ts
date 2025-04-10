@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
@@ -166,7 +170,7 @@ export class ProductionService {
 
       return await this.productionsRepository.remove(production);
     } catch (e) {
-      throw new BadRequestException(e);
+      throw new NotFoundException(e);
     }
   }
 
