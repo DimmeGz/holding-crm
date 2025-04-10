@@ -101,14 +101,29 @@ export class InvoiceService {
         'package.name',
         'package.capacity',
       ])
+      .leftJoin('invoice.commissionInvoices', 'commissionInvoice')
+      .leftJoin('commissionInvoice.commissionPayments', 'commissionPayment')
+      .leftJoin('invoice.children', 'children')
+      .addSelect([
+        'commissionInvoice.id',
+        'commissionInvoice.status',
+        'commissionPayment.id',
+        'commissionPayment.status',
+        'children.id',
+        'children.status',
+      ])
       .getOne();
 
     const shipments =
       await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
     const payments =
       await this.paymentsService.getPaymentsByInvoiceId(invoiceId);
+    const commission = invoice.commissionInvoices;
+    delete invoice.commissionInvoices;
+    const childInvoices = invoice.children;
+    delete invoice.children;
 
-    return { invoice, shipments, payments };
+    return { invoice, shipments, payments, commission, childInvoices };
   }
 
   async getInvoicesByOrderId(orderId: number) {
