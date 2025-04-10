@@ -171,7 +171,7 @@ export class PaymentService {
       where: { id: paymentId },
     });
 
-    payment.status = payment.status ? false : true;
+    payment.status = !payment.status;
 
     // TODO: make finanshial changes in companies
 

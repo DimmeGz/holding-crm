@@ -262,7 +262,7 @@ export class ShipmentService {
       where: { id: shipmentId },
     });
 
-    shipment.status = shipment.status ? false : true;
+    shipment.status = !shipment.status;
 
     // TODO: make changes in warehouseAccounting
 

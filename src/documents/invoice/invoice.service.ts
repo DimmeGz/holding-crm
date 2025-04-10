@@ -275,7 +275,7 @@ export class InvoiceService {
       where: { id: invoiceId },
     });
 
-    invoice.status = invoice.status ? false : true;
+    invoice.status = !invoice.status;
 
     // TODO: make finanshial changes in companies
 

@@ -256,7 +256,7 @@ export class OrdersService {
       where: { id: orderId },
     });
 
-    order.status = order.status ? false : true;
+    order.status = !order.status;
 
     return await this.ordersRepository.save(order);
   }
