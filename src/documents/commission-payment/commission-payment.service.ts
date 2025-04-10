@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -98,5 +98,29 @@ export class CommissionPaymentService {
     );
 
     return await this.commissionPaymentsRepository.save(updated);
+  }
+
+  async removeCommissionPayment(commissionPaymentId: number) {
+    try {
+      const commissionPayment =
+        await this.commissionPaymentsRepository.findOneByOrFail({
+          id: commissionPaymentId,
+          status: false,
+        });
+
+      return await this.commissionPaymentsRepository.remove(commissionPayment);
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
+  }
+
+  async changeCommissionPaymentStatus(commissionPaymentId: number) {
+    const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
+      { id: commissionPaymentId },
+    );
+
+    commissionPayment.status = !commissionPayment.status;
+
+    return await this.commissionPaymentsRepository.save(commissionPayment);
   }
 }
