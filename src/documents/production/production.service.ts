@@ -177,6 +177,8 @@ export class ProductionService {
 
     production.status = !production.status;
 
+    // TODO: change qty in warehouseaccounting
+
     return await this.productionsRepository.save(production);
   }
 }
