@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 
 import { CommissionPaymentService } from './commission-payment.service';
 
@@ -42,6 +50,24 @@ export class CommissionPaymentController {
     return this.commissionPaymentService.updateCommissionPayment(
       commissionPaymentId,
       updateCommissionPaymentDTO,
+    );
+  }
+
+  @Delete(':commissionPaymentId')
+  removeCommissionPayment(
+    @Param('commissionPaymentId') commissionPaymentId: number,
+  ) {
+    return this.commissionPaymentService.removeCommissionPayment(
+      commissionPaymentId,
+    );
+  }
+
+  @Patch('change-status/:commissionPaymentId')
+  changeCommissionPaymentStatus(
+    @Param('commissionPaymentId') commissionPaymentId: number,
+  ) {
+    return this.commissionPaymentService.changeCommissionPaymentStatus(
+      commissionPaymentId,
     );
   }
 }
