@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 
 import { ProductionService } from './production.service';
 import { CreateProductionDTO, UpdateProductionDTO } from './dto';
@@ -31,5 +39,15 @@ export class ProductionController {
       productionId,
       updateProductionDTO,
     );
+  }
+
+  @Delete(':productionId')
+  removeProduction(@Param('productionId') productionId: number) {
+    return this.productionService.removeProduction(productionId);
+  }
+
+  @Patch('change-status/:productionId')
+  changeProductionStatus(@Param('productionId') productionId: number) {
+    return this.productionService.changeProductionStatus(productionId);
   }
 }

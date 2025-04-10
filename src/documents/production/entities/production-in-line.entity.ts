@@ -7,7 +7,7 @@ import { Production } from './production.entity';
 @Entity({ name: 'documents_productioninline' })
 export class ProductionInLine extends AbstractEntity {
   @ManyToOne(() => Production, {
-    onDelete: 'RESTRICT',
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'production_id' })
   production: Production;

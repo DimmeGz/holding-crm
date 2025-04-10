@@ -145,7 +145,7 @@ export class CommissionInvoiceService {
       id: commissionId,
     });
 
-    commission.status = commission.status ? false : true;
+    commission.status = !commission.status;
 
     // make financial changes
 

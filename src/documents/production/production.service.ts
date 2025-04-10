@@ -156,4 +156,27 @@ export class ProductionService {
       await queryRunner.release();
     }
   }
+
+  async removeProduction(productionId: number) {
+    try {
+      const production = await this.productionsRepository.findOneByOrFail({
+        id: productionId,
+        status: false,
+      });
+
+      return await this.productionsRepository.remove(production);
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
+  }
+
+  async changeProductionStatus(productionId: number) {
+    const production = await this.productionsRepository.findOneBy({
+      id: productionId,
+    });
+
+    production.status = !production.status;
+
+    return await this.productionsRepository.save(production);
+  }
 }

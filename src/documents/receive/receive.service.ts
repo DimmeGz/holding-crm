@@ -221,7 +221,7 @@ export class ReceiveService {
       where: { id: receiveId },
     });
 
-    receive.status = receive.status ? false : true;
+    receive.status = !receive.status;
 
     // TODO: make changes in warehouseAccounting
 

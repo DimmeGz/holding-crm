@@ -298,7 +298,7 @@ export class ContractsService {
       where: { id: contractId },
     });
 
-    contract.status = contract.status ? false : true;
+    contract.status = !contract.status;
 
     return await this.contractsRepository.save(contract);
   }
