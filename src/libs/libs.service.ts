@@ -18,4 +18,17 @@ export class LibsService {
       .select('technicalProcess.id')
       .getMany();
   }
+
+  async getTechnicalProcessesByCommissionInvoiceId(
+    commissionInvoiceId: number,
+  ) {
+    return await this.technicalProcessesRepository
+      .createQueryBuilder('technicalProcess')
+      .leftJoin('technicalProcess.commissionInvoices', 'commissionInvoice')
+      .where('commissionInvoice.id = :commissionInvoiceId', {
+        commissionInvoiceId,
+      })
+      .select('technicalProcess.id')
+      .getMany();
+  }
 }
