@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { DataSource, Repository } from 'typeorm';
@@ -151,11 +155,15 @@ export class PaymentService {
   }
 
   async removePayment(paymentId: number) {
-    const invoice = await this.paymentsRepository.findOne({
-      where: { id: paymentId, status: false },
-      relations: ['paymentLines'],
-    });
-    return await this.paymentsRepository.remove(invoice);
+    try {
+      const invoice = await this.paymentsRepository.findOne({
+        where: { id: paymentId, status: false },
+        relations: ['paymentLines'],
+      });
+      return await this.paymentsRepository.remove(invoice);
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
   }
 
   async changePaymentStatus(paymentId: number) {

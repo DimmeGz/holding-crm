@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
@@ -201,11 +205,15 @@ export class ReceiveService {
   }
 
   async removeReceive(receiveId: number) {
-    const invoice = await this.receivesRepository.findOne({
-      where: { id: receiveId, status: false },
-      relations: ['receiveLines', 'receiveServiceLines'],
-    });
-    return await this.receivesRepository.remove(invoice);
+    try {
+      const invoice = await this.receivesRepository.findOne({
+        where: { id: receiveId, status: false },
+        relations: ['receiveLines', 'receiveServiceLines'],
+      });
+      return await this.receivesRepository.remove(invoice);
+    } catch (e) {
+      throw new NotFoundException(e);
+    }
   }
 
   async changeReceiveStatus(receiveId: number) {
