@@ -97,6 +97,8 @@ export class CommissionInvoiceService {
       (childrenSum * newCommissionIvoice.rate) / 100;
     newCommissionIvoice.paymentBalance = newCommissionIvoice.documentSum;
 
+    newCommissionIvoice.technicalProcesses = invoiceData.technicalProcesses;
+
     return await this.commissionRepository.save(newCommissionIvoice);
   }
 
@@ -120,6 +122,7 @@ export class CommissionInvoiceService {
     );
 
     updated.documentSum = (childrenSum * updated.rate) / 100;
+    updated.technicalProcesses = invoiceData.technicalProcesses;
 
     return await this.commissionRepository.save(updated);
   }

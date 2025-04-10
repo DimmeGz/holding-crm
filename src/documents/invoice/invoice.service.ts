@@ -280,6 +280,7 @@ export class InvoiceService {
       .where('invoice.id = :invoiceId', { invoiceId })
       .andWhere('invoice.status = true')
       .leftJoin('invoice.children', 'children')
+      .leftJoin('invoice.technicalProcesses', 'technicalProcess')
       .andWhere('children.status = true')
       .select([
         'invoice.id',
@@ -288,6 +289,7 @@ export class InvoiceService {
         'children.id',
         'children.invoiceNumber',
         'children.documentSum',
+        'technicalProcess.id',
       ])
       .getOne();
 
