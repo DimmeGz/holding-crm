@@ -9,14 +9,20 @@ export class Account extends AbstractEntity {
   @ManyToOne(() => Company, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'currency_id' })
+  @JoinColumn({ name: 'company_id' })
   company: Company;
+
+  @Column({ name: 'company_id' })
+  companyId: number;
 
   @ManyToOne(() => Currency, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'currency_id' })
   currency: Currency;
+
+  @Column({ name: 'currency_id' })
+  currencyId: number;
 
   @Column({
     default: 0,
