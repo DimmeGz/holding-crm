@@ -34,7 +34,7 @@ export class CompaniesService {
   ): Promise<void> {
     const account = await this.getAccount(companyId, currencyId);
 
-    account.wait = +account.wait + +value;
+    account.wait = account.wait + value;
 
     await this.accountsRepository.save(account);
     return;
@@ -46,7 +46,7 @@ export class CompaniesService {
     value: number,
   ): Promise<void> {
     const account = await this.getAccount(companyId, currencyId);
-    account.debt = +account.debt + +value;
+    account.debt = account.debt + value;
 
     await this.accountsRepository.save(account);
     return;

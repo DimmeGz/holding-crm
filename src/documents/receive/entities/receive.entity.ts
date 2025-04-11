@@ -8,6 +8,8 @@ import {
   OneToMany,
 } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Warehouse } from '../../../warehouse/entities';
@@ -40,6 +42,7 @@ export class Receive extends AbstractDocumentEntity<Receive> {
     precision: 8,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   transportAmount: number;
 
@@ -66,6 +69,7 @@ export class Receive extends AbstractDocumentEntity<Receive> {
     precision: 13,
     scale: 3,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   documentSum: number;
 
