@@ -21,6 +21,7 @@ import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
+import { CompaniesService } from '../../companies/companies.service';
 
 @Injectable()
 export class InvoiceService {
@@ -28,6 +29,7 @@ export class InvoiceService {
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly companiesService: CompaniesService,
     private readonly goodsService: GoodsService,
     private readonly paymentsService: PaymentService,
     private readonly shipmentsService: ShipmentService,
@@ -323,11 +325,39 @@ export class InvoiceService {
       where: { id: invoiceId },
     });
 
+    // TODO: make transaction
+
+    await this.updateAccountsAfterStatusChange(invoice);
+
     invoice.status = !invoice.status;
 
-    // TODO: make finanshial changes in companies
-
     return await this.invoiceRepository.save(invoice);
+  }
+
+  private async updateAccountsAfterStatusChange(invoice: Invoice) {
+    if (!invoice.status) {
+      await this.companiesService.changeAccountWaitBallance(
+        invoice.sellerId,
+        invoice.currencyId,
+        invoice.documentSum,
+      );
+      await this.companiesService.changeAccountDebtBallance(
+        invoice.buyerId,
+        invoice.currencyId,
+        invoice.documentSum,
+      );
+    } else {
+      await this.companiesService.changeAccountWaitBallance(
+        invoice.sellerId,
+        invoice.currencyId,
+        -invoice.documentSum,
+      );
+      await this.companiesService.changeAccountDebtBallance(
+        invoice.buyerId,
+        invoice.currencyId,
+        -invoice.documentSum,
+      );
+    }
   }
 
   async getInvoiceDataForCommission(invoiceId: number) {
