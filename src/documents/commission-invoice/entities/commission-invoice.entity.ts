@@ -71,7 +71,7 @@ export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice>
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @OneToMany(
     () => CommissionPayment,

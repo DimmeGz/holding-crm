@@ -164,7 +164,7 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @Column({
     name: 'contract_info',
