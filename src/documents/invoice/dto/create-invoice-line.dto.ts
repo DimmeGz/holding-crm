@@ -29,9 +29,10 @@ export class CreateInvoiceLineDTO {
   @IsNumber({ maxDecimalPlaces: 3 })
   price: number;
 
+  @IsOptional()
   @IsPositive()
   @IsNumber({ maxDecimalPlaces: 3 })
-  cost: number;
+  cost?: number;
 
   @IsOptional()
   @IsPositive()

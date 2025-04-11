@@ -9,5 +9,6 @@ import { WarehouseController } from './warehouse.controller';
   imports: [TypeOrmModule.forFeature([WarehouseAccounting])],
   providers: [WarehouseService],
   controllers: [WarehouseController],
+  exports: [WarehouseService],
 })
 export class WarehouseModule {}

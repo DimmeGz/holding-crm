@@ -6,17 +6,21 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { ShipmentService } from '../shipment';
 import { PaymentService } from '../payment/payment.service';
 import { GoodsService } from '../../goods';
+import { ShipmentService } from '../shipment';
+import { WarehouseService } from '../../warehouse/warehouse.service';
 
 import { Invoice, InvoiceLine } from './entities';
-import { CreateInvoiceDTO, UpdateInvoiceDTO } from './dto';
+import {
+  CreateInvoiceDTO,
+  GetTechnicalProcessesDataDTO,
+  UpdateInvoiceDTO,
+} from './dto';
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
-import { GetTechnicalProcessesData } from './types';
 
 @Injectable()
 export class InvoiceService {
@@ -27,6 +31,7 @@ export class InvoiceService {
     private readonly goodsService: GoodsService,
     private readonly paymentsService: PaymentService,
     private readonly shipmentsService: ShipmentService,
+    private readonly warehouseService: WarehouseService,
   ) {}
 
   async getInvoices() {
@@ -134,10 +139,10 @@ export class InvoiceService {
   async getInvoicesByOrderId(orderId: number) {
     const invoices = await this.invoiceRepository
       .createQueryBuilder('invoice')
-      .leftJoin('invoice.invoiceLines', 'invoiceLine')
       .where('invoiceLine.orderId = :orderId', { orderId })
-      .orderBy('invoice.id', 'ASC')
       .select(['invoice.id', 'invoice.status', 'invoice.invoiceNumber'])
+      .leftJoinAndSelect('invoice.invoiceLines', 'invoiceLine')
+      .orderBy('invoice.id', 'ASC')
       .getMany();
 
     for await (const invoice of invoices) {
@@ -175,6 +180,12 @@ export class InvoiceService {
         0,
       );
     newInvoice.paymentBalance = newInvoice.documentSum;
+    newInvoice.invoiceLines = await this.populateLinesCosts(
+      newInvoice.invoiceLines,
+      newInvoice.sellerId,
+      newInvoice.sellerWarehouseId,
+      newInvoice.currencyId,
+    );
 
     newInvoice.grossWeight = this.countInvoiceGrossWeight(
       newInvoice.invoiceLines,
@@ -183,7 +194,9 @@ export class InvoiceService {
     return await this.invoiceRepository.save(newInvoice);
   }
 
-  private async getTechnicalProcesses(invoiceData: GetTechnicalProcessesData) {
+  private async getTechnicalProcesses(
+    invoiceData: GetTechnicalProcessesDataDTO,
+  ) {
     const productIds = getProductIdsFromProductLines(invoiceData.invoiceLines);
     const productProcesses =
       await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
@@ -199,6 +212,26 @@ export class InvoiceService {
     ];
 
     return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  private async populateLinesCosts(
+    invoiceLines: Partial<InvoiceLine>[],
+    companyId: number,
+    warehouseId: number,
+    currencyId: number,
+  ) {
+    for await (const line of invoiceLines) {
+      if (!line.cost) {
+        line.cost = await this.warehouseService.getWareCost({
+          ...line,
+          companyId,
+          warehouseId,
+          currencyId,
+        });
+      }
+    }
+
+    return invoiceLines;
   }
 
   async updateInvoice(invoiceId: number, updateInvoiceDTO: UpdateInvoiceDTO) {
@@ -235,10 +268,17 @@ export class InvoiceService {
       updateInvoiceDTO.invoiceLines,
     );
 
-    const updated = Object.assign(invoice, updateInvoiceDTO);
+    const updated = Object.assign(invoice, updateInvoiceDTO) as Invoice;
 
     updated.technicalProcesses =
       await this.getTechnicalProcesses(updateInvoiceDTO);
+
+    updated.invoiceLines = await this.populateLinesCosts(
+      updated.invoiceLines,
+      updated.sellerId,
+      updated.sellerWarehouseId,
+      updated.currencyId,
+    );
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
