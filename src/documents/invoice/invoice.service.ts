@@ -237,11 +237,12 @@ export class InvoiceService {
 
     const updated = Object.assign(invoice, updateInvoiceDTO);
 
+    updated.technicalProcesses =
+      await this.getTechnicalProcesses(updateInvoiceDTO);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    // TODO: update technical processes
 
     try {
       if (invoiceLinesToDelete.length) {
