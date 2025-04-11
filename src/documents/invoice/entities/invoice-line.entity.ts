@@ -1,5 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractLineEntity } from '../../entities';
 import { Invoice } from './invoice.entity';
 import { Batch, Package, Product } from '../../../goods/entities';
@@ -22,6 +24,7 @@ export class InvoiceLine extends AbstractLineEntity {
     unsigned: true,
     precision: 12,
     scale: 3,
+    transformer: new DecimalColumnTransformer(),
   })
   cost: number;
 
@@ -84,6 +87,7 @@ export class InvoiceLine extends AbstractLineEntity {
     precision: 8,
     scale: 2,
     nullable: true,
+    transformer: new DecimalColumnTransformer(),
   })
   grossWeight: number;
 }

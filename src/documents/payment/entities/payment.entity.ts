@@ -1,5 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractDocumentEntity } from '../../entities';
 import { TechnicalProcess } from '../../../libs/entities';
 import { PaymentLine } from './payment-line.entity';
@@ -13,6 +15,7 @@ export class Payment extends AbstractDocumentEntity<Payment> {
     precision: 13,
     scale: 3,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   documentSum: number;
 

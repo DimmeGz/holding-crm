@@ -1,9 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
+import { DecimalColumnTransformer } from '../../common/transformers';
+
+import { AbstractEntity } from '../../common/entities';
 import { Batch, Package } from '../../goods/entities';
-import { Warehouse } from './warehouse.entity';
 import { Company } from '../../companies/entities';
 import { Currency } from '../../libs/entities';
-import { AbstractEntity } from '../../common/entities';
+import { Warehouse } from './warehouse.entity';
 
 @Entity({ name: 'warehouse_warehouseaccounting' })
 export class WarehouseAccounting extends AbstractEntity {
@@ -54,6 +57,7 @@ export class WarehouseAccounting extends AbstractEntity {
     precision: 8,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   cost: number;
 

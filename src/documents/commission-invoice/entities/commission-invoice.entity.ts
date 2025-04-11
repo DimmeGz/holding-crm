@@ -8,6 +8,8 @@ import {
   OneToMany,
 } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractDocumentEntity } from '../../entities';
 import { Invoice } from '../../invoice/entities';
 import { TechnicalProcess } from '../../../libs/entities';
@@ -22,6 +24,7 @@ export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice>
     precision: 13,
     scale: 3,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   documentSum: number;
 
@@ -32,6 +35,7 @@ export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice>
     precision: 10,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   paymentBalance: number;
 
@@ -56,6 +60,7 @@ export class CommissionInvoice extends AbstractDocumentEntity<CommissionInvoice>
     unsigned: true,
     precision: 5,
     scale: 2,
+    transformer: new DecimalColumnTransformer(),
   })
   rate: number;
 
