@@ -8,6 +8,7 @@ import { PaymentModule } from '../payment';
 import { InvoiceService } from './invoice.service';
 import { InvoiceController } from './invoice.controller';
 import { GoodsModule } from '../../goods';
+import { WarehouseModule } from '../../warehouse';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { GoodsModule } from '../../goods';
     GoodsModule,
     PaymentModule,
     ShipmentModule,
+    WarehouseModule,
   ],
   providers: [InvoiceService],
   controllers: [InvoiceController],
