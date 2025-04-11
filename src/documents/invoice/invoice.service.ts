@@ -10,12 +10,13 @@ import { ShipmentService } from '../shipment';
 import { PaymentService } from '../payment/payment.service';
 import { GoodsService } from '../../goods';
 
-import { Invoice } from './entities';
+import { Invoice, InvoiceLine } from './entities';
 import { CreateInvoiceDTO, UpdateInvoiceDTO } from './dto';
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
+import { GetTechnicalProcessesData } from './types';
 
 @Injectable()
 export class InvoiceService {
@@ -175,18 +176,20 @@ export class InvoiceService {
       );
     newInvoice.paymentBalance = newInvoice.documentSum;
 
+    newInvoice.grossWeight = this.countInvoiceGrossWeight(
+      newInvoice.invoiceLines,
+    );
+
     return await this.invoiceRepository.save(newInvoice);
   }
 
-  private async getTechnicalProcesses(createInvoiceDTO: CreateInvoiceDTO) {
-    const productIds = getProductIdsFromProductLines(
-      createInvoiceDTO.invoiceLines,
-    );
+  private async getTechnicalProcesses(invoiceData: GetTechnicalProcessesData) {
+    const productIds = getProductIdsFromProductLines(invoiceData.invoiceLines);
     const productProcesses =
       await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
 
     const serviceIds = getServiceIdsFromServiceLines(
-      createInvoiceDTO.invoiceServiceLines,
+      invoiceData.invoiceServiceLines,
     );
     const serviceProcesses =
       await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
@@ -226,6 +229,10 @@ export class InvoiceService {
     }
     const invoiceServiceLinesToDelete = invoice.invoiceServiceLines.filter(
       (line) => !updatedInvoiceServiceLinesIds.includes(line.id),
+    );
+
+    updateInvoiceDTO.grossWeight = this.countInvoiceGrossWeight(
+      updateInvoiceDTO.invoiceLines,
     );
 
     const updated = Object.assign(invoice, updateInvoiceDTO);
@@ -302,5 +309,17 @@ export class InvoiceService {
       .getOne();
 
     return invoice;
+  }
+
+  private countInvoiceGrossWeight(
+    invoiceLines: Partial<InvoiceLine>[],
+  ): number {
+    let totalGrossWeight = 0;
+    for (const line of invoiceLines) {
+      if (line.grossWeight) {
+        totalGrossWeight += line.grossWeight;
+      }
+    }
+    return totalGrossWeight;
   }
 }
