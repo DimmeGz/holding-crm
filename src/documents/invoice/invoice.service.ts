@@ -272,6 +272,16 @@ export class InvoiceService {
 
     const updated = Object.assign(invoice, updateInvoiceDTO) as Invoice;
 
+    updated.documentSum =
+      updated.invoiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      updated.invoiceServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+
     updated.technicalProcesses =
       await this.getTechnicalProcesses(updateInvoiceDTO);
 
