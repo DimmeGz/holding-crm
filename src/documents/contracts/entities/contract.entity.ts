@@ -29,7 +29,7 @@ export class Contract extends AbstractDocumentEntity<Contract> {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @Column({
     name: 'payment_delay',
