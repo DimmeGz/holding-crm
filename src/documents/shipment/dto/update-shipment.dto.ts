@@ -9,7 +9,7 @@ import { CreateServiceLineDTO, UpdateServiceLineDTO } from '../../common/dto';
 import { CreateShipmentLineDTO } from './create-shipment-line.dto';
 import { UpdateShipmentLineDTO } from './update-shipment-line.dto';
 
-export class UpdateShipmentDTO extends PartialType(BaseShipmentDTO) {
+export class UpdateShipmentDTO extends BaseShipmentDTO {
   @IsOptional()
   @IsArray()
   @ArrayNotEmpty()

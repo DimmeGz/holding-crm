@@ -12,6 +12,7 @@ import {
 } from '../../common/utils';
 
 import { GoodsService } from '../../goods';
+import { WarehouseService } from '../../warehouse';
 
 import { Receive } from './entities';
 import { CreateReveiveDTO, UpdateReceiveDTO } from './dto';
@@ -23,6 +24,7 @@ export class ReceiveService {
     private readonly receivesRepository: Repository<Receive>,
     @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
+    private readonly warehouseService: WarehouseService,
   ) {}
 
   async getReceives() {
@@ -180,7 +182,8 @@ export class ReceiveService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    // TODO: update technical processes
+    updated.technicalProcesses =
+      await this.getTechnicalProcesses(updateReceiveDTO);
 
     try {
       if (receiveLinesToDelete.length) {
@@ -219,12 +222,43 @@ export class ReceiveService {
   async changeReceiveStatus(receiveId: number) {
     const receive = await this.receivesRepository.findOne({
       where: { id: receiveId },
+      relations: ['receiveLines'],
     });
+
+    // TODO: make transaction
+
+    await this.updateWarehouseAccounting(receive);
 
     receive.status = !receive.status;
 
-    // TODO: make changes in warehouseAccounting
-
     return await this.receivesRepository.save(receive);
+  }
+
+  private async updateWarehouseAccounting(receive: Receive) {
+    if (!receive.status) {
+      for await (const line of receive.receiveLines) {
+        await this.warehouseService.increaseReceiveGoodsCount({
+          companyId: receive.buyerId,
+          warehouseId: receive.buyerWarehouseId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+          qty: line.qty,
+          price: line.price,
+          currencyId: receive.currencyId,
+        });
+      }
+    } else {
+      for await (const line of receive.receiveLines) {
+        await this.warehouseService.returnReceiveGoodsCount({
+          companyId: receive.buyerId,
+          warehouseId: receive.buyerWarehouseId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+          qty: line.qty,
+          price: line.price,
+          currencyId: receive.currencyId,
+        });
+      }
+    }
   }
 }

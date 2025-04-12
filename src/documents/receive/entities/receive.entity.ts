@@ -94,7 +94,7 @@ export class Receive extends AbstractDocumentEntity<Receive> {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @OneToMany(() => ReceiveLine, (receiveLine) => receiveLine.receive, {
     cascade: true,

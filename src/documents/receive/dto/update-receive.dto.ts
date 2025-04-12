@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { ArrayNotEmpty, IsArray, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -9,7 +8,7 @@ import { CreateServiceLineDTO, UpdateServiceLineDTO } from '../../common/dto';
 import { CreateReceiveLineDTO } from './create-receive-line.dto';
 import { UpdateReceiveLineDTO } from './update-receive-line.dto';
 
-export class UpdateReceiveDTO extends PartialType(BaseReceiveDTO) {
+export class UpdateReceiveDTO extends BaseReceiveDTO {
   @IsOptional()
   @IsArray()
   @ArrayNotEmpty()
