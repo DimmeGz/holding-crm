@@ -6,9 +6,10 @@ import { ReceiveController } from './receive.controller';
 
 import { Receive } from './entities';
 import { GoodsModule } from '../../goods';
+import { WarehouseModule } from '../../warehouse';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Receive]), GoodsModule],
+  imports: [TypeOrmModule.forFeature([Receive]), GoodsModule, WarehouseModule],
   providers: [ReceiveService],
   controllers: [ReceiveController],
   exports: [ReceiveService],
