@@ -11,9 +11,9 @@ import { DataSource, Repository } from 'typeorm';
 import { Order } from './entities';
 import { CreateOrderDTO, UpdateOrderDTO } from './dto';
 
-import { ContractsService } from '../contracts/contracts.service';
+import { ContractsService } from '../contracts';
 import { GoodsService } from '../../goods';
-import { InvoiceService } from '../invoice/invoice.service';
+import { InvoiceService } from '../invoice';
 import { OrdersConfirmationService } from '../orders-confirmation';
 
 import {
