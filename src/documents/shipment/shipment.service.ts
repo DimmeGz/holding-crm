@@ -7,7 +7,8 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
 import { GoodsService } from '../../goods';
-import { ReceiveService } from '../receive/receive.service';
+import { ReceiveService } from '../receive';
+import { WarehouseService } from '../../warehouse';
 
 import { Shipment, ShipmentLine } from './entities';
 
@@ -27,6 +28,7 @@ export class ShipmentService {
     @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
     private readonly receiveService: ReceiveService,
+    private readonly warehouseService: WarehouseService,
   ) {}
 
   async getShipments() {
@@ -261,12 +263,39 @@ export class ShipmentService {
   async changeShipmentStatus(shipmentId: number) {
     const shipment = await this.shipmentsRepository.findOne({
       where: { id: shipmentId },
+      relations: ['shipmentLines'],
     });
+
+    // TODO: make transaction
+
+    await this.updateWarehouseAccountingAfterStatusChange(shipment);
 
     shipment.status = !shipment.status;
 
-    // TODO: make changes in warehouseAccounting
-
     return await this.shipmentsRepository.save(shipment);
+  }
+
+  private async updateWarehouseAccountingAfterStatusChange(shipment: Shipment) {
+    if (!shipment.status) {
+      for await (const line of shipment.shipmentLines) {
+        await this.warehouseService.decreaseGoodsCount({
+          companyId: shipment.sellerId,
+          warehouseId: shipment.sellerWarehouseId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+          qty: line.qty,
+        });
+      }
+    } else {
+      for await (const line of shipment.shipmentLines) {
+        await this.warehouseService.returnGoodsCount({
+          companyId: shipment.sellerId,
+          warehouseId: shipment.sellerWarehouseId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+          qty: line.qty,
+        });
+      }
+    }
   }
 }

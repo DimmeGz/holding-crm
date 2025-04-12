@@ -47,12 +47,4 @@ export class OrdersController {
   changeContractStatus(@Param('orderId') orderId: number) {
     return this.ordersService.changeOrderStatus(orderId);
   }
-
-  @Get('count/:contractId/:sellerId')
-  countOrderNumber(
-    @Param('contractId') contractId: number,
-    @Param('sellerId') sellerId: number,
-  ) {
-    return this.ordersService.countOrderNumber(contractId, sellerId);
-  }
 }
