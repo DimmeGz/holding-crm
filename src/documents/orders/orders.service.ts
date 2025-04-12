@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,6 +25,7 @@ export class OrdersService {
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
     @InjectDataSource() private dataSource: DataSource,
+    @Inject(forwardRef(() => InvoiceService))
     private readonly invoiceService: InvoiceService,
     private readonly goodsService: GoodsService,
     private readonly orderConfirmationsService: OrdersConfirmationService,
@@ -137,7 +140,9 @@ export class OrdersService {
 
     const newOrder = new Order(createOrderDTO);
 
-    newOrder.isHidden = false;
+    newOrder.isHidden = createOrderDTO.isHidden
+      ? createOrderDTO.isHidden
+      : false;
     newOrder.createdAt = new Date();
     newOrder.signatureDate = newOrder.signatureDate || newOrder.createdAt;
     newOrder.comment = newOrder.comment || '';
