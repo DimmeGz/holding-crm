@@ -69,4 +69,9 @@ export class WarehouseAccounting extends AbstractEntity {
 
   @Column({ name: 'currency_id' })
   currencyId: number;
+
+  constructor(entity: Partial<WarehouseAccounting>) {
+    super();
+    Object.assign(this, entity);
+  }
 }

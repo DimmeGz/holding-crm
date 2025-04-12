@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { WarehouseAccounting } from './entities';
-import { GetWareCostDTO } from './dto';
+import { ChangeShipGoodsCountDTO, GetWareCostDTO } from './dto';
+import { ChangeReceiveGoodsCountDTO } from './dto/change-receive-goods-count.dto';
 
 @Injectable()
 export class WarehouseService {
@@ -71,5 +72,131 @@ export class WarehouseService {
     } catch (e) {
       return 0;
     }
+  }
+
+  async decreaseShipGoodsCount(decreaseGoodsCountDTO: ChangeShipGoodsCountDTO) {
+    try {
+      const warehouseAccounting = await this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: decreaseGoodsCountDTO.companyId,
+        })
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: decreaseGoodsCountDTO.warehouseId,
+        })
+        .andWhere('ware.batchId = :batchId', {
+          batchId: decreaseGoodsCountDTO.batchId,
+        })
+        .andWhere('ware.packageId = :packageId', {
+          packageId: decreaseGoodsCountDTO.packageId,
+        })
+        .getOneOrFail();
+
+      warehouseAccounting.qty -= decreaseGoodsCountDTO.qty;
+      await this.warehouseAccountingRepository.save(warehouseAccounting);
+    } catch (e) {}
+  }
+
+  async returnShipGoodsCount(returnGoodsCountDTO: ChangeShipGoodsCountDTO) {
+    try {
+      const warehouseAccounting = await this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: returnGoodsCountDTO.companyId,
+        })
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: returnGoodsCountDTO.warehouseId,
+        })
+        .andWhere('ware.batchId = :batchId', {
+          batchId: returnGoodsCountDTO.batchId,
+        })
+        .andWhere('ware.packageId = :packageId', {
+          packageId: returnGoodsCountDTO.packageId,
+        })
+        .getOneOrFail();
+
+      warehouseAccounting.qty += returnGoodsCountDTO.qty;
+      await this.warehouseAccountingRepository.save(warehouseAccounting);
+    } catch (e) {}
+  }
+
+  async increaseReceiveGoodsCount(
+    increaseGoodsCountDTO: ChangeReceiveGoodsCountDTO,
+  ) {
+    try {
+      let warehouseAccounting = await this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: increaseGoodsCountDTO.companyId,
+        })
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: increaseGoodsCountDTO.warehouseId,
+        })
+        .andWhere('ware.batchId = :batchId', {
+          batchId: increaseGoodsCountDTO.batchId,
+        })
+        .andWhere('ware.packageId = :packageId', {
+          packageId: increaseGoodsCountDTO.packageId,
+        })
+        .andWhere('ware.currencyId = :currencyId', {
+          currencyId: increaseGoodsCountDTO.currencyId,
+        })
+        .getOne();
+
+      if (warehouseAccounting) {
+        const totalCost =
+          warehouseAccounting.cost * warehouseAccounting.qty +
+          increaseGoodsCountDTO.price * increaseGoodsCountDTO.qty;
+
+        warehouseAccounting.qty += increaseGoodsCountDTO.qty;
+        warehouseAccounting.cost = totalCost / warehouseAccounting.qty;
+      } else {
+        warehouseAccounting = new WarehouseAccounting({
+          ...increaseGoodsCountDTO,
+          cost: increaseGoodsCountDTO.price,
+        });
+      }
+
+      await this.warehouseAccountingRepository.save(warehouseAccounting);
+    } catch (e) {}
+  }
+
+  async returnReceiveGoodsCount(
+    returnGoodsCountDTO: ChangeReceiveGoodsCountDTO,
+  ) {
+    try {
+      const warehouseAccounting = await this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: returnGoodsCountDTO.companyId,
+        })
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: returnGoodsCountDTO.warehouseId,
+        })
+        .andWhere('ware.batchId = :batchId', {
+          batchId: returnGoodsCountDTO.batchId,
+        })
+        .andWhere('ware.packageId = :packageId', {
+          packageId: returnGoodsCountDTO.packageId,
+        })
+        .andWhere('ware.currencyId = :currencyId', {
+          currencyId: returnGoodsCountDTO.currencyId,
+        })
+        .getOne();
+
+      const newTotalCost =
+        warehouseAccounting.cost * warehouseAccounting.qty -
+        returnGoodsCountDTO.price * returnGoodsCountDTO.qty;
+
+      warehouseAccounting.qty -= returnGoodsCountDTO.qty;
+
+      if (!warehouseAccounting.qty) {
+        await this.warehouseAccountingRepository.remove(warehouseAccounting);
+      } else {
+        warehouseAccounting.cost = newTotalCost / warehouseAccounting.qty;
+
+        await this.warehouseAccountingRepository.save(warehouseAccounting);
+      }
+    } catch (e) {}
   }
 }
