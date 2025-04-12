@@ -268,17 +268,17 @@ export class ShipmentService {
 
     // TODO: make transaction
 
-    await this.updateWarehouseAccountingAfterStatusChange(shipment);
+    await this.updateWarehouseAccounting(shipment);
 
     shipment.status = !shipment.status;
 
     return await this.shipmentsRepository.save(shipment);
   }
 
-  private async updateWarehouseAccountingAfterStatusChange(shipment: Shipment) {
+  private async updateWarehouseAccounting(shipment: Shipment) {
     if (!shipment.status) {
       for await (const line of shipment.shipmentLines) {
-        await this.warehouseService.decreaseGoodsCount({
+        await this.warehouseService.decreaseShipGoodsCount({
           companyId: shipment.sellerId,
           warehouseId: shipment.sellerWarehouseId,
           batchId: line.batchId,
@@ -288,7 +288,7 @@ export class ShipmentService {
       }
     } else {
       for await (const line of shipment.shipmentLines) {
-        await this.warehouseService.returnGoodsCount({
+        await this.warehouseService.returnShipGoodsCount({
           companyId: shipment.sellerId,
           warehouseId: shipment.sellerWarehouseId,
           batchId: line.batchId,
