@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { WarehouseAccounting } from './entities';
-import { GetWareCostDTO } from './dto';
+import { ChangeGoodsCountDTO, GetWareCostDTO } from './dto';
 
 @Injectable()
 export class WarehouseService {
@@ -71,5 +71,51 @@ export class WarehouseService {
     } catch (e) {
       return 0;
     }
+  }
+
+  async decreaseGoodsCount(returnGoodsCountDTO: ChangeGoodsCountDTO) {
+    try {
+      const warehouseAccounting = await this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: returnGoodsCountDTO.companyId,
+        })
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: returnGoodsCountDTO.warehouseId,
+        })
+        .andWhere('ware.batchId = :batchId', {
+          batchId: returnGoodsCountDTO.batchId,
+        })
+        .andWhere('ware.packageId = :packageId', {
+          packageId: returnGoodsCountDTO.packageId,
+        })
+        .getOneOrFail();
+
+      warehouseAccounting.qty -= returnGoodsCountDTO.qty;
+      await this.warehouseAccountingRepository.save(warehouseAccounting);
+    } catch (e) {}
+  }
+
+  async returnGoodsCount(returnGoodsCountDTO: ChangeGoodsCountDTO) {
+    try {
+      const warehouseAccounting = await this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: returnGoodsCountDTO.companyId,
+        })
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: returnGoodsCountDTO.warehouseId,
+        })
+        .andWhere('ware.batchId = :batchId', {
+          batchId: returnGoodsCountDTO.batchId,
+        })
+        .andWhere('ware.packageId = :packageId', {
+          packageId: returnGoodsCountDTO.packageId,
+        })
+        .getOneOrFail();
+
+      warehouseAccounting.qty += returnGoodsCountDTO.qty;
+      await this.warehouseAccountingRepository.save(warehouseAccounting);
+    } catch (e) {}
   }
 }

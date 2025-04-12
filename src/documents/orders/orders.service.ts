@@ -273,7 +273,7 @@ export class OrdersService {
     return await this.ordersRepository.save(order);
   }
 
-  async countOrderNumber(contractId: number, sellerId: number) {
+  private async countOrderNumber(contractId: number, sellerId: number) {
     const orderPrefix =
       (await this.contractsService.getOrderPrefix(contractId)) || '';
 
