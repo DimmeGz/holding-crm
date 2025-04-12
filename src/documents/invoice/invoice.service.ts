@@ -8,12 +8,12 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { CompaniesService } from '../../companies/companies.service';
+import { CompaniesService } from '../../companies';
 import { GoodsService } from '../../goods';
 import { OrdersService } from '../orders';
-import { PaymentService } from '../payment/payment.service';
+import { PaymentService } from '../payment';
 import { ShipmentService } from '../shipment';
-import { WarehouseService } from '../../warehouse/warehouse.service';
+import { WarehouseService } from '../../warehouse';
 
 import { Invoice, InvoiceLine } from './entities';
 import {
