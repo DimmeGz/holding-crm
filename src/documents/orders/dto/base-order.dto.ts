@@ -53,11 +53,11 @@ export class BaseOrderDTO {
   @ValidateIf((o) => !o.isDateAsap || o.expectedDate)
   @IsDate()
   @Type(() => Date)
-  expectedDate: Date;
+  expectedDate?: Date;
 
   @ValidateIf((o) => !o.expectedDate || o.isDateAsap)
   @IsBoolean()
-  isDateAsap: boolean;
+  isDateAsap?: boolean;
 
   @IsPositive()
   @IsInt()
@@ -85,10 +85,14 @@ export class BaseOrderDTO {
   @IsOptional()
   @IsString()
   @Length(1, 30)
-  carPlate: string;
+  carPlate?: string;
 
   @IsOptional()
   @IsString()
   @Length(0, 200)
-  comment: string;
+  comment?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isHidden?: boolean;
 }

@@ -9,7 +9,11 @@ import {
 } from '@nestjs/common';
 
 import { InvoiceService } from './invoice.service';
-import { CreateInvoiceDTO, UpdateInvoiceDTO } from './dto';
+import {
+  CreateInvoiceByContractDTO,
+  CreateInvoiceDTO,
+  UpdateInvoiceDTO,
+} from './dto';
 
 @Controller('invoices')
 export class InvoiceController {
@@ -28,6 +32,15 @@ export class InvoiceController {
   @Post()
   createInvoice(@Body() createInvoiceDTO: CreateInvoiceDTO) {
     return this.invoiceService.createInvoice(createInvoiceDTO);
+  }
+
+  @Post('by-contract')
+  createInvoiceByContract(
+    @Body() createInvoiceByContractDTO: CreateInvoiceByContractDTO,
+  ) {
+    return this.invoiceService.createInvoiceByContract(
+      createInvoiceByContractDTO,
+    );
   }
 
   @Patch(':invoiceId')
