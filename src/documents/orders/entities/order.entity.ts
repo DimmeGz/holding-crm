@@ -8,6 +8,8 @@ import {
   OneToMany,
 } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractDocumentRecipientEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Contract } from '../../contracts/entities';
@@ -42,6 +44,7 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
     precision: 5,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   vat: number;
 
@@ -52,6 +55,7 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
     precision: 13,
     scale: 3,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   documentSum: number;
 

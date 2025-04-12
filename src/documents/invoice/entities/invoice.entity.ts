@@ -8,6 +8,8 @@ import {
   OneToMany,
 } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractDocumentRecipientEntity } from '../../entities';
 import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { InvoiceLine } from './invoice-line.entity';
@@ -40,6 +42,7 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     precision: 5,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   vat: number;
 
@@ -50,6 +53,7 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     precision: 13,
     scale: 3,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   documentSum: number;
 
@@ -60,6 +64,7 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     precision: 10,
     scale: 3,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   paymentBalance: number;
 
@@ -149,6 +154,7 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
     precision: 8,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   transportAmount: number;
 
@@ -164,7 +170,7 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @Column({
     name: 'contract_info',

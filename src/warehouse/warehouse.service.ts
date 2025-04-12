@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { WarehouseAccounting } from './entities';
 import { Repository } from 'typeorm';
+
+import { WarehouseAccounting } from './entities';
+import { GetWareCostDTO } from './dto';
 
 @Injectable()
 export class WarehouseService {
@@ -38,5 +40,36 @@ export class WarehouseService {
       .getMany();
 
     return warehouseAccounting;
+  }
+
+  async getWareCost(wareData: GetWareCostDTO): Promise<number> {
+    try {
+      const warehouseAccounting = await this.warehouseAccountingRepository
+        .createQueryBuilder('warehouseAccounting')
+        .andWhere('warehouseAccounting.batchId = :batchId', {
+          batchId: wareData.batchId,
+        })
+        .andWhere('warehouseAccounting.packageId = :packageId', {
+          packageId: wareData.packageId,
+        })
+        .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+          warehouseId: wareData.warehouseId,
+        })
+        .andWhere('warehouseAccounting.companyId = :companyId', {
+          companyId: wareData.companyId,
+        })
+        .andWhere('warehouseAccounting.currencyId = :currencyId', {
+          currencyId: wareData.currencyId,
+        })
+        .getOneOrFail();
+
+      if (warehouseAccounting.cost) {
+        return warehouseAccounting.cost;
+      } else {
+        return 0;
+      }
+    } catch (e) {
+      return 0;
+    }
   }
 }

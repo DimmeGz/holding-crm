@@ -1,5 +1,7 @@
 import { Column, Entity } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../common/transformers';
+
 import { AbstractEntity } from '../../common/entities';
 
 @Entity()
@@ -12,6 +14,7 @@ export class AbstractServiceLineEntity extends AbstractEntity {
     unsigned: true,
     precision: 12,
     scale: 3,
+    transformer: new DecimalColumnTransformer(),
   })
   price: number;
 }

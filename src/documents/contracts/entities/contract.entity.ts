@@ -8,6 +8,8 @@ import {
   OneToMany,
 } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { ContractLine } from './contract-line.entity';
@@ -27,7 +29,7 @@ export class Contract extends AbstractDocumentEntity<Contract> {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @Column({
     name: 'payment_delay',
@@ -49,6 +51,7 @@ export class Contract extends AbstractDocumentEntity<Contract> {
     precision: 5,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   vat: number;
 

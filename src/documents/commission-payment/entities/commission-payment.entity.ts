@@ -7,6 +7,8 @@ import {
   ManyToOne,
 } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractDocumentEntity } from '../../entities';
 import { CommissionInvoice } from '../../commission-invoice/entities';
 import { TechnicalProcess } from '../../../libs/entities';
@@ -34,6 +36,7 @@ export class CommissionPayment extends AbstractDocumentEntity<CommissionPayment>
     unsigned: true,
     precision: 8,
     scale: 2,
+    transformer: new DecimalColumnTransformer(),
   })
   amount: number;
 
