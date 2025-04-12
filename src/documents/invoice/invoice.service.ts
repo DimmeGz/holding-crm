@@ -6,16 +6,22 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { ShipmentService } from '../shipment';
 import { PaymentService } from '../payment/payment.service';
 import { GoodsService } from '../../goods';
+import { ShipmentService } from '../shipment';
+import { WarehouseService } from '../../warehouse/warehouse.service';
 
-import { Invoice } from './entities';
-import { CreateInvoiceDTO, UpdateInvoiceDTO } from './dto';
+import { Invoice, InvoiceLine } from './entities';
+import {
+  CreateInvoiceDTO,
+  GetTechnicalProcessesDataDTO,
+  UpdateInvoiceDTO,
+} from './dto';
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
+import { CompaniesService } from '../../companies/companies.service';
 
 @Injectable()
 export class InvoiceService {
@@ -23,9 +29,11 @@ export class InvoiceService {
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly companiesService: CompaniesService,
     private readonly goodsService: GoodsService,
     private readonly paymentsService: PaymentService,
     private readonly shipmentsService: ShipmentService,
+    private readonly warehouseService: WarehouseService,
   ) {}
 
   async getInvoices() {
@@ -133,10 +141,10 @@ export class InvoiceService {
   async getInvoicesByOrderId(orderId: number) {
     const invoices = await this.invoiceRepository
       .createQueryBuilder('invoice')
-      .leftJoin('invoice.invoiceLines', 'invoiceLine')
       .where('invoiceLine.orderId = :orderId', { orderId })
-      .orderBy('invoice.id', 'ASC')
       .select(['invoice.id', 'invoice.status', 'invoice.invoiceNumber'])
+      .leftJoinAndSelect('invoice.invoiceLines', 'invoiceLine')
+      .orderBy('invoice.id', 'ASC')
       .getMany();
 
     for await (const invoice of invoices) {
@@ -174,19 +182,29 @@ export class InvoiceService {
         0,
       );
     newInvoice.paymentBalance = newInvoice.documentSum;
+    newInvoice.invoiceLines = await this.populateLinesCosts(
+      newInvoice.invoiceLines,
+      newInvoice.sellerId,
+      newInvoice.sellerWarehouseId,
+      newInvoice.currencyId,
+    );
+
+    newInvoice.grossWeight = this.countInvoiceGrossWeight(
+      newInvoice.invoiceLines,
+    );
 
     return await this.invoiceRepository.save(newInvoice);
   }
 
-  private async getTechnicalProcesses(createInvoiceDTO: CreateInvoiceDTO) {
-    const productIds = getProductIdsFromProductLines(
-      createInvoiceDTO.invoiceLines,
-    );
+  private async getTechnicalProcesses(
+    invoiceData: GetTechnicalProcessesDataDTO,
+  ) {
+    const productIds = getProductIdsFromProductLines(invoiceData.invoiceLines);
     const productProcesses =
       await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
 
     const serviceIds = getServiceIdsFromServiceLines(
-      createInvoiceDTO.invoiceServiceLines,
+      invoiceData.invoiceServiceLines,
     );
     const serviceProcesses =
       await this.goodsService.getTechnicalProcessesFromServiceIds(serviceIds);
@@ -196,6 +214,26 @@ export class InvoiceService {
     ];
 
     return technicalProcesses.map((process) => ({ id: process.id }));
+  }
+
+  private async populateLinesCosts(
+    invoiceLines: Partial<InvoiceLine>[],
+    companyId: number,
+    warehouseId: number,
+    currencyId: number,
+  ) {
+    for await (const line of invoiceLines) {
+      if (!line.cost) {
+        line.cost = await this.warehouseService.getWareCost({
+          ...line,
+          companyId,
+          warehouseId,
+          currencyId,
+        });
+      }
+    }
+
+    return invoiceLines;
   }
 
   async updateInvoice(invoiceId: number, updateInvoiceDTO: UpdateInvoiceDTO) {
@@ -228,13 +266,35 @@ export class InvoiceService {
       (line) => !updatedInvoiceServiceLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(invoice, updateInvoiceDTO);
+    updateInvoiceDTO.grossWeight = this.countInvoiceGrossWeight(
+      updateInvoiceDTO.invoiceLines,
+    );
+
+    const updated = Object.assign(invoice, updateInvoiceDTO) as Invoice;
+
+    updated.documentSum =
+      updated.invoiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      updated.invoiceServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      );
+
+    updated.technicalProcesses =
+      await this.getTechnicalProcesses(updateInvoiceDTO);
+
+    updated.invoiceLines = await this.populateLinesCosts(
+      updated.invoiceLines,
+      updated.sellerId,
+      updated.sellerWarehouseId,
+      updated.currencyId,
+    );
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    // TODO: update technical processes
 
     try {
       if (invoiceLinesToDelete.length) {
@@ -275,11 +335,39 @@ export class InvoiceService {
       where: { id: invoiceId },
     });
 
+    // TODO: make transaction
+
+    await this.updateAccountsAfterStatusChange(invoice);
+
     invoice.status = !invoice.status;
 
-    // TODO: make finanshial changes in companies
-
     return await this.invoiceRepository.save(invoice);
+  }
+
+  private async updateAccountsAfterStatusChange(invoice: Invoice) {
+    if (!invoice.status) {
+      await this.companiesService.changeAccountWaitBallance(
+        invoice.sellerId,
+        invoice.currencyId,
+        invoice.documentSum,
+      );
+      await this.companiesService.changeAccountDebtBallance(
+        invoice.buyerId,
+        invoice.currencyId,
+        invoice.documentSum,
+      );
+    } else {
+      await this.companiesService.changeAccountWaitBallance(
+        invoice.sellerId,
+        invoice.currencyId,
+        -invoice.documentSum,
+      );
+      await this.companiesService.changeAccountDebtBallance(
+        invoice.buyerId,
+        invoice.currencyId,
+        -invoice.documentSum,
+      );
+    }
   }
 
   async getInvoiceDataForCommission(invoiceId: number) {
@@ -302,5 +390,17 @@ export class InvoiceService {
       .getOne();
 
     return invoice;
+  }
+
+  private countInvoiceGrossWeight(
+    invoiceLines: Partial<InvoiceLine>[],
+  ): number {
+    let totalGrossWeight = 0;
+    for (const line of invoiceLines) {
+      if (line.grossWeight) {
+        totalGrossWeight += line.grossWeight;
+      }
+    }
+    return totalGrossWeight;
   }
 }

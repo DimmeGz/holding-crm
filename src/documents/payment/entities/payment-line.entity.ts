@@ -1,5 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
+import { DecimalColumnTransformer } from '../../../common/transformers';
+
 import { AbstractEntity } from '../../../common/entities';
 import { Payment } from './payment.entity';
 import { Invoice } from '../../invoice/entities';
@@ -26,6 +28,7 @@ export class PaymentLine extends AbstractEntity {
     unsigned: true,
     precision: 13,
     scale: 3,
+    transformer: new DecimalColumnTransformer(),
   })
   amount: number;
 }

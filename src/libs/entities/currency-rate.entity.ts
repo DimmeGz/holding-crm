@@ -1,4 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
+import { DecimalColumnTransformer } from '../../common/transformers';
+
 import { AbstractEntity } from '../../common/entities';
 import { Currency } from './currency.entity';
 
@@ -25,6 +28,7 @@ export class CurrencyRate extends AbstractEntity {
     unsigned: true,
     precision: 6,
     scale: 4,
+    transformer: new DecimalColumnTransformer(),
   })
   rate: number;
 }

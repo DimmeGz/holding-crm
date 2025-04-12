@@ -1,9 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
+import { DecimalColumnTransformer } from '../../common/transformers';
+
+import { AbstractEntity } from '../../common/entities';
 import { Batch, Package } from '../../goods/entities';
-import { Warehouse } from './warehouse.entity';
 import { Company } from '../../companies/entities';
 import { Currency } from '../../libs/entities';
-import { AbstractEntity } from '../../common/entities';
+import { Warehouse } from './warehouse.entity';
 
 @Entity({ name: 'warehouse_warehouseaccounting' })
 export class WarehouseAccounting extends AbstractEntity {
@@ -13,11 +16,17 @@ export class WarehouseAccounting extends AbstractEntity {
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
 
+  @Column({ name: 'batch_id' })
+  batchId: number;
+
   @ManyToOne(() => Package, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'package_id' })
   package: Package;
+
+  @Column({ name: 'package_id' })
+  packageId: number;
 
   @ManyToOne(() => Warehouse, {
     onDelete: 'CASCADE',
@@ -25,11 +34,17 @@ export class WarehouseAccounting extends AbstractEntity {
   @JoinColumn({ name: 'warehouse_id' })
   warehouse: Warehouse;
 
+  @Column({ name: 'warehouse_id' })
+  warehouseId: number;
+
   @ManyToOne(() => Company, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'company_id' })
   company: Company;
+
+  @Column({ name: 'company_id' })
+  companyId: number;
 
   @Column({
     type: 'int',
@@ -42,6 +57,7 @@ export class WarehouseAccounting extends AbstractEntity {
     precision: 8,
     scale: 2,
     default: 0,
+    transformer: new DecimalColumnTransformer(),
   })
   cost: number;
 
@@ -50,4 +66,7 @@ export class WarehouseAccounting extends AbstractEntity {
   })
   @JoinColumn({ name: 'currency_id' })
   currency: Currency;
+
+  @Column({ name: 'currency_id' })
+  currencyId: number;
 }
