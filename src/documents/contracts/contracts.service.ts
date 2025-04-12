@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -26,8 +28,9 @@ export class ContractsService {
   constructor(
     @InjectRepository(Contract)
     private readonly contractsRepository: Repository<Contract>,
-    private readonly shipmentsService: ShipmentService,
+    @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
+    private readonly shipmentsService: ShipmentService,
     private readonly goodsService: GoodsService,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
@@ -302,5 +305,15 @@ export class ContractsService {
     contract.status = !contract.status;
 
     return await this.contractsRepository.save(contract);
+  }
+
+  async getOrderPrefix(contractId: number): Promise<string> {
+    const contract = await this.contractsRepository
+      .createQueryBuilder('contract')
+      .where('contract.id = :contractId', { contractId })
+      .select(['contract.id', 'contract.orderPrefix'])
+      .getOne();
+
+    return contract.orderPrefix || '';
   }
 }

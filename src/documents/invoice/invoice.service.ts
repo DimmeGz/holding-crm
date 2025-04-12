@@ -1,19 +1,25 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { PaymentService } from '../payment/payment.service';
+import { CompaniesService } from '../../companies';
 import { GoodsService } from '../../goods';
+import { OrdersService } from '../orders';
+import { PaymentService } from '../payment';
 import { ShipmentService } from '../shipment';
-import { WarehouseService } from '../../warehouse/warehouse.service';
+import { WarehouseService } from '../../warehouse';
 
 import { Invoice, InvoiceLine } from './entities';
 import {
+  CreateInvoiceByContractDTO,
   CreateInvoiceDTO,
+  CreateInvoiceLineDTO,
   GetTechnicalProcessesDataDTO,
   UpdateInvoiceDTO,
 } from './dto';
@@ -21,7 +27,7 @@ import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
-import { CompaniesService } from '../../companies/companies.service';
+import { CreateOrderDTO, CreateOrderLineDTO } from '../orders/dto';
 
 @Injectable()
 export class InvoiceService {
@@ -29,6 +35,8 @@ export class InvoiceService {
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
     @InjectDataSource() private dataSource: DataSource,
+    @Inject(forwardRef(() => OrdersService))
+    private readonly ordersService: OrdersService,
     private readonly companiesService: CompaniesService,
     private readonly goodsService: GoodsService,
     private readonly paymentsService: PaymentService,
@@ -234,6 +242,56 @@ export class InvoiceService {
     }
 
     return invoiceLines;
+  }
+
+  async createInvoiceByContract(
+    createInvoiceByContractDTO: CreateInvoiceByContractDTO,
+  ) {
+    const createOrderDto: CreateOrderDTO = {
+      orderNumber: '',
+      contractId: createInvoiceByContractDTO.contractId,
+      sellerId: createInvoiceByContractDTO.sellerId,
+      sellerWarehouseId: createInvoiceByContractDTO.sellerWarehouseId,
+      buyerId: createInvoiceByContractDTO.buyerId,
+      buyerWarehouseId: createInvoiceByContractDTO.buyerWarehouseId,
+      recipientId: createInvoiceByContractDTO.recipientId,
+      recipientWarehouseId: createInvoiceByContractDTO.recipientWarehouseId,
+      expectedDate: createInvoiceByContractDTO.expectedDate || new Date(),
+      isDateAsap: false,
+      currencyId: createInvoiceByContractDTO.currencyId,
+      vat: createInvoiceByContractDTO.vat,
+      paymentDelay: createInvoiceByContractDTO.paymentDelay,
+      incotermsId: createInvoiceByContractDTO.incotermsId,
+      transportPlace: createInvoiceByContractDTO.transportPlace,
+      orderLines: [],
+      orderServiceLines: createInvoiceByContractDTO.invoiceServiceLines,
+      isHidden: true,
+    };
+
+    createOrderDto.orderLines = createInvoiceByContractDTO.invoiceLines.map(
+      (line: Partial<CreateOrderLineDTO> & { productId: number }) => {
+        line.productManId = line.productId;
+        line.productBuyId = line.productId;
+        line.batchRename = '';
+
+        return line as CreateOrderLineDTO;
+      },
+    );
+
+    const order = await this.ordersService.createOrder(createOrderDto);
+    delete createInvoiceByContractDTO.invoiceId;
+
+    const createInvoiceDTO: CreateInvoiceDTO = {
+      ...createInvoiceByContractDTO,
+      invoiceLines: createInvoiceByContractDTO.invoiceLines.map(
+        (line: Partial<CreateInvoiceLineDTO>) => {
+          line.orderId = order.id;
+          return line as CreateInvoiceLineDTO;
+        },
+      ),
+    };
+
+    return await this.createInvoice(createInvoiceDTO);
   }
 
   async updateInvoice(invoiceId: number, updateInvoiceDTO: UpdateInvoiceDTO) {

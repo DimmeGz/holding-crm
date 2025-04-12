@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CompaniesModule } from '../../companies';
 import { GoodsModule } from '../../goods';
 import { ShipmentModule } from '../shipment';
+import { OrdersModule } from '../orders';
 import { PaymentModule } from '../payment';
 import { WarehouseModule } from '../../warehouse';
 
@@ -20,6 +21,7 @@ import { InvoiceController } from './invoice.controller';
     PaymentModule,
     ShipmentModule,
     WarehouseModule,
+    forwardRef(() => OrdersModule),
   ],
   providers: [InvoiceService],
   controllers: [InvoiceController],

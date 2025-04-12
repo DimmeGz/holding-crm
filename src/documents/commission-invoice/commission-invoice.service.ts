@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { InvoiceService } from '../invoice/invoice.service';
+import { InvoiceService } from '../invoice';
 
 import { CommissionInvoice } from './entities';
 import { CreateCommissionInvoiceDTO, UpdateCommissionInvoiceDTO } from './dto';
