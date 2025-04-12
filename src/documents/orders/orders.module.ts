@@ -6,8 +6,9 @@ import { Order } from './entities';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 
-import { InvoiceModule } from '../invoice';
+import { ContractsModule } from '../contracts';
 import { GoodsModule } from '../../goods';
+import { InvoiceModule } from '../invoice';
 import { OrdersConfirmationModule } from '../orders-confirmation';
 
 @Module({
@@ -15,6 +16,7 @@ import { OrdersConfirmationModule } from '../orders-confirmation';
     TypeOrmModule.forFeature([Order]),
     GoodsModule,
     OrdersConfirmationModule,
+    forwardRef(() => ContractsModule),
     forwardRef(() => InvoiceModule),
   ],
   providers: [OrdersService],

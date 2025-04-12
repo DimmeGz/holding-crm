@@ -11,9 +11,11 @@ import { DataSource, Repository } from 'typeorm';
 import { Order } from './entities';
 import { CreateOrderDTO, UpdateOrderDTO } from './dto';
 
-import { InvoiceService } from '../invoice/invoice.service';
+import { ContractsService } from '../contracts/contracts.service';
 import { GoodsService } from '../../goods';
+import { InvoiceService } from '../invoice/invoice.service';
 import { OrdersConfirmationService } from '../orders-confirmation';
+
 import {
   getProductIdsFromOrderProductLines,
   getServiceIdsFromServiceLines,
@@ -25,6 +27,8 @@ export class OrdersService {
     @InjectRepository(Order)
     private readonly ordersRepository: Repository<Order>,
     @InjectDataSource() private dataSource: DataSource,
+    @Inject(forwardRef(() => ContractsService))
+    private readonly contractsService: ContractsService,
     @Inject(forwardRef(() => InvoiceService))
     private readonly invoiceService: InvoiceService,
     private readonly goodsService: GoodsService,
@@ -150,6 +154,9 @@ export class OrdersService {
     newOrder.status = false;
     newOrder.paymentDelay = newOrder.paymentDelay || 0;
     newOrder.vat = newOrder.vat || 0;
+    newOrder.orderNumber =
+      newOrder.orderNumber ||
+      (await this.countOrderNumber(newOrder.contractId, newOrder.sellerId));
 
     newOrder.documentSum =
       createOrderDTO.orderLines.reduce(
@@ -264,5 +271,34 @@ export class OrdersService {
     order.status = !order.status;
 
     return await this.ordersRepository.save(order);
+  }
+
+  async countOrderNumber(contractId: number, sellerId: number) {
+    const orderPrefix =
+      (await this.contractsService.getOrderPrefix(contractId)) || '';
+
+    const regexPattern = `^${orderPrefix}[0-9]+$`;
+
+    const orders = await this.ordersRepository
+      .createQueryBuilder('order')
+      .where('order.sellerId = :sellerId', { sellerId })
+      .andWhere('order.orderNumber ~ :regexPattern', {
+        regexPattern,
+      })
+      .select(['order.orderNumber'])
+      .getMany();
+
+    let numbers: number[] = [];
+    if (orderPrefix) {
+      numbers = orders
+        .map((order) => +order.orderNumber.split(orderPrefix)[1])
+        .filter(
+          (item) => typeof item === 'number' && !isNaN(item) && item !== null,
+        );
+    } else {
+      numbers = orders.map((order) => +order.orderNumber);
+    }
+
+    return orderPrefix + (Math.max(...numbers) + 1);
   }
 }

@@ -248,7 +248,7 @@ export class InvoiceService {
     createInvoiceByContractDTO: CreateInvoiceByContractDTO,
   ) {
     const createOrderDto: CreateOrderDTO = {
-      orderNumber: 'tempNumber123', // TODO: count orderNumber
+      orderNumber: '',
       contractId: createInvoiceByContractDTO.contractId,
       sellerId: createInvoiceByContractDTO.sellerId,
       sellerWarehouseId: createInvoiceByContractDTO.sellerWarehouseId,
@@ -273,7 +273,6 @@ export class InvoiceService {
         line.productManId = line.productId;
         line.productBuyId = line.productId;
         line.batchRename = '';
-        delete line.productId;
 
         return line as CreateOrderLineDTO;
       },
