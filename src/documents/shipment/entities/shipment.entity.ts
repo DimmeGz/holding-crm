@@ -94,7 +94,7 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @OneToMany(() => ShipmentLine, (shipmentLine) => shipmentLine.shipment, {
     cascade: true,
