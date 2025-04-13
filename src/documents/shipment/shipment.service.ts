@@ -8,6 +8,7 @@ import { DataSource, Repository } from 'typeorm';
 
 import { GoodsService } from '../../goods';
 import { ReceiveService } from '../receive';
+import { TransitService } from '../transit/transit.service';
 import { WarehouseService } from '../../warehouse';
 
 import { Shipment, ShipmentLine } from './entities';
@@ -28,6 +29,7 @@ export class ShipmentService {
     @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
     private readonly receiveService: ReceiveService,
+    private readonly transitService: TransitService,
     private readonly warehouseService: WarehouseService,
   ) {}
 
@@ -272,7 +274,11 @@ export class ShipmentService {
 
     shipment.status = !shipment.status;
 
-    return await this.shipmentsRepository.save(shipment);
+    const createdShipment = await this.shipmentsRepository.save(shipment);
+
+    await this.updateTransitLines(createdShipment);
+
+    return createdShipment;
   }
 
   private async updateWarehouseAccounting(shipment: Shipment) {
@@ -296,6 +302,17 @@ export class ShipmentService {
           qty: line.qty,
         });
       }
+    }
+  }
+
+  private async updateTransitLines(shipment: Shipment) {
+    if (shipment.status) {
+      await this.transitService.createTransitLine({
+        shipmentId: shipment.id,
+        lines: shipment.shipmentLines,
+      });
+    } else {
+      await this.transitService.removeTransitLines(shipment.id);
     }
   }
 }

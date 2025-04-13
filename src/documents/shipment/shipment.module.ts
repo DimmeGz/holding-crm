@@ -3,17 +3,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { GoodsModule } from '../../goods';
 import { ReceiveModule } from '../receive';
-import { Shipment, ShipmentLine } from './entities';
+import { TransitModule } from '../transit';
 import { WarehouseModule } from '../../warehouse';
 
 import { ShipmentService } from './shipment.service';
 import { ShipmentController } from './shipment.controller';
+import { Shipment, ShipmentLine } from './entities';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Shipment, ShipmentLine]),
     GoodsModule,
     ReceiveModule,
+    TransitModule,
     WarehouseModule,
   ],
   providers: [ShipmentService],

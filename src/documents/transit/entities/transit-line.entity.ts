@@ -11,7 +11,7 @@ import { AbstractEntity } from '../../../common/entities';
 import { Shipment } from '../../shipment/entities';
 import { Receive } from '../../receive/entities';
 import { TechnicalProcess } from '../../../libs/entities';
-import { Batch } from '../../../goods/entities';
+import { Batch, Package } from '../../../goods/entities';
 
 @Entity({ name: 'documents_transitline' })
 export class TransitLine extends AbstractEntity {
@@ -21,11 +21,26 @@ export class TransitLine extends AbstractEntity {
   @JoinColumn({ name: 'shipment_id' })
   shipment: Shipment;
 
+  @Column({ name: 'shipment_id' })
+  shipmentId: number;
+
   @ManyToOne(() => Batch, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
+
+  @Column({ name: 'batch_id' })
+  batchId: number;
+
+  @ManyToOne(() => Batch, {
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'package_id' })
+  package: Package;
+
+  @Column({ name: 'package_id' })
+  packageId: number;
 
   @Column({
     type: 'int',
@@ -36,7 +51,10 @@ export class TransitLine extends AbstractEntity {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'receive_id' })
-  receive: Receive;
+  receive?: Receive;
+
+  @Column({ name: 'receive_id' })
+  receiveId?: number;
 
   @ManyToMany(() => TechnicalProcess)
   @JoinTable({
@@ -50,5 +68,10 @@ export class TransitLine extends AbstractEntity {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
+
+  constructor(entity: Partial<TransitLine>) {
+    super();
+    Object.assign(this, entity);
+  }
 }
