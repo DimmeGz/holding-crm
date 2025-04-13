@@ -27,6 +27,7 @@ import {
   CreateInvoiceLineDTO,
   GetTechnicalProcessesDataDTO,
   UpdateInvoiceDTO,
+  UpdatePaymentBalanceDTO,
 } from './dto';
 
 import { CreateOrderDTO, CreateOrderLineDTO } from '../orders/dto';
@@ -40,9 +41,10 @@ export class InvoiceService {
     @InjectDataSource() private dataSource: DataSource,
     @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
+    @Inject(forwardRef(() => PaymentService))
+    private readonly paymentsService: PaymentService,
     private readonly companiesService: CompaniesService,
     private readonly goodsService: GoodsService,
-    private readonly paymentsService: PaymentService,
     private readonly shipmentsService: ShipmentService,
     private readonly warehouseService: WarehouseService,
   ) {}
@@ -449,5 +451,40 @@ export class InvoiceService {
       }
     }
     return totalGrossWeight;
+  }
+
+  async changePaymentBalance(
+    updateBalanceDTO: UpdatePaymentBalanceDTO,
+  ): Promise<void> {
+    const changeBalanceData = updateBalanceDTO.paymentLines.reduce(
+      (acc, cur) => {
+        if (!acc[cur.invoiceId]) {
+          acc[cur.invoiceId] = cur.amount;
+        } else {
+          acc[cur.invoiceId] += cur.amount;
+        }
+        return acc;
+      },
+      {},
+    );
+
+    const invoices = await this.invoiceRepository
+      .createQueryBuilder('invoice')
+      .where('invoice.id IN (:...invoiceIds)', {
+        invoiceIds: Object.keys(changeBalanceData),
+      })
+      .getMany();
+
+    if (updateBalanceDTO.status) {
+      invoices.forEach(
+        (invoice) => (invoice.paymentBalance -= changeBalanceData[invoice.id]),
+      );
+    } else {
+      invoices.forEach(
+        (invoice) => (invoice.paymentBalance += changeBalanceData[invoice.id]),
+      );
+    }
+
+    await this.invoiceRepository.save(invoices);
   }
 }
