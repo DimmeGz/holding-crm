@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { CompaniesService } from '../../companies';
 import { InvoiceService } from '../invoice';
 
 import { CommissionInvoice } from './entities';
@@ -13,6 +14,7 @@ export class CommissionInvoiceService {
     @InjectRepository(CommissionInvoice)
     private readonly commissionRepository: Repository<CommissionInvoice>,
     private readonly invoicesService: InvoiceService,
+    private readonly companiesService: CompaniesService,
   ) {}
 
   async getCommissionInvoicess() {
@@ -145,9 +147,17 @@ export class CommissionInvoiceService {
       id: commissionId,
     });
 
+    // TODO: make transaction
+
     commission.status = !commission.status;
 
-    // make financial changes
+    await this.companiesService.changeInvoiceStatusBalances({
+      sellerId: commission.sellerId,
+      buyerId: commission.buyerId,
+      currencyId: commission.currencyId,
+      status: commission.status,
+      amount: commission.documentSum,
+    });
 
     return await this.commissionRepository.save(commission);
   }

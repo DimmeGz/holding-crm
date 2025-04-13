@@ -36,11 +36,11 @@ export class CompaniesService {
     );
 
     if (changeInvoiceStatusBalanceDTO.status) {
-      sellerAccount.debt += changeInvoiceStatusBalanceDTO.value;
-      buyerAccount.wait -= changeInvoiceStatusBalanceDTO.value;
+      sellerAccount.wait += changeInvoiceStatusBalanceDTO.amount;
+      buyerAccount.debt -= changeInvoiceStatusBalanceDTO.amount;
     } else {
-      sellerAccount.debt -= changeInvoiceStatusBalanceDTO.value;
-      buyerAccount.wait += changeInvoiceStatusBalanceDTO.value;
+      sellerAccount.wait -= changeInvoiceStatusBalanceDTO.amount;
+      buyerAccount.debt += changeInvoiceStatusBalanceDTO.amount;
     }
 
     await this.accountsRepository.save([sellerAccount, buyerAccount]);

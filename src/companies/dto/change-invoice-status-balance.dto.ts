@@ -3,5 +3,5 @@ export class ChangeInvoiceStatusBalanceDTO {
   buyerId: number;
   status: boolean;
   currencyId: number;
-  value: number;
+  amount: number;
 }
