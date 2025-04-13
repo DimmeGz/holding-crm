@@ -46,7 +46,7 @@ export class CompaniesService {
     await this.accountsRepository.save([sellerAccount, buyerAccount]);
   }
 
-  async makePayment(makePaymentDTO: MakePaymentDTO): Promise<void> {
+  async changeAccountsBalances(makePaymentDTO: MakePaymentDTO): Promise<void> {
     const [sellerAccount, buyerAccount] =
       await this.getSellerBuyerAccounts(makePaymentDTO);
 
