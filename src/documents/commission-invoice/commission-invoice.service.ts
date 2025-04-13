@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { CompaniesService } from '../../companies';
 import { InvoiceService } from '../invoice';
 
 import { CommissionInvoice } from './entities';
@@ -13,9 +14,10 @@ export class CommissionInvoiceService {
     @InjectRepository(CommissionInvoice)
     private readonly commissionRepository: Repository<CommissionInvoice>,
     private readonly invoicesService: InvoiceService,
+    private readonly companiesService: CompaniesService,
   ) {}
 
-  async getCommissionInvoicess() {
+  async getCommissionInvoicess(): Promise<CommissionInvoice[]> {
     const commissions = await this.commissionRepository
       .createQueryBuilder('commission')
       .leftJoin('commission.seller', 'seller')
@@ -42,7 +44,9 @@ export class CommissionInvoiceService {
     return commissions;
   }
 
-  async getCommissionInvoiceById(commissionId: number) {
+  async getCommissionInvoiceById(
+    commissionId: number,
+  ): Promise<CommissionInvoice> {
     const commission = await this.commissionRepository
       .createQueryBuilder('commission')
       .leftJoin('commission.seller', 'seller')
@@ -75,7 +79,7 @@ export class CommissionInvoiceService {
 
   async createCommissionInvoice(
     createCommissionInvoiceDTO: CreateCommissionInvoiceDTO,
-  ) {
+  ): Promise<CommissionInvoice> {
     const newCommissionIvoice = new CommissionInvoice(
       createCommissionInvoiceDTO,
     );
@@ -105,7 +109,7 @@ export class CommissionInvoiceService {
   async updateCommissionInvoice(
     commissionId: number,
     updateCommissionInvoiceDTO: UpdateCommissionInvoiceDTO,
-  ) {
+  ): Promise<CommissionInvoice> {
     const commission = await this.commissionRepository.findOneBy({
       id: commissionId,
       status: false,
@@ -127,7 +131,7 @@ export class CommissionInvoiceService {
     return await this.commissionRepository.save(updated);
   }
 
-  async removeCommission(commissionId: number) {
+  async removeCommission(commissionId: number): Promise<CommissionInvoice> {
     try {
       const commission = await this.commissionRepository.findOneBy({
         id: commissionId,
@@ -140,14 +144,24 @@ export class CommissionInvoiceService {
     }
   }
 
-  async changeCommissionStatus(commissionId: number) {
+  async changeCommissionStatus(
+    commissionId: number,
+  ): Promise<CommissionInvoice> {
     const commission = await this.commissionRepository.findOneBy({
       id: commissionId,
     });
 
+    // TODO: make transaction
+
     commission.status = !commission.status;
 
-    // make financial changes
+    await this.companiesService.changeInvoiceStatusBalances({
+      sellerId: commission.sellerId,
+      buyerId: commission.buyerId,
+      currencyId: commission.currencyId,
+      status: commission.status,
+      amount: commission.documentSum,
+    });
 
     return await this.commissionRepository.save(commission);
   }

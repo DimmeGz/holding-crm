@@ -20,7 +20,7 @@ export class ProductionService {
     private readonly libsService: LibsService,
   ) {}
 
-  async getProductions() {
+  async getProductions(): Promise<Production[]> {
     const productions = await this.productionsRepository
       .createQueryBuilder('production')
       .leftJoin('production.company', 'company')
@@ -42,7 +42,7 @@ export class ProductionService {
     return productions;
   }
 
-  async getProductionById(productionId: number) {
+  async getProductionById(productionId: number): Promise<Production> {
     const production = await this.productionsRepository
       .createQueryBuilder('production')
       .leftJoin('production.company', 'company')
@@ -81,7 +81,9 @@ export class ProductionService {
     return production;
   }
 
-  async createProduction(createProductionDTO: CreateProductionDTO) {
+  async createProduction(
+    createProductionDTO: CreateProductionDTO,
+  ): Promise<Production> {
     createProductionDTO['createdAt'] = new Date();
     const newProduction = new Production(createProductionDTO);
     newProduction.status = false;
@@ -103,7 +105,7 @@ export class ProductionService {
   async updateProduction(
     productionId: number,
     updateProductionDTO: UpdateProductionDTO,
-  ) {
+  ): Promise<Production> {
     const production = await this.productionsRepository
       .createQueryBuilder('production')
       .leftJoinAndSelect('production.productionInLines', 'productionInLine')
@@ -161,7 +163,7 @@ export class ProductionService {
     }
   }
 
-  async removeProduction(productionId: number) {
+  async removeProduction(productionId: number): Promise<Production> {
     try {
       const production = await this.productionsRepository.findOneByOrFail({
         id: productionId,
@@ -174,7 +176,7 @@ export class ProductionService {
     }
   }
 
-  async changeProductionStatus(productionId: number) {
+  async changeProductionStatus(productionId: number): Promise<Production> {
     const production = await this.productionsRepository.findOneBy({
       id: productionId,
     });

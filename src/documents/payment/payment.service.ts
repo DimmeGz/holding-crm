@@ -7,6 +7,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { DataSource, Repository } from 'typeorm';
 
+import { CompaniesService } from '../../companies';
 import { LibsService } from '../../libs';
 
 import { Payment } from './entities';
@@ -18,10 +19,11 @@ export class PaymentService {
     @InjectRepository(Payment)
     private readonly paymentsRepository: Repository<Payment>,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly companiesService: CompaniesService,
     private readonly libsService: LibsService,
   ) {}
 
-  async getPayments() {
+  async getPayments(): Promise<Payment[]> {
     const payments = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoin('payment.seller', 'seller')
@@ -44,7 +46,7 @@ export class PaymentService {
     return payments;
   }
 
-  async getPaymentById(paymentId: number) {
+  async getPaymentById(paymentId: number): Promise<Payment> {
     const payment = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoin('payment.seller', 'seller')
@@ -65,12 +67,12 @@ export class PaymentService {
         'invoice.invoiceNumber',
       ])
       .orderBy('payment.id', 'DESC')
-      .getMany();
+      .getOne();
 
     return payment;
   }
 
-  async getPaymentsByInvoiceId(invoiceId: number) {
+  async getPaymentsByInvoiceId(invoiceId: number): Promise<Payment[]> {
     const payments = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoin('payment.paymentLines', 'paymentLine')
@@ -82,7 +84,7 @@ export class PaymentService {
     return payments;
   }
 
-  async createPayment(createPaymentDTO: CreatePaymentDTO) {
+  async createPayment(createPaymentDTO: CreatePaymentDTO): Promise<Payment> {
     const newPayment = new Payment(createPaymentDTO);
     newPayment.createdAt = new Date();
     newPayment.comment = newPayment.comment || '';
@@ -106,7 +108,10 @@ export class PaymentService {
     return await this.paymentsRepository.save(newPayment);
   }
 
-  async updatePayment(paymentId: number, updatePaymentDTO: UpdatePaymentDTO) {
+  async updatePayment(
+    paymentId: number,
+    updatePaymentDTO: UpdatePaymentDTO,
+  ): Promise<Payment> {
     const payment = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoinAndSelect('payment.paymentLines', 'paymentLine')
@@ -130,11 +135,14 @@ export class PaymentService {
 
     const updated = Object.assign(payment, updatePaymentDTO);
 
+    updated.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByInvoiceIds(
+        updated.paymentLines.map((line) => line.invoiceId),
+      );
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    // TODO: update technical processes
 
     try {
       if (paymentLinesToDelete.length) {
@@ -154,7 +162,7 @@ export class PaymentService {
     }
   }
 
-  async removePayment(paymentId: number) {
+  async removePayment(paymentId: number): Promise<Payment> {
     try {
       const invoice = await this.paymentsRepository.findOne({
         where: { id: paymentId, status: false },
@@ -169,11 +177,20 @@ export class PaymentService {
   async changePaymentStatus(paymentId: number) {
     const payment = await this.paymentsRepository.findOne({
       where: { id: paymentId },
+      relations: ['paymentLines'],
     });
+
+    // TODO: make transaction
 
     payment.status = !payment.status;
 
-    // TODO: make finanshial changes in companies
+    await this.companiesService.makePayment({
+      sellerId: payment.sellerId,
+      buyerId: payment.buyerId,
+      currencyId: payment.currencyId,
+      status: payment.status,
+      amount: payment.documentSum,
+    });
 
     return await this.paymentsRepository.save(payment);
   }

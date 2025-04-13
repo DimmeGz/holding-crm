@@ -8,20 +8,21 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { Contract } from './entities';
-import {
-  ContractsResponseDTO,
-  CreateContractDTO,
-  UpdateContractDTO,
-} from './dto';
-
 import { GoodsService } from '../../goods';
 import { OrdersService } from '../orders';
 import { ShipmentService } from '../shipment';
+
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
+
+import { Contract } from './entities';
+import { CreateContractDTO, UpdateContractDTO } from './dto';
+import {
+  GetContractResponseDTO,
+  GetContractsResponseDTO,
+} from './dto/response-dto';
 
 @Injectable()
 export class ContractsService {
@@ -35,7 +36,7 @@ export class ContractsService {
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async getContracts(): Promise<ContractsResponseDTO> {
+  async getContracts(): Promise<GetContractsResponseDTO> {
     const actualContracts: Contract[] = await this.contractsRepository
       .createQueryBuilder('actualContract')
       .where('actualContract.isArchived = false')
@@ -121,7 +122,7 @@ export class ContractsService {
     };
   }
 
-  async getContractById(contractId: number) {
+  async getContractById(contractId: number): Promise<GetContractResponseDTO> {
     const contract = await this.contractsRepository
       .createQueryBuilder('contract')
       .where('contract.id = :contractId', { contractId })
@@ -181,7 +182,9 @@ export class ContractsService {
     return { contract, orders };
   }
 
-  async createContract(createContractDTO: CreateContractDTO) {
+  async createContract(
+    createContractDTO: CreateContractDTO,
+  ): Promise<Contract> {
     createContractDTO['technicalProcesses'] =
       await this.getTechnicalProcesses(createContractDTO);
     const newContract = new Contract(createContractDTO);
@@ -221,7 +224,7 @@ export class ContractsService {
   async updateContract(
     contractId: number,
     updateContractDTO: UpdateContractDTO,
-  ) {
+  ): Promise<Contract> {
     const contract = await this.contractsRepository
       .createQueryBuilder('contract')
       .where('contract.id = :contractId', { contractId })
@@ -285,7 +288,7 @@ export class ContractsService {
     }
   }
 
-  async removeContract(contractId: number) {
+  async removeContract(contractId: number): Promise<Contract> {
     try {
       const contract = await this.contractsRepository.findOne({
         where: { id: contractId },
@@ -297,7 +300,7 @@ export class ContractsService {
     }
   }
 
-  async changeContractStatus(contractId: number) {
+  async changeContractStatus(contractId: number): Promise<Contract> {
     const contract = await this.contractsRepository.findOne({
       where: { id: contractId },
     });

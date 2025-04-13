@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { CompaniesService } from '../../companies';
 import { LibsService } from '../../libs';
 
 import { CommissionPayment } from './entities';
@@ -12,10 +13,11 @@ export class CommissionPaymentService {
   constructor(
     @InjectRepository(CommissionPayment)
     private readonly commissionPaymentsRepository: Repository<CommissionPayment>,
+    private readonly companiesService: CompaniesService,
     private readonly libsService: LibsService,
   ) {}
 
-  async getCommisionPayments() {
+  async getCommisionPayments(): Promise<CommissionPayment[]> {
     const commissionPayments = await this.commissionPaymentsRepository
       .createQueryBuilder('commissionPayment')
       .leftJoin('commissionPayment.seller', 'seller')
@@ -38,7 +40,9 @@ export class CommissionPaymentService {
     return commissionPayments;
   }
 
-  async getCommisionPaymentById(commissionPaymentId: number) {
+  async getCommisionPaymentById(
+    commissionPaymentId: number,
+  ): Promise<CommissionPayment> {
     const commissionPayment = await this.commissionPaymentsRepository
       .createQueryBuilder('commissionPayment')
       .leftJoin('commissionPayment.seller', 'seller')
@@ -58,14 +62,14 @@ export class CommissionPaymentService {
       .where('commissionPayment.id = :commissionPaymentId', {
         commissionPaymentId,
       })
-      .getMany();
+      .getOne();
 
     return commissionPayment;
   }
 
   async createCommissionPayment(
     createCommissionPaymentDTO: CreateCommissionPaymentDTO,
-  ) {
+  ): Promise<CommissionPayment> {
     createCommissionPaymentDTO.expectedDate =
       createCommissionPaymentDTO.expectedDate || new Date();
     const newCommissionPayment = new CommissionPayment(
@@ -87,7 +91,7 @@ export class CommissionPaymentService {
   async updateCommissionPayment(
     commissionPaymentId: number,
     updateCommissionPaymentDTO: UpdateCommissionPaymentDTO,
-  ) {
+  ): Promise<CommissionPayment> {
     const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
       { id: commissionPaymentId, status: false },
     );
@@ -114,14 +118,24 @@ export class CommissionPaymentService {
     }
   }
 
-  async changeCommissionPaymentStatus(commissionPaymentId: number) {
+  async changeCommissionPaymentStatus(
+    commissionPaymentId: number,
+  ): Promise<CommissionPayment> {
     const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
       { id: commissionPaymentId },
     );
 
+    // TODO: make transaction
+
     commissionPayment.status = !commissionPayment.status;
 
-    // TODO: make financial changes
+    await this.companiesService.makePayment({
+      sellerId: commissionPayment.sellerId,
+      buyerId: commissionPayment.buyerId,
+      currencyId: commissionPayment.currencyId,
+      status: commissionPayment.status,
+      amount: commissionPayment.amount,
+    });
 
     return await this.commissionPaymentsRepository.save(commissionPayment);
   }
