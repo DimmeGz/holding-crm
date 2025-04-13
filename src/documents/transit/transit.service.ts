@@ -5,7 +5,11 @@ import { Repository } from 'typeorm';
 import { LibsService } from '../../libs';
 
 import { TransitLine } from './entities';
-import { AddReceiveToTransitLineDTO, CreateTransitLinesDTO } from './dto';
+import {
+  AddReceiveToTransitLineDTO,
+  CreateTransitLinesDTO,
+  ReceiveTransitLinesDTO,
+} from './dto';
 
 @Injectable()
 export class TransitService {
@@ -25,6 +29,7 @@ export class TransitService {
       .leftJoin('transitLine.batch', 'batch')
       .leftJoin('batch.product', 'product')
       .leftJoin('transitLine.package', 'package')
+      .where('transitLine.qty != 0')
       .select([
         'transitLine.id',
         'transitLine.qty',
@@ -84,6 +89,39 @@ export class TransitService {
         packageId: line.packageId,
       });
       transitLine.receiveId = addReceiveDTO.receiveId;
+      linesToUpdate.push(transitLine);
+    }
+
+    await this.transitLinesRepository.save(linesToUpdate);
+  }
+
+  async receiveTransitLines(receiveDTO: ReceiveTransitLinesDTO) {
+    const linesToUpdate: TransitLine[] = [];
+
+    for (const line of receiveDTO.lines) {
+      const transitLine = await this.transitLinesRepository.findOneBy({
+        receiveId: receiveDTO.receiveId,
+        batchId: line.batchId,
+        packageId: line.packageId,
+      });
+
+      transitLine.qty -= line.qty;
+      linesToUpdate.push(transitLine);
+    }
+
+    await this.transitLinesRepository.save(linesToUpdate);
+  }
+
+  async cancelReceiveTransitLines(receiveDTO: ReceiveTransitLinesDTO) {
+    const linesToUpdate: TransitLine[] = [];
+
+    for (const line of receiveDTO.lines) {
+      const transitLine = await this.transitLinesRepository.findOneBy({
+        receiveId: receiveDTO.receiveId,
+        batchId: line.batchId,
+        packageId: line.packageId,
+      });
+      transitLine.qty += line.qty;
       linesToUpdate.push(transitLine);
     }
 
