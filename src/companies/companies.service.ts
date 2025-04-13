@@ -4,7 +4,7 @@ import { Account, Company } from './entities';
 import { Repository } from 'typeorm';
 
 import { CompanyType } from './enums';
-import { MakePaymentDTO } from './dto';
+import { ChangeAccountBalanceDTO, MakePaymentDTO } from './dto';
 
 @Injectable()
 export class CompaniesService {
@@ -29,25 +29,27 @@ export class CompaniesService {
   }
 
   async changeAccountWaitBallance(
-    companyId: number,
-    currencyId: number,
-    value: number,
+    changeAccountBalanceDTO: ChangeAccountBalanceDTO,
   ): Promise<void> {
-    const account = await this.getAccount(companyId, currencyId);
+    const account = await this.getAccount(
+      changeAccountBalanceDTO.companyId,
+      changeAccountBalanceDTO.currencyId,
+    );
 
-    account.wait = account.wait + value;
+    account.wait = account.wait + changeAccountBalanceDTO.value;
 
     await this.accountsRepository.save(account);
     return;
   }
 
   async changeAccountDebtBallance(
-    companyId: number,
-    currencyId: number,
-    value: number,
+    changeAccountBalanceDTO: ChangeAccountBalanceDTO,
   ): Promise<void> {
-    const account = await this.getAccount(companyId, currencyId);
-    account.debt = account.debt + value;
+    const account = await this.getAccount(
+      changeAccountBalanceDTO.companyId,
+      changeAccountBalanceDTO.currencyId,
+    );
+    account.debt = account.debt + changeAccountBalanceDTO.value;
 
     await this.accountsRepository.save(account);
     return;
