@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { LibsService } from '../../libs';
 
 import { TransitLine } from './entities';
-import { CreateTransitLinesDTO } from './dto';
+import { AddReceiveToTransitLineDTO, CreateTransitLinesDTO } from './dto';
 
 @Injectable()
 export class TransitService {
@@ -39,5 +39,21 @@ export class TransitService {
     });
 
     await this.transitLinesRepository.remove(transitLines);
+  }
+
+  async addReceiveToTransitLines(addReceiveDTO: AddReceiveToTransitLineDTO) {
+    const linesToUpdate: TransitLine[] = [];
+
+    for (const line of addReceiveDTO.lines) {
+      const transitLine = await this.transitLinesRepository.findOneBy({
+        shipmentId: addReceiveDTO.shipmentId,
+        batchId: line.batchId,
+        packageId: line.packageId,
+      });
+      transitLine.receiveId = addReceiveDTO.receiveId;
+      linesToUpdate.push(transitLine);
+    }
+
+    await this.transitLinesRepository.save(linesToUpdate);
   }
 }

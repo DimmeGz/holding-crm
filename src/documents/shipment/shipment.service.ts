@@ -8,7 +8,7 @@ import { DataSource, Repository } from 'typeorm';
 
 import { GoodsService } from '../../goods';
 import { ReceiveService } from '../receive';
-import { TransitService } from '../transit/transit.service';
+import { TransitService } from '../transit';
 import { WarehouseService } from '../../warehouse';
 
 import { Shipment, ShipmentLine } from './entities';
@@ -65,10 +65,6 @@ export class ShipmentService {
       .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('shipment.invoice', 'invoice')
       .leftJoin('shipment.currency', 'currency')
-      .leftJoin('shipment.shipmentLines', 'shipmentLine')
-      .leftJoin('shipmentLine.product', 'product')
-      .leftJoin('shipmentLine.batch', 'batch')
-      .leftJoin('shipmentLine.package', 'package')
       .select([
         'shipment.id',
         'shipment.status',
@@ -83,13 +79,31 @@ export class ShipmentService {
         'invoice.id',
         'invoice.invoiceNumber',
         'currency.name',
+      ])
+      .leftJoin('shipment.shipmentLines', 'shipmentLine')
+      .leftJoin('shipmentLine.product', 'product')
+      .leftJoin('shipmentLine.batch', 'batch')
+      .leftJoin('shipmentLine.package', 'package')
+      .addSelect([
         'shipmentLine',
+        'product.id',
         'product.name',
         'batch.id',
         'batch.name',
+        'package.id',
         'package.name',
         'package.capacity',
       ])
+      .leftJoin('shipment.shipmentServiceLines', 'shipmentServiceLine')
+      .leftJoin('shipmentServiceLine.service', 'service')
+      .addSelect([
+        'shipmentServiceLine.id',
+        'shipmentServiceLine.qty',
+        'shipmentServiceLine.price',
+        'service.id',
+        'service.name',
+      ])
+
       .where('shipment.id = :shipmentId', { shipmentId })
       .getOne();
 
