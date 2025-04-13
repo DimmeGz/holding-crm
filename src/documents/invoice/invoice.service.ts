@@ -405,7 +405,7 @@ export class InvoiceService {
       buyerId: invoice.buyerId,
       currencyId: invoice.currencyId,
       status: invoice.status,
-      value: invoice.documentSum,
+      amount: invoice.documentSum,
     });
 
     return await this.invoiceRepository.save(invoice);
