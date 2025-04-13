@@ -17,7 +17,7 @@ export class CommissionPaymentService {
     private readonly libsService: LibsService,
   ) {}
 
-  async getCommisionPayments() {
+  async getCommisionPayments(): Promise<CommissionPayment[]> {
     const commissionPayments = await this.commissionPaymentsRepository
       .createQueryBuilder('commissionPayment')
       .leftJoin('commissionPayment.seller', 'seller')
@@ -40,7 +40,9 @@ export class CommissionPaymentService {
     return commissionPayments;
   }
 
-  async getCommisionPaymentById(commissionPaymentId: number) {
+  async getCommisionPaymentById(
+    commissionPaymentId: number,
+  ): Promise<CommissionPayment> {
     const commissionPayment = await this.commissionPaymentsRepository
       .createQueryBuilder('commissionPayment')
       .leftJoin('commissionPayment.seller', 'seller')
@@ -60,14 +62,14 @@ export class CommissionPaymentService {
       .where('commissionPayment.id = :commissionPaymentId', {
         commissionPaymentId,
       })
-      .getMany();
+      .getOne();
 
     return commissionPayment;
   }
 
   async createCommissionPayment(
     createCommissionPaymentDTO: CreateCommissionPaymentDTO,
-  ) {
+  ): Promise<CommissionPayment> {
     createCommissionPaymentDTO.expectedDate =
       createCommissionPaymentDTO.expectedDate || new Date();
     const newCommissionPayment = new CommissionPayment(
@@ -89,7 +91,7 @@ export class CommissionPaymentService {
   async updateCommissionPayment(
     commissionPaymentId: number,
     updateCommissionPaymentDTO: UpdateCommissionPaymentDTO,
-  ) {
+  ): Promise<CommissionPayment> {
     const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
       { id: commissionPaymentId, status: false },
     );
@@ -116,7 +118,9 @@ export class CommissionPaymentService {
     }
   }
 
-  async changeCommissionPaymentStatus(commissionPaymentId: number) {
+  async changeCommissionPaymentStatus(
+    commissionPaymentId: number,
+  ): Promise<CommissionPayment> {
     const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
       { id: commissionPaymentId },
     );

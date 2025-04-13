@@ -23,7 +23,7 @@ export class ProductTransportService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getProductTransports() {
+  async getProductTransports(): Promise<ProductTransport[]> {
     const productTransports = await this.productTransportRepository
       .createQueryBuilder('productTransport')
       .leftJoin('productTransport.company', 'company')
@@ -43,7 +43,9 @@ export class ProductTransportService {
     return productTransports;
   }
 
-  async getProductTransportById(productTransportId: number) {
+  async getProductTransportById(
+    productTransportId: number,
+  ): Promise<ProductTransport> {
     const productTransport = await this.productTransportRepository
       .createQueryBuilder('productTransport')
       .leftJoin('productTransport.company', 'company')
@@ -77,7 +79,9 @@ export class ProductTransportService {
     return productTransport;
   }
 
-  async createProductTransport(createTransportDTO: CreateProductTransportDTO) {
+  async createProductTransport(
+    createTransportDTO: CreateProductTransportDTO,
+  ): Promise<ProductTransport> {
     const newTransport = new ProductTransport(createTransportDTO);
     newTransport.status = false;
     newTransport.createdAt = new Date();
@@ -98,7 +102,7 @@ export class ProductTransportService {
   async updateProductTransport(
     productTransportId: number,
     updateTransportDTO: UpdateProductTransportDTO,
-  ) {
+  ): Promise<ProductTransport> {
     const transport = await this.productTransportRepository
       .createQueryBuilder('transport')
       .where('transport.id = :productTransportId', {
@@ -172,7 +176,9 @@ export class ProductTransportService {
     }
   }
 
-  async removeProductTransport(productTransportId: number) {
+  async removeProductTransport(
+    productTransportId: number,
+  ): Promise<ProductTransport> {
     try {
       const transport = await this.productTransportRepository.findOneByOrFail({
         id: productTransportId,
@@ -185,7 +191,9 @@ export class ProductTransportService {
     }
   }
 
-  async changeProductTransportStatus(productTransportId: number) {
+  async changeProductTransportStatus(
+    productTransportId: number,
+  ): Promise<ProductTransport> {
     const transport = await this.productTransportRepository.findOne({
       where: { id: productTransportId },
       relations: ['productTransportLines'],
@@ -198,7 +206,9 @@ export class ProductTransportService {
     return await this.productTransportRepository.save(transport);
   }
 
-  private async updateWarehouseAccounting(transport: ProductTransport) {
+  private async updateWarehouseAccounting(
+    transport: ProductTransport,
+  ): Promise<void> {
     if (transport.status) {
       await this.warehouseService.transportProducts({
         companyId: transport.companyId,

@@ -17,7 +17,7 @@ export class WarehouseService {
     private readonly warehouseAccountingRepository: Repository<WarehouseAccounting>,
   ) {}
 
-  async getWarehouseAccounting() {
+  async getWarehouseAccountings(): Promise<WarehouseAccounting[]> {
     const warehouseAccounting = await this.warehouseAccountingRepository
       .createQueryBuilder('warehouseAccounting')
       .leftJoin('warehouseAccounting.batch', 'batch')
@@ -79,7 +79,9 @@ export class WarehouseService {
     }
   }
 
-  async decreaseShipGoodsCount(decreaseGoodsCountDTO: ChangeShipGoodsCountDTO) {
+  async decreaseShipGoodsCount(
+    decreaseGoodsCountDTO: ChangeShipGoodsCountDTO,
+  ): Promise<void> {
     try {
       const warehouseAccounting = await this.warehouseAccountingRepository
         .createQueryBuilder('ware')
@@ -102,7 +104,9 @@ export class WarehouseService {
     } catch (e) {}
   }
 
-  async returnShipGoodsCount(returnGoodsCountDTO: ChangeShipGoodsCountDTO) {
+  async returnShipGoodsCount(
+    returnGoodsCountDTO: ChangeShipGoodsCountDTO,
+  ): Promise<void> {
     try {
       const warehouseAccounting = await this.warehouseAccountingRepository
         .createQueryBuilder('ware')
@@ -127,7 +131,7 @@ export class WarehouseService {
 
   async increaseReceiveGoodsCount(
     increaseGoodsCountDTO: ChangeReceiveGoodsCountDTO,
-  ) {
+  ): Promise<void> {
     try {
       let warehouseAccounting = await this.warehouseAccountingRepository
         .createQueryBuilder('ware')
@@ -168,7 +172,7 @@ export class WarehouseService {
 
   async returnReceiveGoodsCount(
     returnGoodsCountDTO: ChangeReceiveGoodsCountDTO,
-  ) {
+  ): Promise<void> {
     try {
       const warehouseAccounting = await this.warehouseAccountingRepository
         .createQueryBuilder('ware')
@@ -205,7 +209,7 @@ export class WarehouseService {
     } catch (e) {}
   }
 
-  async transportProducts(transportDTO: TransportProductsDTO) {
+  async transportProducts(transportDTO: TransportProductsDTO): Promise<void> {
     // TODO: add serviceLines to cost
 
     const linesToSave: WarehouseAccounting[] = [];
@@ -256,7 +260,7 @@ export class WarehouseService {
     await this.warehouseAccountingRepository.save(linesToSave);
   }
 
-  async unTransportProducts(transportDTO: TransportProductsDTO) {
+  async unTransportProducts(transportDTO: TransportProductsDTO): Promise<void> {
     // TODO: remove serviceLines to cost
 
     const linesToSave: WarehouseAccounting[] = [];
