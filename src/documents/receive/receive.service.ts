@@ -29,7 +29,7 @@ export class ReceiveService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getReceives() {
+  async getReceives(): Promise<Receive[]> {
     const receives = await this.receivesRepository
       .createQueryBuilder('receive')
       .leftJoin('receive.seller', 'seller')
@@ -52,7 +52,7 @@ export class ReceiveService {
     return receives;
   }
 
-  async getReceiveById(receiveId: number) {
+  async getReceiveById(receiveId: number): Promise<Receive> {
     const receive = await this.receivesRepository
       .createQueryBuilder('receive')
       .leftJoin('receive.seller', 'seller')
@@ -94,7 +94,7 @@ export class ReceiveService {
     return receive;
   }
 
-  async getReceivesByShipmentId(shipmentId: number) {
+  async getReceivesByShipmentId(shipmentId: number): Promise<Receive[]> {
     const receives = await this.receivesRepository
       .createQueryBuilder('receive')
       .where('receive.shipmentId = :shipmentId', { shipmentId })
@@ -105,7 +105,7 @@ export class ReceiveService {
     return receives;
   }
 
-  async createReceive(createReceiveDTO: CreateReveiveDTO) {
+  async createReceive(createReceiveDTO: CreateReveiveDTO): Promise<Receive> {
     createReceiveDTO['technicalProcesses'] =
       await this.getTechnicalProcesses(createReceiveDTO);
 
@@ -137,7 +137,9 @@ export class ReceiveService {
     return createdReceive;
   }
 
-  private async getTechnicalProcesses(createReveiveDTO: CreateReveiveDTO) {
+  private async getTechnicalProcesses(
+    createReveiveDTO: CreateReveiveDTO,
+  ): Promise<{ id: number }[]> {
     const productIds = getProductIdsFromProductLines(
       createReveiveDTO.receiveLines,
     );
@@ -157,7 +159,10 @@ export class ReceiveService {
     return technicalProcesses.map((process) => ({ id: process.id }));
   }
 
-  async updateReceive(receiveId: number, updateReceiveDTO: UpdateReceiveDTO) {
+  async updateReceive(
+    receiveId: number,
+    updateReceiveDTO: UpdateReceiveDTO,
+  ): Promise<Receive> {
     const receive = await this.receivesRepository
       .createQueryBuilder('receive')
       .where('receive.id = :receiveId', { receiveId })
@@ -218,7 +223,7 @@ export class ReceiveService {
     }
   }
 
-  async removeReceive(receiveId: number) {
+  async removeReceive(receiveId: number): Promise<Receive> {
     try {
       const invoice = await this.receivesRepository.findOne({
         where: { id: receiveId, status: false },
@@ -230,7 +235,7 @@ export class ReceiveService {
     }
   }
 
-  async changeReceiveStatus(receiveId: number) {
+  async changeReceiveStatus(receiveId: number): Promise<Receive> {
     const receive = await this.receivesRepository.findOne({
       where: { id: receiveId },
       relations: ['receiveLines'],
@@ -246,7 +251,7 @@ export class ReceiveService {
     return await this.receivesRepository.save(receive);
   }
 
-  private async updateWarehouseAccounting(receive: Receive) {
+  private async updateWarehouseAccounting(receive: Receive): Promise<void> {
     if (receive.status) {
       for await (const line of receive.receiveLines) {
         await this.warehouseService.increaseReceiveGoodsCount({
@@ -274,7 +279,7 @@ export class ReceiveService {
     }
   }
 
-  private async updateTransitLines(receive: Receive) {
+  private async updateTransitLines(receive: Receive): Promise<void> {
     if (receive.status) {
       await this.transitService.receiveTransitLines({
         receiveId: receive.id,

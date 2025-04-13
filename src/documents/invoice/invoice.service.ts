@@ -15,6 +15,11 @@ import { PaymentService } from '../payment';
 import { ShipmentService } from '../shipment';
 import { WarehouseService } from '../../warehouse';
 
+import {
+  getProductIdsFromProductLines,
+  getServiceIdsFromServiceLines,
+} from '../../common/utils';
+
 import { Invoice, InvoiceLine } from './entities';
 import {
   CreateInvoiceByContractDTO,
@@ -23,11 +28,9 @@ import {
   GetTechnicalProcessesDataDTO,
   UpdateInvoiceDTO,
 } from './dto';
-import {
-  getProductIdsFromProductLines,
-  getServiceIdsFromServiceLines,
-} from '../../common/utils';
+
 import { CreateOrderDTO, CreateOrderLineDTO } from '../orders/dto';
+import { GetInvoiceResponseDTO } from './dto/response-dto';
 
 @Injectable()
 export class InvoiceService {
@@ -44,7 +47,7 @@ export class InvoiceService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getInvoices() {
+  async getInvoices(): Promise<Invoice[]> {
     const invoices = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .leftJoin('invoice.seller', 'seller')
@@ -71,7 +74,7 @@ export class InvoiceService {
     return invoices;
   }
 
-  async getInvoiceById(invoiceId: number) {
+  async getInvoiceById(invoiceId: number): Promise<GetInvoiceResponseDTO> {
     const invoice = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .leftJoin('invoice.seller', 'seller')
@@ -138,15 +141,15 @@ export class InvoiceService {
       await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
     const payments =
       await this.paymentsService.getPaymentsByInvoiceId(invoiceId);
-    const commission = invoice.commissionInvoices;
+    const commissions = invoice.commissionInvoices;
     delete invoice.commissionInvoices;
     const childInvoices = invoice.children;
     delete invoice.children;
 
-    return { invoice, shipments, payments, commission, childInvoices };
+    return { invoice, shipments, payments, commissions, childInvoices };
   }
 
-  async getInvoicesByOrderId(orderId: number) {
+  async getInvoicesByOrderId(orderId: number): Promise<Invoice[]> {
     const invoices = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .where('invoiceLine.orderId = :orderId', { orderId })
@@ -166,7 +169,7 @@ export class InvoiceService {
     return invoices;
   }
 
-  async createInvoice(createInvoiceDTO: CreateInvoiceDTO) {
+  async createInvoice(createInvoiceDTO: CreateInvoiceDTO): Promise<Invoice> {
     createInvoiceDTO['technicalProcesses'] =
       await this.getTechnicalProcesses(createInvoiceDTO);
     const newInvoice = new Invoice(createInvoiceDTO);
@@ -206,7 +209,7 @@ export class InvoiceService {
 
   private async getTechnicalProcesses(
     invoiceData: GetTechnicalProcessesDataDTO,
-  ) {
+  ): Promise<{ id: number }[]> {
     const productIds = getProductIdsFromProductLines(invoiceData.invoiceLines);
     const productProcesses =
       await this.goodsService.getTechnicalProcessesFromProductIds(productIds);
@@ -229,7 +232,7 @@ export class InvoiceService {
     companyId: number,
     warehouseId: number,
     currencyId: number,
-  ) {
+  ): Promise<Partial<InvoiceLine>[]> {
     for await (const line of invoiceLines) {
       if (!line.cost) {
         line.cost = await this.warehouseService.getWareCost({
@@ -246,7 +249,10 @@ export class InvoiceService {
 
   async createInvoiceByContract(
     createInvoiceByContractDTO: CreateInvoiceByContractDTO,
-  ) {
+  ): Promise<Invoice> {
+    createInvoiceByContractDTO.transportAmount =
+      createInvoiceByContractDTO.transportAmount || 0;
+
     const createOrderDto: CreateOrderDTO = {
       orderNumber: '',
       contractId: createInvoiceByContractDTO.contractId,
@@ -294,7 +300,10 @@ export class InvoiceService {
     return await this.createInvoice(createInvoiceDTO);
   }
 
-  async updateInvoice(invoiceId: number, updateInvoiceDTO: UpdateInvoiceDTO) {
+  async updateInvoice(
+    invoiceId: number,
+    updateInvoiceDTO: UpdateInvoiceDTO,
+  ): Promise<Invoice> {
     const invoice = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .where('invoice.id = :invoiceId', { invoiceId })
@@ -376,7 +385,7 @@ export class InvoiceService {
     }
   }
 
-  async removeInvoice(invoiceId: number) {
+  async removeInvoice(invoiceId: number): Promise<Invoice> {
     try {
       const invoice = await this.invoiceRepository.findOne({
         where: { id: invoiceId, status: false },
@@ -388,47 +397,27 @@ export class InvoiceService {
     }
   }
 
-  async changeInvoiceStatus(invoiceId: number) {
+  async changeInvoiceStatus(invoiceId: number): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id: invoiceId },
     });
 
     // TODO: make transaction
 
-    await this.updateAccountsAfterStatusChange(invoice);
-
     invoice.status = !invoice.status;
+
+    await this.companiesService.changeInvoiceStatusBalances({
+      sellerId: invoice.sellerId,
+      buyerId: invoice.buyerId,
+      currencyId: invoice.currencyId,
+      status: invoice.status,
+      amount: invoice.documentSum,
+    });
 
     return await this.invoiceRepository.save(invoice);
   }
 
-  private async updateAccountsAfterStatusChange(invoice: Invoice) {
-    if (!invoice.status) {
-      await this.companiesService.changeAccountWaitBallance(
-        invoice.sellerId,
-        invoice.currencyId,
-        invoice.documentSum,
-      );
-      await this.companiesService.changeAccountDebtBallance(
-        invoice.buyerId,
-        invoice.currencyId,
-        invoice.documentSum,
-      );
-    } else {
-      await this.companiesService.changeAccountWaitBallance(
-        invoice.sellerId,
-        invoice.currencyId,
-        -invoice.documentSum,
-      );
-      await this.companiesService.changeAccountDebtBallance(
-        invoice.buyerId,
-        invoice.currencyId,
-        -invoice.documentSum,
-      );
-    }
-  }
-
-  async getInvoiceDataForCommission(invoiceId: number) {
+  async getInvoiceDataForCommission(invoiceId: number): Promise<Invoice> {
     const invoice = await this.invoiceRepository
       .createQueryBuilder('invoice')
       .where('invoice.id = :invoiceId', { invoiceId })

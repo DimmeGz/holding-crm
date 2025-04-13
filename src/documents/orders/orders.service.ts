@@ -8,9 +8,6 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
-import { Order } from './entities';
-import { CreateOrderDTO, UpdateOrderDTO } from './dto';
-
 import { ContractsService } from '../contracts';
 import { GoodsService } from '../../goods';
 import { InvoiceService } from '../invoice';
@@ -20,6 +17,10 @@ import {
   getProductIdsFromOrderProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
+
+import { Order } from './entities';
+import { CreateOrderDTO, UpdateOrderDTO } from './dto';
+import { GetOrderResponseDTO } from './dto/respone-dto';
 
 @Injectable()
 export class OrdersService {
@@ -35,7 +36,7 @@ export class OrdersService {
     private readonly orderConfirmationsService: OrdersConfirmationService,
   ) {}
 
-  async getOrders() {
+  async getOrders(): Promise<Order[]> {
     const orders = await this.ordersRepository
       .createQueryBuilder('order')
       .leftJoin('order.seller', 'seller')
@@ -60,26 +61,27 @@ export class OrdersService {
       .orderBy('order.id', 'DESC')
       .getMany();
 
-    for (let order of orders) {
-      order = this.getOrderProducts(order);
-      order = this.getOrderConfirmationDate(order);
+    for (const order of orders) {
+      order['orderProducts'] = this.getOrderProductNames(order);
+      delete order.orderLines;
+
+      order['confirmDate'] = this.getOrderConfirmationDate(order);
+      delete order.orderConfirmations;
     }
 
     return orders;
   }
 
-  private getOrderProducts(order: Order) {
-    const products = new Set();
+  private getOrderProductNames(order: Order): string[] {
+    const products: Set<string> = new Set();
     for (const line of order.orderLines) {
       products.add(line.productMan.name);
     }
 
-    delete order.orderLines;
-    order['orderProducts'] = [...products].sort();
-    return order;
+    return [...products].sort();
   }
 
-  private getOrderConfirmationDate(order: Order) {
+  private getOrderConfirmationDate(order: Order): Date {
     if (order.orderConfirmations.length) {
       if (order.orderConfirmations.length > 1) {
         let id = 0;
@@ -90,17 +92,14 @@ export class OrdersService {
             confirmDate = confirmation.expectedDate;
           }
         }
-        order['confirmDate'] = confirmDate;
+        return confirmDate;
       } else {
-        order['confirmDate'] = order.orderConfirmations[0].expectedDate;
+        return order.orderConfirmations[0].expectedDate;
       }
-      delete order.orderConfirmations;
     }
-
-    return order;
   }
 
-  async getOrderById(orderId: number) {
+  async getOrderById(orderId: number): Promise<GetOrderResponseDTO> {
     const order = await this.ordersRepository
       .createQueryBuilder('order')
       .leftJoinAndMapOne(
@@ -121,7 +120,7 @@ export class OrdersService {
     return { order, invoices, orderConfirmations };
   }
 
-  async getOrdersByContractId(contractId: number) {
+  async getOrdersByContractId(contractId: number): Promise<Order[]> {
     const orders = await this.ordersRepository
       .createQueryBuilder('order')
       .where('order.contractId = :contractId', { contractId })
@@ -138,7 +137,7 @@ export class OrdersService {
     return orders;
   }
 
-  async createOrder(createOrderDTO: CreateOrderDTO) {
+  async createOrder(createOrderDTO: CreateOrderDTO): Promise<Order> {
     createOrderDTO['technicalProcesses'] =
       await this.getTechnicalProcesses(createOrderDTO);
 
@@ -156,7 +155,10 @@ export class OrdersService {
     newOrder.vat = newOrder.vat || 0;
     newOrder.orderNumber =
       newOrder.orderNumber ||
-      (await this.countOrderNumber(newOrder.contractId, newOrder.sellerId));
+      (await this.createNextOrderNumber(
+        newOrder.contractId,
+        newOrder.sellerId,
+      ));
 
     newOrder.documentSum =
       createOrderDTO.orderLines.reduce(
@@ -171,7 +173,9 @@ export class OrdersService {
     return await this.ordersRepository.save(newOrder);
   }
 
-  private async getTechnicalProcesses(createOrderDTO: CreateOrderDTO) {
+  private async getTechnicalProcesses(
+    createOrderDTO: CreateOrderDTO,
+  ): Promise<{ id: number }[]> {
     const productIds = getProductIdsFromOrderProductLines(
       createOrderDTO.orderLines,
     );
@@ -191,7 +195,10 @@ export class OrdersService {
     return technicalProcesses.map((process) => ({ id: process.id }));
   }
 
-  async updateOrder(orderId: number, updateOrderDTO: UpdateOrderDTO) {
+  async updateOrder(
+    orderId: number,
+    updateOrderDTO: UpdateOrderDTO,
+  ): Promise<Order> {
     const order = await this.ordersRepository
       .createQueryBuilder('order')
       .where('order.id = :orderId', { orderId })
@@ -251,7 +258,7 @@ export class OrdersService {
     }
   }
 
-  async removeOrder(orderId: number) {
+  async removeOrder(orderId: number): Promise<Order> {
     try {
       const order = await this.ordersRepository.findOne({
         where: { id: orderId, status: false },
@@ -263,7 +270,7 @@ export class OrdersService {
     }
   }
 
-  async changeOrderStatus(orderId: number) {
+  async changeOrderStatus(orderId: number): Promise<Order> {
     const order = await this.ordersRepository.findOne({
       where: { id: orderId },
     });
@@ -273,7 +280,10 @@ export class OrdersService {
     return await this.ordersRepository.save(order);
   }
 
-  private async countOrderNumber(contractId: number, sellerId: number) {
+  private async createNextOrderNumber(
+    contractId: number,
+    sellerId: number,
+  ): Promise<string> {
     const orderPrefix =
       (await this.contractsService.getOrderPrefix(contractId)) || '';
 

@@ -10,7 +10,9 @@ export class OrdersConfirmationService {
     private readonly orderConfirmationsRepository: Repository<OrderConfirmation>,
   ) {}
 
-  async getConfirmationsByOrderId(orderId: number) {
+  async getConfirmationsByOrderId(
+    orderId: number,
+  ): Promise<OrderConfirmation[]> {
     return await this.orderConfirmationsRepository
       .createQueryBuilder('orderConfirmation')
       .where('orderConfirmation.orderId = :orderId', { orderId })

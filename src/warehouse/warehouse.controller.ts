@@ -7,7 +7,7 @@ export class WarehouseController {
   constructor(private readonly warehouseService: WarehouseService) {}
 
   @Get()
-  async getWarehouseAccounting() {
-    return this.warehouseService.getWarehouseAccounting();
+  async getWarehouseAccountings() {
+    return this.warehouseService.getWarehouseAccountings();
   }
 }

@@ -11,13 +11,15 @@ import { ReceiveService } from '../receive';
 import { TransitService } from '../transit';
 import { WarehouseService } from '../../warehouse';
 
-import { Shipment, ShipmentLine } from './entities';
-
 import {
   getProductIdsFromProductLines,
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
+
+import { Shipment, ShipmentLine } from './entities';
+
 import { CreateShipmentDTO, UpdateShipmentDTO } from './dto';
+import { GetShipmentResponseDTO } from './dto/response-dto';
 
 @Injectable()
 export class ShipmentService {
@@ -33,7 +35,7 @@ export class ShipmentService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getShipments() {
+  async getShipments(): Promise<Shipment[]> {
     const shipments = await this.shipmentsRepository
       .createQueryBuilder('shipment')
       .leftJoin('shipment.seller', 'seller')
@@ -58,7 +60,7 @@ export class ShipmentService {
     return shipments;
   }
 
-  async getShipmentById(shipmentId: number) {
+  async getShipmentById(shipmentId: number): Promise<GetShipmentResponseDTO> {
     const shipment = await this.shipmentsRepository
       .createQueryBuilder('shipment')
       .leftJoin('shipment.seller', 'seller')
@@ -154,7 +156,9 @@ export class ShipmentService {
     return shipments;
   }
 
-  async createShipment(createShipmentDTO: CreateShipmentDTO) {
+  async createShipment(
+    createShipmentDTO: CreateShipmentDTO,
+  ): Promise<Shipment> {
     createShipmentDTO['technicalProcesses'] =
       await this.getTechnicalProcesses(createShipmentDTO);
 
@@ -177,7 +181,9 @@ export class ShipmentService {
     return await this.shipmentsRepository.save(newShipment);
   }
 
-  private async getTechnicalProcesses(createShipmentDTO: CreateShipmentDTO) {
+  private async getTechnicalProcesses(
+    createShipmentDTO: CreateShipmentDTO,
+  ): Promise<{ id: number }[]> {
     const productIds = getProductIdsFromProductLines(
       createShipmentDTO.shipmentLines,
     );
@@ -200,7 +206,7 @@ export class ShipmentService {
   async updateShipment(
     shipmentId: number,
     updateShipmentDTO: UpdateShipmentDTO,
-  ) {
+  ): Promise<Shipment> {
     const shipment = await this.shipmentsRepository
       .createQueryBuilder('shipment')
       .where('shipment.id = :shipmentId', { shipmentId })
@@ -264,7 +270,7 @@ export class ShipmentService {
     }
   }
 
-  async removeShipment(shipmentId: number) {
+  async removeShipment(shipmentId: number): Promise<Shipment> {
     try {
       const invoice = await this.shipmentsRepository.findOne({
         where: { id: shipmentId, status: false },
@@ -276,7 +282,7 @@ export class ShipmentService {
     }
   }
 
-  async changeShipmentStatus(shipmentId: number) {
+  async changeShipmentStatus(shipmentId: number): Promise<Shipment> {
     const shipment = await this.shipmentsRepository.findOne({
       where: { id: shipmentId },
       relations: ['shipmentLines'],
@@ -295,7 +301,7 @@ export class ShipmentService {
     return createdShipment;
   }
 
-  private async updateWarehouseAccounting(shipment: Shipment) {
+  private async updateWarehouseAccounting(shipment: Shipment): Promise<void> {
     if (!shipment.status) {
       for await (const line of shipment.shipmentLines) {
         await this.warehouseService.decreaseShipGoodsCount({
@@ -319,7 +325,7 @@ export class ShipmentService {
     }
   }
 
-  private async updateTransitLines(shipment: Shipment) {
+  private async updateTransitLines(shipment: Shipment): Promise<void> {
     if (shipment.status) {
       await this.transitService.createTransitLine({
         shipmentId: shipment.id,
