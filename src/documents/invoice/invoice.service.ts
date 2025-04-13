@@ -247,6 +247,9 @@ export class InvoiceService {
   async createInvoiceByContract(
     createInvoiceByContractDTO: CreateInvoiceByContractDTO,
   ) {
+    createInvoiceByContractDTO.transportAmount =
+      createInvoiceByContractDTO.transportAmount || 0;
+
     const createOrderDto: CreateOrderDTO = {
       orderNumber: '',
       contractId: createInvoiceByContractDTO.contractId,
@@ -395,37 +398,17 @@ export class InvoiceService {
 
     // TODO: make transaction
 
-    await this.updateAccountsAfterStatusChange(invoice);
-
     invoice.status = !invoice.status;
 
-    return await this.invoiceRepository.save(invoice);
-  }
+    await this.companiesService.changeInvoiceStatusBalances({
+      sellerId: invoice.sellerId,
+      buyerId: invoice.buyerId,
+      currencyId: invoice.currencyId,
+      status: invoice.status,
+      value: invoice.documentSum,
+    });
 
-  private async updateAccountsAfterStatusChange(invoice: Invoice) {
-    if (!invoice.status) {
-      await this.companiesService.changeAccountWaitBallance({
-        companyId: invoice.sellerId,
-        currencyId: invoice.currencyId,
-        value: invoice.documentSum,
-      });
-      await this.companiesService.changeAccountDebtBallance({
-        companyId: invoice.buyerId,
-        currencyId: invoice.currencyId,
-        value: invoice.documentSum,
-      });
-    } else {
-      await this.companiesService.changeAccountWaitBallance({
-        companyId: invoice.sellerId,
-        currencyId: invoice.currencyId,
-        value: -invoice.documentSum,
-      });
-      await this.companiesService.changeAccountDebtBallance({
-        companyId: invoice.buyerId,
-        currencyId: invoice.currencyId,
-        value: -invoice.documentSum,
-      });
-    }
+    return await this.invoiceRepository.save(invoice);
   }
 
   async getInvoiceDataForCommission(invoiceId: number) {

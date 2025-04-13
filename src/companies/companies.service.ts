@@ -4,7 +4,7 @@ import { Account, Company } from './entities';
 import { Repository } from 'typeorm';
 
 import { CompanyType } from './enums';
-import { ChangeAccountBalanceDTO, MakePaymentDTO } from './dto';
+import { ChangeInvoiceStatusBalanceDTO, MakePaymentDTO } from './dto';
 
 @Injectable()
 export class CompaniesService {
@@ -28,38 +28,22 @@ export class CompaniesService {
       .getMany();
   }
 
-  async changeAccountWaitBallance(
-    changeAccountBalanceDTO: ChangeAccountBalanceDTO,
-  ): Promise<void> {
-    const account = await this.getAccount(
-      changeAccountBalanceDTO.companyId,
-      changeAccountBalanceDTO.currencyId,
+  async changeInvoiceStatusBalances(
+    changeInvoiceStatusBalanceDTO: ChangeInvoiceStatusBalanceDTO,
+  ) {
+    const [sellerAccount, buyerAccount] = await this.getSellerBuyerAccounts(
+      changeInvoiceStatusBalanceDTO,
     );
 
-    account.wait = account.wait + changeAccountBalanceDTO.value;
+    if (changeInvoiceStatusBalanceDTO.status) {
+      sellerAccount.debt += changeInvoiceStatusBalanceDTO.value;
+      buyerAccount.wait -= changeInvoiceStatusBalanceDTO.value;
+    } else {
+      sellerAccount.debt -= changeInvoiceStatusBalanceDTO.value;
+      buyerAccount.wait += changeInvoiceStatusBalanceDTO.value;
+    }
 
-    await this.accountsRepository.save(account);
-    return;
-  }
-
-  async changeAccountDebtBallance(
-    changeAccountBalanceDTO: ChangeAccountBalanceDTO,
-  ): Promise<void> {
-    const account = await this.getAccount(
-      changeAccountBalanceDTO.companyId,
-      changeAccountBalanceDTO.currencyId,
-    );
-    account.debt = account.debt + changeAccountBalanceDTO.value;
-
-    await this.accountsRepository.save(account);
-    return;
-  }
-
-  private async getAccount(companyId: number, currencyId: number) {
-    return await this.accountsRepository.findOneBy({
-      companyId,
-      currencyId,
-    });
+    await this.accountsRepository.save([sellerAccount, buyerAccount]);
   }
 
   async makePayment(makePaymentDTO: MakePaymentDTO) {
@@ -84,7 +68,7 @@ export class CompaniesService {
   }
 
   private async getSellerBuyerAccounts(
-    makePaymentDTO: MakePaymentDTO,
+    makePaymentDTO: Partial<MakePaymentDTO>,
   ): Promise<Account[]> {
     const sellerAccount = await this.accountsRepository
       .createQueryBuilder('account')
