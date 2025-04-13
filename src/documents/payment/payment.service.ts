@@ -177,6 +177,8 @@ export class PaymentService {
       relations: ['paymentLines'],
     });
 
+    // TODO: make transaction
+
     payment.status = !payment.status;
 
     await this.companiesService.makePayment({
