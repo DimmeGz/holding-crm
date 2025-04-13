@@ -404,27 +404,27 @@ export class InvoiceService {
 
   private async updateAccountsAfterStatusChange(invoice: Invoice) {
     if (!invoice.status) {
-      await this.companiesService.changeAccountWaitBallance(
-        invoice.sellerId,
-        invoice.currencyId,
-        invoice.documentSum,
-      );
-      await this.companiesService.changeAccountDebtBallance(
-        invoice.buyerId,
-        invoice.currencyId,
-        invoice.documentSum,
-      );
+      await this.companiesService.changeAccountWaitBallance({
+        companyId: invoice.sellerId,
+        currencyId: invoice.currencyId,
+        value: invoice.documentSum,
+      });
+      await this.companiesService.changeAccountDebtBallance({
+        companyId: invoice.buyerId,
+        currencyId: invoice.currencyId,
+        value: invoice.documentSum,
+      });
     } else {
-      await this.companiesService.changeAccountWaitBallance(
-        invoice.sellerId,
-        invoice.currencyId,
-        -invoice.documentSum,
-      );
-      await this.companiesService.changeAccountDebtBallance(
-        invoice.buyerId,
-        invoice.currencyId,
-        -invoice.documentSum,
-      );
+      await this.companiesService.changeAccountWaitBallance({
+        companyId: invoice.sellerId,
+        currencyId: invoice.currencyId,
+        value: -invoice.documentSum,
+      });
+      await this.companiesService.changeAccountDebtBallance({
+        companyId: invoice.buyerId,
+        currencyId: invoice.currencyId,
+        value: -invoice.documentSum,
+      });
     }
   }
 
