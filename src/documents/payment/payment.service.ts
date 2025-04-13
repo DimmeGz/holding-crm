@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,6 +10,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
+import { InvoiceService } from '../invoice';
 import { LibsService } from '../../libs';
 
 import { Payment } from './entities';
@@ -19,6 +22,8 @@ export class PaymentService {
     @InjectRepository(Payment)
     private readonly paymentsRepository: Repository<Payment>,
     @InjectDataSource() private dataSource: DataSource,
+    @Inject(forwardRef(() => InvoiceService))
+    private readonly invoiceService: InvoiceService,
     private readonly companiesService: CompaniesService,
     private readonly libsService: LibsService,
   ) {}
@@ -184,12 +189,16 @@ export class PaymentService {
 
     payment.status = !payment.status;
 
-    await this.companiesService.makePayment({
+    await this.companiesService.changeAccountsBalances({
       sellerId: payment.sellerId,
       buyerId: payment.buyerId,
       currencyId: payment.currencyId,
       status: payment.status,
       amount: payment.documentSum,
+    });
+    await this.invoiceService.changePaymentBalance({
+      status: payment.status,
+      paymentLines: payment.paymentLines,
     });
 
     return await this.paymentsRepository.save(payment);

@@ -18,7 +18,7 @@ import { InvoiceController } from './invoice.controller';
     TypeOrmModule.forFeature([Invoice]),
     CompaniesModule,
     GoodsModule,
-    PaymentModule,
+    forwardRef(() => PaymentModule),
     ShipmentModule,
     WarehouseModule,
     forwardRef(() => OrdersModule),
