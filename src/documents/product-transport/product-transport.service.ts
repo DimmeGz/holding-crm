@@ -136,7 +136,12 @@ export class ProductTransportService {
 
     const updated = Object.assign(transport, updateTransportDTO);
 
-    // TODO: update technical processes
+    const productIds = updated.productTransportLines.map(
+      (line) => line.productId,
+    );
+
+    updated.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByProductIds([...productIds]);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
