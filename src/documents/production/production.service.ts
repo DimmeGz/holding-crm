@@ -135,11 +135,17 @@ export class ProductionService {
 
     const updated = Object.assign(production, updateProductionDTO);
 
+    const productIds = new Set([
+      ...updated.productionInLines.map((line) => line.productId),
+      ...updated.productionOutLines.map((line) => line.productId),
+    ]);
+
+    updated.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByProductIds([...productIds]);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    // TODO: update technical processes
 
     try {
       if (inLinesToDelete.length) {
