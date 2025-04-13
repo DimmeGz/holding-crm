@@ -10,6 +10,7 @@ import { LibsService } from '../../libs';
 
 import { Production } from './entities';
 import { CreateProductionDTO, UpdateProductionDTO } from './dto';
+import { WarehouseService } from '../../warehouse';
 
 @Injectable()
 export class ProductionService {
@@ -18,6 +19,7 @@ export class ProductionService {
     private readonly productionsRepository: Repository<Production>,
     @InjectDataSource() private dataSource: DataSource,
     private readonly libsService: LibsService,
+    private readonly warehouseService: WarehouseService,
   ) {}
 
   async getProductions(): Promise<Production[]> {
@@ -183,13 +185,24 @@ export class ProductionService {
   }
 
   async changeProductionStatus(productionId: number): Promise<Production> {
-    const production = await this.productionsRepository.findOneBy({
-      id: productionId,
+    const production = await this.productionsRepository.findOne({
+      where: {
+        id: productionId,
+      },
+      relations: ['productionOutLines', 'productionInLines'],
     });
 
     production.status = !production.status;
 
-    // TODO: change qty in warehouseaccounting
+    // TODO: make transaction
+
+    await this.warehouseService.makeProduction({
+      companyId: production.companyId,
+      warehouseId: production.warehouseId,
+      status: production.status,
+      outLines: production.productionOutLines,
+      inLines: production.productionInLines,
+    });
 
     return await this.productionsRepository.save(production);
   }
