@@ -294,11 +294,11 @@ export class ShipmentService {
 
     shipment.status = !shipment.status;
 
-    const createdShipment = await this.shipmentsRepository.save(shipment);
+    const updatedShipment = await this.shipmentsRepository.save(shipment);
 
-    await this.updateTransitLines(createdShipment);
+    await this.updateTransitLines(updatedShipment);
 
-    return createdShipment;
+    return updatedShipment;
   }
 
   private async updateWarehouseAccounting(shipment: Shipment): Promise<void> {
