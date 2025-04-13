@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { WarehouseAccounting } from './entities';
-import { ChangeShipGoodsCountDTO, GetWareCostDTO } from './dto';
-import { ChangeReceiveGoodsCountDTO } from './dto/change-receive-goods-count.dto';
+import {
+  ChangeReceiveGoodsCountDTO,
+  ChangeShipGoodsCountDTO,
+  GetWareCostDTO,
+  TransportProductsDTO,
+} from './dto';
 
 @Injectable()
 export class WarehouseService {
@@ -22,6 +26,7 @@ export class WarehouseService {
       .leftJoin('warehouseAccounting.warehouse', 'warehouse')
       .leftJoin('warehouseAccounting.company', 'company')
       .leftJoin('warehouseAccounting.currency', 'currency')
+      .where('warehouseAccounting.qty != 0')
       .select([
         'warehouseAccounting.id',
         'warehouseAccounting.qty',
@@ -198,5 +203,93 @@ export class WarehouseService {
         await this.warehouseAccountingRepository.save(warehouseAccounting);
       }
     } catch (e) {}
+  }
+
+  async transportProducts(transportDTO: TransportProductsDTO) {
+    // TODO: add serviceLines to cost
+
+    const linesToSave: WarehouseAccounting[] = [];
+    for await (const line of transportDTO.transportLines) {
+      const baseQueryBuilder = this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: transportDTO.companyId,
+        })
+        .andWhere('ware.batchId = :batchId', { batchId: line.batchId })
+        .andWhere('ware.packageId = :packageId', { packageId: line.packageId });
+
+      const fromLine = await baseQueryBuilder
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: transportDTO.warehouseSenderId,
+        })
+        .getOne();
+
+      if (!fromLine) {
+        throw new NotFoundException('WarehouseAccounting not found');
+      }
+
+      let toLine = await baseQueryBuilder
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: transportDTO.warehouseReceiveId,
+        })
+        .getOne();
+
+      fromLine.qty -= line.qty;
+      linesToSave.push(fromLine);
+
+      if (!toLine) {
+        toLine = new WarehouseAccounting({
+          companyId: transportDTO.companyId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+          warehouseId: transportDTO.warehouseReceiveId,
+          qty: line.qty,
+          cost: fromLine.cost,
+          currencyId: fromLine.currencyId,
+        });
+      } else {
+        toLine.qty += line.qty;
+      }
+      linesToSave.push(toLine);
+    }
+
+    await this.warehouseAccountingRepository.save(linesToSave);
+  }
+
+  async unTransportProducts(transportDTO: TransportProductsDTO) {
+    // TODO: remove serviceLines to cost
+
+    const linesToSave: WarehouseAccounting[] = [];
+    for await (const line of transportDTO.transportLines) {
+      const baseQueryBuilder = this.warehouseAccountingRepository
+        .createQueryBuilder('ware')
+        .where('ware.companyId = :companyId', {
+          companyId: transportDTO.companyId,
+        })
+        .andWhere('ware.batchId = :batchId', { batchId: line.batchId })
+        .andWhere('ware.packageId = :packageId', { packageId: line.packageId });
+
+      const fromLine = await baseQueryBuilder
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: transportDTO.warehouseSenderId,
+        })
+        .getOne();
+
+      const toLine = await baseQueryBuilder
+        .andWhere('ware.warehouseId = :warehouseId', {
+          warehouseId: transportDTO.warehouseReceiveId,
+        })
+        .getOne();
+
+      if (!fromLine || !toLine) {
+        throw new NotFoundException('WarehouseAccounting not found');
+      }
+
+      fromLine.qty += line.qty;
+      toLine.qty -= line.qty;
+      linesToSave.push(fromLine, toLine);
+    }
+
+    await this.warehouseAccountingRepository.save(linesToSave);
   }
 }

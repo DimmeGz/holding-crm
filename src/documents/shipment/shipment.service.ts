@@ -8,6 +8,7 @@ import { DataSource, Repository } from 'typeorm';
 
 import { GoodsService } from '../../goods';
 import { ReceiveService } from '../receive';
+import { TransitService } from '../transit';
 import { WarehouseService } from '../../warehouse';
 
 import { Shipment, ShipmentLine } from './entities';
@@ -28,6 +29,7 @@ export class ShipmentService {
     @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
     private readonly receiveService: ReceiveService,
+    private readonly transitService: TransitService,
     private readonly warehouseService: WarehouseService,
   ) {}
 
@@ -63,10 +65,6 @@ export class ShipmentService {
       .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('shipment.invoice', 'invoice')
       .leftJoin('shipment.currency', 'currency')
-      .leftJoin('shipment.shipmentLines', 'shipmentLine')
-      .leftJoin('shipmentLine.product', 'product')
-      .leftJoin('shipmentLine.batch', 'batch')
-      .leftJoin('shipmentLine.package', 'package')
       .select([
         'shipment.id',
         'shipment.status',
@@ -81,13 +79,31 @@ export class ShipmentService {
         'invoice.id',
         'invoice.invoiceNumber',
         'currency.name',
+      ])
+      .leftJoin('shipment.shipmentLines', 'shipmentLine')
+      .leftJoin('shipmentLine.product', 'product')
+      .leftJoin('shipmentLine.batch', 'batch')
+      .leftJoin('shipmentLine.package', 'package')
+      .addSelect([
         'shipmentLine',
+        'product.id',
         'product.name',
         'batch.id',
         'batch.name',
+        'package.id',
         'package.name',
         'package.capacity',
       ])
+      .leftJoin('shipment.shipmentServiceLines', 'shipmentServiceLine')
+      .leftJoin('shipmentServiceLine.service', 'service')
+      .addSelect([
+        'shipmentServiceLine.id',
+        'shipmentServiceLine.qty',
+        'shipmentServiceLine.price',
+        'service.id',
+        'service.name',
+      ])
+
       .where('shipment.id = :shipmentId', { shipmentId })
       .getOne();
 
@@ -272,7 +288,11 @@ export class ShipmentService {
 
     shipment.status = !shipment.status;
 
-    return await this.shipmentsRepository.save(shipment);
+    const createdShipment = await this.shipmentsRepository.save(shipment);
+
+    await this.updateTransitLines(createdShipment);
+
+    return createdShipment;
   }
 
   private async updateWarehouseAccounting(shipment: Shipment) {
@@ -296,6 +316,17 @@ export class ShipmentService {
           qty: line.qty,
         });
       }
+    }
+  }
+
+  private async updateTransitLines(shipment: Shipment) {
+    if (shipment.status) {
+      await this.transitService.createTransitLine({
+        shipmentId: shipment.id,
+        lines: shipment.shipmentLines,
+      });
+    } else {
+      await this.transitService.removeTransitLines(shipment.id);
     }
   }
 }
