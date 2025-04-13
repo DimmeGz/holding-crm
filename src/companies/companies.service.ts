@@ -30,7 +30,7 @@ export class CompaniesService {
 
   async changeInvoiceStatusBalances(
     changeInvoiceStatusBalanceDTO: ChangeInvoiceStatusBalanceDTO,
-  ) {
+  ): Promise<void> {
     const [sellerAccount, buyerAccount] = await this.getSellerBuyerAccounts(
       changeInvoiceStatusBalanceDTO,
     );
@@ -46,7 +46,7 @@ export class CompaniesService {
     await this.accountsRepository.save([sellerAccount, buyerAccount]);
   }
 
-  async makePayment(makePaymentDTO: MakePaymentDTO) {
+  async makePayment(makePaymentDTO: MakePaymentDTO): Promise<void> {
     const [sellerAccount, buyerAccount] =
       await this.getSellerBuyerAccounts(makePaymentDTO);
 

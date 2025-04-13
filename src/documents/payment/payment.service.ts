@@ -23,7 +23,7 @@ export class PaymentService {
     private readonly libsService: LibsService,
   ) {}
 
-  async getPayments() {
+  async getPayments(): Promise<Payment[]> {
     const payments = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoin('payment.seller', 'seller')
@@ -46,7 +46,7 @@ export class PaymentService {
     return payments;
   }
 
-  async getPaymentById(paymentId: number) {
+  async getPaymentById(paymentId: number): Promise<Payment> {
     const payment = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoin('payment.seller', 'seller')
@@ -67,12 +67,12 @@ export class PaymentService {
         'invoice.invoiceNumber',
       ])
       .orderBy('payment.id', 'DESC')
-      .getMany();
+      .getOne();
 
     return payment;
   }
 
-  async getPaymentsByInvoiceId(invoiceId: number) {
+  async getPaymentsByInvoiceId(invoiceId: number): Promise<Payment[]> {
     const payments = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoin('payment.paymentLines', 'paymentLine')
@@ -84,7 +84,7 @@ export class PaymentService {
     return payments;
   }
 
-  async createPayment(createPaymentDTO: CreatePaymentDTO) {
+  async createPayment(createPaymentDTO: CreatePaymentDTO): Promise<Payment> {
     const newPayment = new Payment(createPaymentDTO);
     newPayment.createdAt = new Date();
     newPayment.comment = newPayment.comment || '';
@@ -108,7 +108,10 @@ export class PaymentService {
     return await this.paymentsRepository.save(newPayment);
   }
 
-  async updatePayment(paymentId: number, updatePaymentDTO: UpdatePaymentDTO) {
+  async updatePayment(
+    paymentId: number,
+    updatePaymentDTO: UpdatePaymentDTO,
+  ): Promise<Payment> {
     const payment = await this.paymentsRepository
       .createQueryBuilder('payment')
       .leftJoinAndSelect('payment.paymentLines', 'paymentLine')
@@ -159,7 +162,7 @@ export class PaymentService {
     }
   }
 
-  async removePayment(paymentId: number) {
+  async removePayment(paymentId: number): Promise<Payment> {
     try {
       const invoice = await this.paymentsRepository.findOne({
         where: { id: paymentId, status: false },

@@ -10,7 +10,9 @@ export class LibsService {
     private readonly technicalProcessesRepository: Repository<TechnicalProcess>,
   ) {}
 
-  async getTechnicalProcessesByInvoiceIds(invoiceIds: number[]) {
+  async getTechnicalProcessesByInvoiceIds(
+    invoiceIds: number[],
+  ): Promise<TechnicalProcess[]> {
     return await this.technicalProcessesRepository
       .createQueryBuilder('technicalProcess')
       .leftJoin('technicalProcess.invoices', 'invoice')
@@ -21,7 +23,7 @@ export class LibsService {
 
   async getTechnicalProcessesByCommissionInvoiceId(
     commissionInvoiceId: number,
-  ) {
+  ): Promise<TechnicalProcess[]> {
     return await this.technicalProcessesRepository
       .createQueryBuilder('technicalProcess')
       .leftJoin('technicalProcess.commissionInvoices', 'commissionInvoice')
@@ -32,7 +34,9 @@ export class LibsService {
       .getMany();
   }
 
-  async getTechnicalProcessesByProductIds(productIds: number[]) {
+  async getTechnicalProcessesByProductIds(
+    productIds: number[],
+  ): Promise<TechnicalProcess[]> {
     return await this.technicalProcessesRepository
       .createQueryBuilder('technicalProcess')
       .leftJoin('technicalProcess.products', 'product')
@@ -43,7 +47,9 @@ export class LibsService {
       .getMany();
   }
 
-  async getTechnicalProcessesByBatchId(batchId: number) {
+  async getTechnicalProcessesByBatchId(
+    batchId: number,
+  ): Promise<TechnicalProcess[]> {
     return await this.technicalProcessesRepository
       .createQueryBuilder('technicalProcess')
       .leftJoin('technicalProcess.products', 'product')

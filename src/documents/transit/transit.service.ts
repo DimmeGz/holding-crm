@@ -19,7 +19,7 @@ export class TransitService {
     private readonly libsService: LibsService,
   ) {}
 
-  async getTransitLines() {
+  async getTransitLines(): Promise<TransitLine[]> {
     const transitLines = await this.transitLinesRepository
       .createQueryBuilder('transitLine')
       .leftJoin('transitLine.shipment', 'shipment')
@@ -53,7 +53,9 @@ export class TransitService {
     return transitLines;
   }
 
-  async createTransitLine(createTransitLineDTO: CreateTransitLinesDTO) {
+  async createTransitLine(
+    createTransitLineDTO: CreateTransitLinesDTO,
+  ): Promise<void> {
     const newTransitLines: TransitLine[] = [];
 
     for (const line of createTransitLineDTO.lines) {
@@ -71,7 +73,7 @@ export class TransitService {
     await this.transitLinesRepository.save(newTransitLines);
   }
 
-  async removeTransitLines(shipmentId: number) {
+  async removeTransitLines(shipmentId: number): Promise<void> {
     const transitLines = await this.transitLinesRepository.findBy({
       shipmentId,
     });
@@ -79,7 +81,9 @@ export class TransitService {
     await this.transitLinesRepository.remove(transitLines);
   }
 
-  async addReceiveToTransitLines(addReceiveDTO: AddReceiveToTransitLineDTO) {
+  async addReceiveToTransitLines(
+    addReceiveDTO: AddReceiveToTransitLineDTO,
+  ): Promise<void> {
     const linesToUpdate: TransitLine[] = [];
 
     for (const line of addReceiveDTO.lines) {
@@ -95,7 +99,7 @@ export class TransitService {
     await this.transitLinesRepository.save(linesToUpdate);
   }
 
-  async receiveTransitLines(receiveDTO: ReceiveTransitLinesDTO) {
+  async receiveTransitLines(receiveDTO: ReceiveTransitLinesDTO): Promise<void> {
     const linesToUpdate: TransitLine[] = [];
 
     for (const line of receiveDTO.lines) {
@@ -112,7 +116,9 @@ export class TransitService {
     await this.transitLinesRepository.save(linesToUpdate);
   }
 
-  async cancelReceiveTransitLines(receiveDTO: ReceiveTransitLinesDTO) {
+  async cancelReceiveTransitLines(
+    receiveDTO: ReceiveTransitLinesDTO,
+  ): Promise<void> {
     const linesToUpdate: TransitLine[] = [];
 
     for (const line of receiveDTO.lines) {
