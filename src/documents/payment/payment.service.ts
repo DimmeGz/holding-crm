@@ -189,7 +189,7 @@ export class PaymentService {
 
     payment.status = !payment.status;
 
-    await this.companiesService.makePayment({
+    await this.companiesService.changeAccountsBalances({
       sellerId: payment.sellerId,
       buyerId: payment.buyerId,
       currencyId: payment.currencyId,

@@ -129,7 +129,7 @@ export class CommissionPaymentService {
 
     commissionPayment.status = !commissionPayment.status;
 
-    await this.companiesService.makePayment({
+    await this.companiesService.changeAccountsBalances({
       sellerId: commissionPayment.sellerId,
       buyerId: commissionPayment.buyerId,
       currencyId: commissionPayment.currencyId,
