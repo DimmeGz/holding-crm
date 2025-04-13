@@ -404,8 +404,6 @@ export class InvoiceService {
       where: { id: invoiceId },
     });
 
-    // TODO: make transaction
-
     invoice.status = !invoice.status;
 
     await this.companiesService.changeInvoiceStatusBalances({

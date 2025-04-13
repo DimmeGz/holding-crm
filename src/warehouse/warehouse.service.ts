@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -301,56 +305,60 @@ export class WarehouseService {
   }
 
   async makeProduction(makeProductionDTO: MakeProductionDTO): Promise<void> {
-    const outLines: WarehouseAccounting[] = [];
-    for (const line of makeProductionDTO.outLines) {
-      const outLine = await this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
-        .andWhere('ware.packageId = :warePackageId', {
-          warePackageId: line.packageId,
-        })
-        .andWhere('ware.companyId = :companyId', {
-          companyId: makeProductionDTO.companyId,
-        })
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: makeProductionDTO.warehouseId,
-        })
-        .getOne();
+    try {
+      const outLines: WarehouseAccounting[] = [];
+      for (const line of makeProductionDTO.outLines) {
+        const outLine = await this.warehouseAccountingRepository
+          .createQueryBuilder('ware')
+          .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
+          .andWhere('ware.packageId = :warePackageId', {
+            warePackageId: line.packageId,
+          })
+          .andWhere('ware.companyId = :companyId', {
+            companyId: makeProductionDTO.companyId,
+          })
+          .andWhere('ware.warehouseId = :warehouseId', {
+            warehouseId: makeProductionDTO.warehouseId,
+          })
+          .getOne();
 
-      if (makeProductionDTO.status) {
-        outLine.qty -= line.qty;
-      } else {
-        outLine.qty += line.qty;
+        if (makeProductionDTO.status) {
+          outLine.qty -= line.qty;
+        } else {
+          outLine.qty += line.qty;
+        }
+
+        outLines.push(outLine);
       }
 
-      outLines.push(outLine);
-    }
+      const inLines: WarehouseAccounting[] = [];
+      for (const line of makeProductionDTO.inLines) {
+        const inline = await this.warehouseAccountingRepository
+          .createQueryBuilder('ware')
+          .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
+          .andWhere('ware.packageId = :warePackageId', {
+            warePackageId: line.packageId,
+          })
+          .andWhere('ware.companyId = :companyId', {
+            companyId: makeProductionDTO.companyId,
+          })
+          .andWhere('ware.warehouseId = :warehouseId', {
+            warehouseId: makeProductionDTO.warehouseId,
+          })
+          .getOne();
 
-    const inLines: WarehouseAccounting[] = [];
-    for (const line of makeProductionDTO.inLines) {
-      const inline = await this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
-        .andWhere('ware.packageId = :warePackageId', {
-          warePackageId: line.packageId,
-        })
-        .andWhere('ware.companyId = :companyId', {
-          companyId: makeProductionDTO.companyId,
-        })
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: makeProductionDTO.warehouseId,
-        })
-        .getOne();
+        if (makeProductionDTO.status) {
+          inline.qty += line.qty;
+        } else {
+          inline.qty -= line.qty;
+        }
 
-      if (makeProductionDTO.status) {
-        inline.qty += line.qty;
-      } else {
-        inline.qty -= line.qty;
+        inLines.push(inline);
       }
 
-      inLines.push(inline);
+      await this.warehouseAccountingRepository.save([...outLines, ...inLines]);
+    } catch (e) {
+      throw new BadRequestException(e);
     }
-
-    await this.warehouseAccountingRepository.save([...outLines, ...inLines]);
   }
 }
