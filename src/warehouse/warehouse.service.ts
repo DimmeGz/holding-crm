@@ -253,7 +253,9 @@ export class WarehouseService {
           currencyId: fromLine.currencyId,
         });
       } else {
+        const totalCost = toLine.cost * toLine.qty + fromLine.cost * line.qty;
         toLine.qty += line.qty;
+        toLine.cost = totalCost / toLine.qty;
       }
       linesToSave.push(toLine);
     }
@@ -290,6 +292,7 @@ export class WarehouseService {
         throw new NotFoundException('WarehouseAccounting not found');
       }
 
+      fromLine.cost = fromLine.cost * fromLine.qty - toLine.cost * line.qty;
       fromLine.qty += line.qty;
       toLine.qty -= line.qty;
       linesToSave.push(fromLine, toLine);
