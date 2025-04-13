@@ -5,4 +5,5 @@ export class TransportProductsDTO {
   warehouseSenderId: number;
   warehouseReceiveId: number;
   transportLines: ProductLine[];
+  transportCost: number;
 }
