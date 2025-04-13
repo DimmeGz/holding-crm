@@ -8,6 +8,8 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
 import { LibsService } from '../../libs';
+import { WarehouseService } from '../../warehouse';
+
 import { ProductTransport } from './entities';
 import { CreateProductTransportDTO, UpdateProductTransportDTO } from './dto';
 
@@ -18,6 +20,7 @@ export class ProductTransportService {
     private readonly productTransportRepository: Repository<ProductTransport>,
     @InjectDataSource() private dataSource: DataSource,
     private readonly libsService: LibsService,
+    private readonly warehouseService: WarehouseService,
   ) {}
 
   async getProductTransports() {
@@ -136,7 +139,12 @@ export class ProductTransportService {
 
     const updated = Object.assign(transport, updateTransportDTO);
 
-    // TODO: update technical processes
+    const productIds = updated.productTransportLines.map(
+      (line) => line.productId,
+    );
+
+    updated.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByProductIds([...productIds]);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -178,14 +186,33 @@ export class ProductTransportService {
   }
 
   async changeProductTransportStatus(productTransportId: number) {
-    const transport = await this.productTransportRepository.findOneBy({
-      id: productTransportId,
+    const transport = await this.productTransportRepository.findOne({
+      where: { id: productTransportId },
+      relations: ['productTransportLines'],
     });
 
     transport.status = !transport.status;
 
-    // TODO: change qty in warehouseaccounting
+    await this.updateWarehouseAccounting(transport);
 
     return await this.productTransportRepository.save(transport);
+  }
+
+  private async updateWarehouseAccounting(transport: ProductTransport) {
+    if (transport.status) {
+      await this.warehouseService.transportProducts({
+        companyId: transport.companyId,
+        warehouseSenderId: transport.warehouseSenderId,
+        warehouseReceiveId: transport.warehouseReceiveId,
+        transportLines: transport.productTransportLines,
+      });
+    } else {
+      await this.warehouseService.unTransportProducts({
+        companyId: transport.companyId,
+        warehouseSenderId: transport.warehouseSenderId,
+        warehouseReceiveId: transport.warehouseReceiveId,
+        transportLines: transport.productTransportLines,
+      });
+    }
   }
 }

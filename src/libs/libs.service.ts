@@ -42,4 +42,16 @@ export class LibsService {
       .select('technicalProcess.id')
       .getMany();
   }
+
+  async getTechnicalProcessesByBatchId(batchId: number) {
+    return await this.technicalProcessesRepository
+      .createQueryBuilder('technicalProcess')
+      .leftJoin('technicalProcess.products', 'product')
+      .leftJoin('product.batches', 'batch')
+      .where('batch.id = :batchId', {
+        batchId,
+      })
+      .select('technicalProcess.id')
+      .getMany();
+  }
 }

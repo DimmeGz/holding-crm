@@ -4,7 +4,6 @@ import { ContractsModule } from './contracts';
 import { CommissionInvoiceModule } from './commission-invoice';
 import { CommissionPaymentModule } from './commission-payment';
 import { ProductionModule } from './production';
-import { TransitModule } from './transit';
 import { ProductTransportModule } from './product-transport';
 
 @Module({
@@ -13,7 +12,6 @@ import { ProductTransportModule } from './product-transport';
     CommissionInvoiceModule,
     CommissionPaymentModule,
     ProductionModule,
-    TransitModule,
     ProductTransportModule,
   ],
 })

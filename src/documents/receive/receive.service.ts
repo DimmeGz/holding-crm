@@ -12,6 +12,7 @@ import {
 } from '../../common/utils';
 
 import { GoodsService } from '../../goods';
+import { TransitService } from '../transit';
 import { WarehouseService } from '../../warehouse';
 
 import { Receive } from './entities';
@@ -24,6 +25,7 @@ export class ReceiveService {
     private readonly receivesRepository: Repository<Receive>,
     @InjectDataSource() private dataSource: DataSource,
     private readonly goodsService: GoodsService,
+    private readonly transitService: TransitService,
     private readonly warehouseService: WarehouseService,
   ) {}
 
@@ -103,15 +105,16 @@ export class ReceiveService {
     return receives;
   }
 
-  async createReceive(createReveiveDTO: CreateReveiveDTO) {
-    createReveiveDTO['technicalProcesses'] =
-      await this.getTechnicalProcesses(createReveiveDTO);
+  async createReceive(createReceiveDTO: CreateReveiveDTO) {
+    createReceiveDTO['technicalProcesses'] =
+      await this.getTechnicalProcesses(createReceiveDTO);
 
-    const newReceive = new Receive(createReveiveDTO);
+    const newReceive = new Receive(createReceiveDTO);
     newReceive.status = false;
     newReceive.createdAt = new Date();
     newReceive.comment = newReceive.comment || '';
     newReceive.transportPlace = newReceive.transportPlace || '';
+    newReceive.transportAmount = newReceive.transportAmount || 0;
 
     newReceive.documentSum =
       newReceive.receiveLines.reduce(
@@ -123,7 +126,15 @@ export class ReceiveService {
         0,
       );
 
-    return await this.receivesRepository.save(newReceive);
+    const createdReceive = await this.receivesRepository.save(newReceive);
+
+    await this.transitService.addReceiveToTransitLines({
+      shipmentId: createReceiveDTO.shipmentId,
+      receiveId: createdReceive.id,
+      lines: createReceiveDTO.receiveLines,
+    });
+
+    return createdReceive;
   }
 
   private async getTechnicalProcesses(createReveiveDTO: CreateReveiveDTO) {
@@ -227,15 +238,16 @@ export class ReceiveService {
 
     // TODO: make transaction
 
-    await this.updateWarehouseAccounting(receive);
-
     receive.status = !receive.status;
+
+    await this.updateWarehouseAccounting(receive);
+    await this.updateTransitLines(receive);
 
     return await this.receivesRepository.save(receive);
   }
 
   private async updateWarehouseAccounting(receive: Receive) {
-    if (!receive.status) {
+    if (receive.status) {
       for await (const line of receive.receiveLines) {
         await this.warehouseService.increaseReceiveGoodsCount({
           companyId: receive.buyerId,
@@ -259,6 +271,20 @@ export class ReceiveService {
           currencyId: receive.currencyId,
         });
       }
+    }
+  }
+
+  private async updateTransitLines(receive: Receive) {
+    if (receive.status) {
+      await this.transitService.receiveTransitLines({
+        receiveId: receive.id,
+        lines: receive.receiveLines,
+      });
+    } else {
+      await this.transitService.cancelReceiveTransitLines({
+        receiveId: receive.id,
+        lines: receive.receiveLines,
+      });
     }
   }
 }
