@@ -125,8 +125,6 @@ export class CommissionPaymentService {
       { id: commissionPaymentId },
     );
 
-    // TODO: make transaction
-
     commissionPayment.status = !commissionPayment.status;
 
     await this.companiesService.changeAccountsBalances({

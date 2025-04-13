@@ -194,8 +194,6 @@ export class ProductionService {
 
     production.status = !production.status;
 
-    // TODO: make transaction
-
     await this.warehouseService.makeProduction({
       companyId: production.companyId,
       warehouseId: production.warehouseId,
