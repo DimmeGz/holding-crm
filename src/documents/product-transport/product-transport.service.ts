@@ -209,12 +209,24 @@ export class ProductTransportService {
   private async updateWarehouseAccounting(
     transport: ProductTransport,
   ): Promise<void> {
+    const totalQty = transport.productTransportLines.reduce(
+      (acc, cur) => (acc += cur.qty),
+      0,
+    );
+    const totalTransportAmount = transport.productTransportServiceLines.reduce(
+      (acc, cur) => (acc += cur.price * cur.qty),
+      0,
+    );
+
     if (transport.status) {
       await this.warehouseService.transportProducts({
         companyId: transport.companyId,
         warehouseSenderId: transport.warehouseSenderId,
         warehouseReceiveId: transport.warehouseReceiveId,
         transportLines: transport.productTransportLines,
+        transportCost: totalTransportAmount
+          ? totalTransportAmount / totalQty
+          : 0,
       });
     } else {
       await this.warehouseService.unTransportProducts({
@@ -222,6 +234,9 @@ export class ProductTransportService {
         warehouseSenderId: transport.warehouseSenderId,
         warehouseReceiveId: transport.warehouseReceiveId,
         transportLines: transport.productTransportLines,
+        transportCost: totalTransportAmount
+          ? totalTransportAmount / totalQty
+          : 0,
       });
     }
   }

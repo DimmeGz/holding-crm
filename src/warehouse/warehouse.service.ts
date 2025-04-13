@@ -211,8 +211,6 @@ export class WarehouseService {
   }
 
   async transportProducts(transportDTO: TransportProductsDTO): Promise<void> {
-    // TODO: add serviceLines to cost
-
     const linesToSave: WarehouseAccounting[] = [];
     for await (const line of transportDTO.transportLines) {
       const baseQueryBuilder = this.warehouseAccountingRepository
@@ -249,13 +247,13 @@ export class WarehouseService {
           packageId: line.packageId,
           warehouseId: transportDTO.warehouseReceiveId,
           qty: line.qty,
-          cost: fromLine.cost,
+          cost: fromLine.cost + transportDTO.transportCost,
           currencyId: fromLine.currencyId,
         });
       } else {
         const totalCost = toLine.cost * toLine.qty + fromLine.cost * line.qty;
         toLine.qty += line.qty;
-        toLine.cost = totalCost / toLine.qty;
+        toLine.cost = totalCost / toLine.qty + transportDTO.transportCost;
       }
       linesToSave.push(toLine);
     }
@@ -264,8 +262,6 @@ export class WarehouseService {
   }
 
   async unTransportProducts(transportDTO: TransportProductsDTO): Promise<void> {
-    // TODO: remove serviceLines to cost
-
     const linesToSave: WarehouseAccounting[] = [];
     for await (const line of transportDTO.transportLines) {
       const baseQueryBuilder = this.warehouseAccountingRepository
@@ -292,9 +288,12 @@ export class WarehouseService {
         throw new NotFoundException('WarehouseAccounting not found');
       }
 
-      fromLine.cost = fromLine.cost * fromLine.qty - toLine.cost * line.qty;
       fromLine.qty += line.qty;
       toLine.qty -= line.qty;
+      toLine.cost =
+        (toLine.cost - transportDTO.transportCost) * toLine.qty -
+        fromLine.cost * line.qty;
+
       linesToSave.push(fromLine, toLine);
     }
 
