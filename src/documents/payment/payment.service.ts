@@ -130,11 +130,14 @@ export class PaymentService {
 
     const updated = Object.assign(payment, updatePaymentDTO);
 
+    updated.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByInvoiceIds(
+        updated.paymentLines.map((line) => line.invoiceId),
+      );
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    // TODO: update technical processes
 
     try {
       if (paymentLinesToDelete.length) {
