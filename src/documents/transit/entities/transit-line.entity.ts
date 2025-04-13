@@ -33,7 +33,7 @@ export class TransitLine extends AbstractEntity {
   @Column({ name: 'batch_id' })
   batchId: number;
 
-  @ManyToOne(() => Batch, {
+  @ManyToOne(() => Package, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'package_id' })
