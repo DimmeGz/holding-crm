@@ -238,15 +238,16 @@ export class ReceiveService {
 
     // TODO: make transaction
 
-    await this.updateWarehouseAccounting(receive);
-
     receive.status = !receive.status;
+
+    await this.updateWarehouseAccounting(receive);
+    await this.updateTransitLines(receive);
 
     return await this.receivesRepository.save(receive);
   }
 
   private async updateWarehouseAccounting(receive: Receive) {
-    if (!receive.status) {
+    if (receive.status) {
       for await (const line of receive.receiveLines) {
         await this.warehouseService.increaseReceiveGoodsCount({
           companyId: receive.buyerId,
@@ -270,6 +271,20 @@ export class ReceiveService {
           currencyId: receive.currencyId,
         });
       }
+    }
+  }
+
+  private async updateTransitLines(receive: Receive) {
+    if (receive.status) {
+      await this.transitService.receiveTransitLines({
+        receiveId: receive.id,
+        lines: receive.receiveLines,
+      });
+    } else {
+      await this.transitService.cancelReceiveTransitLines({
+        receiveId: receive.id,
+        lines: receive.receiveLines,
+      });
     }
   }
 }

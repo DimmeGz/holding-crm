@@ -1,6 +1,6 @@
 import { BaseLineDTO } from './base-line.dto';
 
-export class CreateTransitLinesDTO {
-  shipmentId: number;
+export class ReceiveTransitLinesDTO {
+  receiveId: number;
   lines: Partial<BaseLineDTO>[];
 }
