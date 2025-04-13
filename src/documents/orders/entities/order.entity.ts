@@ -145,7 +145,7 @@ export class Order extends AbstractDocumentRecipientEntity<Order> {
       referencedColumnName: 'id',
     },
   })
-  technicalProcesses: TechnicalProcess[];
+  technicalProcesses: Partial<TechnicalProcess>[];
 
   @OneToMany(() => OrderLine, (orderLine) => orderLine.order, { cascade: true })
   orderLines: Partial<OrderLine>[];

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -7,6 +11,7 @@ import {
   ChangeReceiveGoodsCountDTO,
   ChangeShipGoodsCountDTO,
   GetWareCostDTO,
+  MakeProductionDTO,
   TransportProductsDTO,
 } from './dto';
 
@@ -210,8 +215,6 @@ export class WarehouseService {
   }
 
   async transportProducts(transportDTO: TransportProductsDTO): Promise<void> {
-    // TODO: add serviceLines to cost
-
     const linesToSave: WarehouseAccounting[] = [];
     for await (const line of transportDTO.transportLines) {
       const baseQueryBuilder = this.warehouseAccountingRepository
@@ -248,11 +251,13 @@ export class WarehouseService {
           packageId: line.packageId,
           warehouseId: transportDTO.warehouseReceiveId,
           qty: line.qty,
-          cost: fromLine.cost,
+          cost: fromLine.cost + transportDTO.transportCost,
           currencyId: fromLine.currencyId,
         });
       } else {
+        const totalCost = toLine.cost * toLine.qty + fromLine.cost * line.qty;
         toLine.qty += line.qty;
+        toLine.cost = totalCost / toLine.qty + transportDTO.transportCost;
       }
       linesToSave.push(toLine);
     }
@@ -261,8 +266,6 @@ export class WarehouseService {
   }
 
   async unTransportProducts(transportDTO: TransportProductsDTO): Promise<void> {
-    // TODO: remove serviceLines to cost
-
     const linesToSave: WarehouseAccounting[] = [];
     for await (const line of transportDTO.transportLines) {
       const baseQueryBuilder = this.warehouseAccountingRepository
@@ -291,9 +294,71 @@ export class WarehouseService {
 
       fromLine.qty += line.qty;
       toLine.qty -= line.qty;
+      toLine.cost =
+        (toLine.cost - transportDTO.transportCost) * toLine.qty -
+        fromLine.cost * line.qty;
+
       linesToSave.push(fromLine, toLine);
     }
 
     await this.warehouseAccountingRepository.save(linesToSave);
+  }
+
+  async makeProduction(makeProductionDTO: MakeProductionDTO): Promise<void> {
+    try {
+      const outLines: WarehouseAccounting[] = [];
+      for (const line of makeProductionDTO.outLines) {
+        const outLine = await this.warehouseAccountingRepository
+          .createQueryBuilder('ware')
+          .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
+          .andWhere('ware.packageId = :warePackageId', {
+            warePackageId: line.packageId,
+          })
+          .andWhere('ware.companyId = :companyId', {
+            companyId: makeProductionDTO.companyId,
+          })
+          .andWhere('ware.warehouseId = :warehouseId', {
+            warehouseId: makeProductionDTO.warehouseId,
+          })
+          .getOne();
+
+        if (makeProductionDTO.status) {
+          outLine.qty -= line.qty;
+        } else {
+          outLine.qty += line.qty;
+        }
+
+        outLines.push(outLine);
+      }
+
+      const inLines: WarehouseAccounting[] = [];
+      for (const line of makeProductionDTO.inLines) {
+        const inline = await this.warehouseAccountingRepository
+          .createQueryBuilder('ware')
+          .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
+          .andWhere('ware.packageId = :warePackageId', {
+            warePackageId: line.packageId,
+          })
+          .andWhere('ware.companyId = :companyId', {
+            companyId: makeProductionDTO.companyId,
+          })
+          .andWhere('ware.warehouseId = :warehouseId', {
+            warehouseId: makeProductionDTO.warehouseId,
+          })
+          .getOne();
+
+        if (makeProductionDTO.status) {
+          inline.qty += line.qty;
+        } else {
+          inline.qty -= line.qty;
+        }
+
+        inLines.push(inline);
+      }
+
+      await this.warehouseAccountingRepository.save([...outLines, ...inLines]);
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
   }
 }

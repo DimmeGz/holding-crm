@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account, Company } from './entities';
 import { Repository } from 'typeorm';
@@ -31,40 +31,48 @@ export class CompaniesService {
   async changeInvoiceStatusBalances(
     changeInvoiceStatusBalanceDTO: ChangeInvoiceStatusBalanceDTO,
   ): Promise<void> {
-    const [sellerAccount, buyerAccount] = await this.getSellerBuyerAccounts(
-      changeInvoiceStatusBalanceDTO,
-    );
+    try {
+      const [sellerAccount, buyerAccount] = await this.getSellerBuyerAccounts(
+        changeInvoiceStatusBalanceDTO,
+      );
 
-    if (changeInvoiceStatusBalanceDTO.status) {
-      sellerAccount.wait += changeInvoiceStatusBalanceDTO.amount;
-      buyerAccount.debt -= changeInvoiceStatusBalanceDTO.amount;
-    } else {
-      sellerAccount.wait -= changeInvoiceStatusBalanceDTO.amount;
-      buyerAccount.debt += changeInvoiceStatusBalanceDTO.amount;
+      if (changeInvoiceStatusBalanceDTO.status) {
+        sellerAccount.wait += changeInvoiceStatusBalanceDTO.amount;
+        buyerAccount.debt -= changeInvoiceStatusBalanceDTO.amount;
+      } else {
+        sellerAccount.wait -= changeInvoiceStatusBalanceDTO.amount;
+        buyerAccount.debt += changeInvoiceStatusBalanceDTO.amount;
+      }
+
+      await this.accountsRepository.save([sellerAccount, buyerAccount]);
+    } catch (e) {
+      throw new BadRequestException(e);
     }
-
-    await this.accountsRepository.save([sellerAccount, buyerAccount]);
   }
 
-  async makePayment(makePaymentDTO: MakePaymentDTO): Promise<void> {
-    const [sellerAccount, buyerAccount] =
-      await this.getSellerBuyerAccounts(makePaymentDTO);
+  async changeAccountsBalances(makePaymentDTO: MakePaymentDTO): Promise<void> {
+    try {
+      const [sellerAccount, buyerAccount] =
+        await this.getSellerBuyerAccounts(makePaymentDTO);
 
-    if (makePaymentDTO.status) {
-      sellerAccount.wait -= makePaymentDTO.amount;
-      sellerAccount.balance += makePaymentDTO.amount;
+      if (makePaymentDTO.status) {
+        sellerAccount.wait -= makePaymentDTO.amount;
+        sellerAccount.balance += makePaymentDTO.amount;
 
-      buyerAccount.debt -= makePaymentDTO.amount;
-      buyerAccount.balance -= makePaymentDTO.amount;
-    } else {
-      sellerAccount.wait += makePaymentDTO.amount;
-      sellerAccount.balance -= makePaymentDTO.amount;
+        buyerAccount.debt -= makePaymentDTO.amount;
+        buyerAccount.balance -= makePaymentDTO.amount;
+      } else {
+        sellerAccount.wait += makePaymentDTO.amount;
+        sellerAccount.balance -= makePaymentDTO.amount;
 
-      buyerAccount.debt += makePaymentDTO.amount;
-      buyerAccount.balance += makePaymentDTO.amount;
+        buyerAccount.debt += makePaymentDTO.amount;
+        buyerAccount.balance += makePaymentDTO.amount;
+      }
+
+      await this.accountsRepository.save([sellerAccount, buyerAccount]);
+    } catch (e) {
+      throw new BadRequestException(e);
     }
-
-    await this.accountsRepository.save([sellerAccount, buyerAccount]);
   }
 
   private async getSellerBuyerAccounts(

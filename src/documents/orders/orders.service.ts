@@ -230,7 +230,8 @@ export class OrdersService {
 
     const updated = Object.assign(order, updateOrderDTO);
 
-    // TODO: update technical processes
+    updated.technicalProcesses =
+      await this.getTechnicalProcesses(updateOrderDTO);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
