@@ -15,6 +15,39 @@ export class TransitService {
     private readonly libsService: LibsService,
   ) {}
 
+  async getTransitLines() {
+    const transitLines = await this.transitLinesRepository
+      .createQueryBuilder('transitLine')
+      .leftJoin('transitLine.shipment', 'shipment')
+      .leftJoin('shipment.seller', 'seller')
+      .leftJoin('transitLine.receive', 'receive')
+      .leftJoin('receive.buyer', 'buyer')
+      .leftJoin('transitLine.batch', 'batch')
+      .leftJoin('batch.product', 'product')
+      .leftJoin('transitLine.package', 'package')
+      .select([
+        'transitLine.id',
+        'transitLine.qty',
+        'seller.id',
+        'seller.name',
+        'buyer.id',
+        'buyer.name',
+        'shipment.id',
+        'shipment.expectedDate',
+        'receive.id',
+        'receive.expectedDate',
+        'product.id',
+        'product.name',
+        'batch.id',
+        'batch.name',
+        'package.id',
+        'package.name',
+      ])
+      .getMany();
+
+    return transitLines;
+  }
+
   async createTransitLine(createTransitLineDTO: CreateTransitLinesDTO) {
     const newTransitLines: TransitLine[] = [];
 
