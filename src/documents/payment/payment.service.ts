@@ -7,6 +7,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 
 import { DataSource, Repository } from 'typeorm';
 
+import { CompaniesService } from '../../companies';
 import { LibsService } from '../../libs';
 
 import { Payment } from './entities';
@@ -18,6 +19,7 @@ export class PaymentService {
     @InjectRepository(Payment)
     private readonly paymentsRepository: Repository<Payment>,
     @InjectDataSource() private dataSource: DataSource,
+    private readonly companiesService: CompaniesService,
     private readonly libsService: LibsService,
   ) {}
 
@@ -172,11 +174,18 @@ export class PaymentService {
   async changePaymentStatus(paymentId: number) {
     const payment = await this.paymentsRepository.findOne({
       where: { id: paymentId },
+      relations: ['paymentLines'],
     });
 
     payment.status = !payment.status;
 
-    // TODO: make finanshial changes in companies
+    await this.companiesService.makePayment({
+      sellerId: payment.sellerId,
+      buyerId: payment.buyerId,
+      currencyId: payment.currencyId,
+      status: payment.status,
+      amount: payment.documentSum,
+    });
 
     return await this.paymentsRepository.save(payment);
   }
