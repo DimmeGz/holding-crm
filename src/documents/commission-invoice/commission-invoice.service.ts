@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
 import { InvoiceService } from '../invoice';
@@ -17,62 +17,58 @@ export class CommissionInvoiceService {
     private readonly companiesService: CompaniesService,
   ) {}
 
-  async getCommissionInvoicess(): Promise<CommissionInvoice[]> {
-    const commissions = await this.commissionRepository
+  private createBaseQueryBuilder(): SelectQueryBuilder<CommissionInvoice> {
+    return this.commissionRepository
       .createQueryBuilder('commission')
       .leftJoin('commission.seller', 'seller')
       .leftJoin('commission.buyer', 'buyer')
       .leftJoin('commission.currency', 'currency')
       .leftJoin('commission.invoice', 'invoice')
-      .leftJoin('invoice.children', 'invoiceChildren')
-      .select([
-        'commission.id',
-        'commission.status',
-        'commission.rate',
-        'commission.documentSum',
-        'currency.name',
-        'seller.name',
-        'buyer.name',
-        'invoice.id',
-        'invoice.invoiceNumber',
-        'invoiceChildren.id',
-        'invoiceChildren.invoiceNumber',
-      ])
+      .leftJoin('invoice.children', 'invoiceChildren');
+  }
+
+  private applyBaseSelect(
+    qb: SelectQueryBuilder<CommissionInvoice>,
+  ): SelectQueryBuilder<CommissionInvoice> {
+    return qb.select([
+      'commission.id',
+      'commission.status',
+      'commission.rate',
+      'commission.documentSum',
+      'currency.name',
+      'seller.name',
+      'buyer.name',
+      'invoice.id',
+      'invoice.invoiceNumber',
+      'invoiceChildren.id',
+      'invoiceChildren.invoiceNumber',
+    ]);
+  }
+
+  async getCommissionInvoicess(): Promise<CommissionInvoice[]> {
+    return await this.applyBaseSelect(this.createBaseQueryBuilder())
       .orderBy('commission.id', 'DESC')
       .getMany();
-
-    return commissions;
   }
 
   async getCommissionInvoiceById(
     commissionId: number,
   ): Promise<CommissionInvoice> {
-    const commission = await this.commissionRepository
-      .createQueryBuilder('commission')
-      .leftJoin('commission.seller', 'seller')
-      .leftJoin('commission.buyer', 'buyer')
-      .leftJoin('commission.currency', 'currency')
-      .leftJoin('commission.invoice', 'invoice')
-      .leftJoin('invoice.children', 'invoiceChildren')
-      .select([
-        'commission.id',
-        'commission.status',
-        'commission.rate',
-        'commission.documentSum',
+    const commission = await this.applyBaseSelect(this.createBaseQueryBuilder())
+      .addSelect([
         'commission.creationDate',
         'commission.paymentBalance',
-        'currency.name',
-        'seller.name',
-        'buyer.name',
-        'invoice.id',
-        'invoice.invoiceNumber',
         'invoice.documentSum',
-        'invoiceChildren.id',
-        'invoiceChildren.invoiceNumber',
         'invoiceChildren.documentSum',
       ])
       .where('commission.id = :commissionId', { commissionId })
       .getOne();
+
+    if (!commission) {
+      throw new NotFoundException(
+        `Commission Invoice with ID ${commissionId} not found`,
+      );
+    }
 
     return commission;
   }
@@ -80,30 +76,18 @@ export class CommissionInvoiceService {
   async createCommissionInvoice(
     createCommissionInvoiceDTO: CreateCommissionInvoiceDTO,
   ): Promise<CommissionInvoice> {
-    const newCommissionIvoice = new CommissionInvoice(
+    const newCommissionInvoice = this.commissionRepository.create(
       createCommissionInvoiceDTO,
     );
-    newCommissionIvoice.status = false;
-    newCommissionIvoice.createdAt = new Date();
-    newCommissionIvoice.creationDate =
-      newCommissionIvoice.creationDate || newCommissionIvoice.createdAt;
-    newCommissionIvoice.comment = newCommissionIvoice.comment || '';
+    newCommissionInvoice.status = false;
+    newCommissionInvoice.createdAt = new Date();
+    newCommissionInvoice.creationDate =
+      newCommissionInvoice.creationDate || newCommissionInvoice.createdAt;
+    newCommissionInvoice.comment = newCommissionInvoice.comment || '';
 
-    const invoiceData = await this.invoicesService.getInvoiceDataForCommission(
-      createCommissionInvoiceDTO.invoiceId,
-    );
-    const childrenSum = invoiceData.children.reduce(
-      (acc, cur) => (acc += cur.documentSum),
-      0,
-    );
+    await this.calculateAndSetDocumentSumAndBalance(newCommissionInvoice);
 
-    newCommissionIvoice.documentSum =
-      (childrenSum * newCommissionIvoice.rate) / 100;
-    newCommissionIvoice.paymentBalance = newCommissionIvoice.documentSum;
-
-    newCommissionIvoice.technicalProcesses = invoiceData.technicalProcesses;
-
-    return await this.commissionRepository.save(newCommissionIvoice);
+    return await this.commissionRepository.save(newCommissionInvoice);
   }
 
   async updateCommissionInvoice(
@@ -115,8 +99,22 @@ export class CommissionInvoiceService {
       status: false,
     });
 
-    const updated = Object.assign(commission, updateCommissionInvoiceDTO);
+    if (!commission) {
+      throw new NotFoundException(
+        `Commission invoice with id: ${commissionId} and status: false not found`,
+      );
+    }
 
+    Object.assign(commission, updateCommissionInvoiceDTO);
+
+    await this.calculateAndSetDocumentSumAndBalance(commission);
+
+    return await this.commissionRepository.save(commission);
+  }
+
+  private async calculateAndSetDocumentSumAndBalance(
+    commission: CommissionInvoice,
+  ): Promise<void> {
     const invoiceData = await this.invoicesService.getInvoiceDataForCommission(
       commission.invoiceId,
     );
@@ -125,23 +123,23 @@ export class CommissionInvoiceService {
       0,
     );
 
-    updated.documentSum = (childrenSum * updated.rate) / 100;
-    updated.technicalProcesses = invoiceData.technicalProcesses;
-
-    return await this.commissionRepository.save(updated);
+    commission.documentSum = (childrenSum * commission.rate) / 100;
+    commission.paymentBalance = commission.documentSum;
+    commission.technicalProcesses = invoiceData.technicalProcesses;
   }
 
   async removeCommission(commissionId: number): Promise<CommissionInvoice> {
-    try {
-      const commission = await this.commissionRepository.findOneBy({
-        id: commissionId,
-        status: false,
-      });
-
-      return this.commissionRepository.remove(commission);
-    } catch (e) {
-      throw new NotFoundException(e);
+    const commission = await this.commissionRepository.findOneBy({
+      id: commissionId,
+      status: false,
+    });
+    if (!commission) {
+      throw new NotFoundException(
+        `Commission invoice with id: ${commissionId} and status: false not found`,
+      );
     }
+
+    return this.commissionRepository.remove(commission);
   }
 
   async changeCommissionStatus(
@@ -150,6 +148,12 @@ export class CommissionInvoiceService {
     const commission = await this.commissionRepository.findOneBy({
       id: commissionId,
     });
+
+    if (!commission) {
+      throw new NotFoundException(
+        `Commission invoice with id: ${commissionId} not found`,
+      );
+    }
 
     commission.status = !commission.status;
 
