@@ -4,13 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { LibsService } from '../../libs';
+import { WarehouseService } from '../../warehouse';
 
 import { Production } from './entities';
 import { CreateProductionDTO, UpdateProductionDTO } from './dto';
-import { WarehouseService } from '../../warehouse';
 
 @Injectable()
 export class ProductionService {
@@ -22,9 +22,14 @@ export class ProductionService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getProductions(): Promise<Production[]> {
-    const productions = await this.productionsRepository
-      .createQueryBuilder('production')
+  private createBaseQueryBuilder(): SelectQueryBuilder<Production> {
+    return this.productionsRepository.createQueryBuilder('production');
+  }
+
+  private applyProductionListSelect(
+    qb: SelectQueryBuilder<Production>,
+  ): SelectQueryBuilder<Production> {
+    return qb
       .leftJoin('production.company', 'company')
       .leftJoin('production.warehouse', 'warehouse')
       .leftJoin('production.productionInLines', 'productionInLine')
@@ -37,16 +42,13 @@ export class ProductionService {
         'warehouse.name',
         'productionInLine.id',
         'product.name',
-      ])
-      .orderBy('production.id', 'DESC')
-      .getMany();
-
-    return productions;
+      ]);
   }
 
-  async getProductionById(productionId: number): Promise<Production> {
-    const production = await this.productionsRepository
-      .createQueryBuilder('production')
+  private applyProductionDetailSelect(
+    qb: SelectQueryBuilder<Production>,
+  ): SelectQueryBuilder<Production> {
+    return qb
       .leftJoin('production.company', 'company')
       .leftJoin('production.warehouse', 'warehouse')
       .leftJoin('production.productionOutLines', 'productionOutLine')
@@ -76,9 +78,27 @@ export class ProductionService {
         'inBatch.id',
         'inBatch.name',
         'inPackage.name',
-      ])
+      ]);
+  }
+
+  async getProductions(): Promise<Production[]> {
+    return await this.applyProductionListSelect(this.createBaseQueryBuilder())
+      .orderBy('production.id', 'DESC')
+      .getMany();
+  }
+
+  async getProductionById(productionId: number): Promise<Production> {
+    const production = await this.applyProductionDetailSelect(
+      this.createBaseQueryBuilder(),
+    )
       .where('production.id = :productionId', { productionId })
       .getOne();
+
+    if (!production) {
+      throw new NotFoundException(
+        `Production with id: ${productionId} not found`,
+      );
+    }
 
     return production;
   }
@@ -86,9 +106,10 @@ export class ProductionService {
   async createProduction(
     createProductionDTO: CreateProductionDTO,
   ): Promise<Production> {
-    createProductionDTO['createdAt'] = new Date();
-    const newProduction = new Production(createProductionDTO);
+    const newProduction =
+      this.productionsRepository.create(createProductionDTO);
     newProduction.status = false;
+    newProduction.createdAt = new Date();
     newProduction.expectedDate =
       newProduction.expectedDate || newProduction.createdAt;
     newProduction.comment = newProduction.comment || '';
@@ -108,29 +129,28 @@ export class ProductionService {
     productionId: number,
     updateProductionDTO: UpdateProductionDTO,
   ): Promise<Production> {
-    const production = await this.productionsRepository
-      .createQueryBuilder('production')
+    const production = await this.createBaseQueryBuilder()
+      .where('production.id = :productionId', { productionId })
       .leftJoinAndSelect('production.productionInLines', 'productionInLine')
       .leftJoinAndSelect('production.productionOutLines', 'productionOutLine')
-      .where('production.id = :productionId', { productionId })
       .getOne();
 
-    const updatedInLinesIds = [];
-    for (const line of updateProductionDTO.productionInLines) {
-      if (line['id']) {
-        updatedInLinesIds.push(line['id']);
-      }
+    if (!production) {
+      throw new NotFoundException(
+        `Production with id: ${productionId} not found`,
+      );
     }
+
+    const updatedInLinesIds = updateProductionDTO.productionInLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const inLinesToDelete = production.productionInLines.filter(
       (line) => !updatedInLinesIds.includes(line.id),
     );
 
-    const updatedOutLinesIds = [];
-    for (const line of production.productionOutLines) {
-      if (line['id']) {
-        updatedOutLinesIds.push(line['id']);
-      }
-    }
+    const updatedOutLinesIds = updateProductionDTO.productionOutLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const outLinesToDelete = production.productionOutLines.filter(
       (line) => !updatedOutLinesIds.includes(line.id),
     );
@@ -172,16 +192,18 @@ export class ProductionService {
   }
 
   async removeProduction(productionId: number): Promise<Production> {
-    try {
-      const production = await this.productionsRepository.findOneByOrFail({
-        id: productionId,
-        status: false,
-      });
+    const production = await this.productionsRepository.findOne({
+      where: { id: productionId, status: false },
+      relations: ['productionInLines', 'productionOutLines'],
+    });
 
-      return await this.productionsRepository.remove(production);
-    } catch (e) {
-      throw new NotFoundException(e);
+    if (!production) {
+      throw new NotFoundException(
+        `Production with id: ${productionId} and status: false not found`,
+      );
     }
+
+    return await this.productionsRepository.remove(production);
   }
 
   async changeProductionStatus(productionId: number): Promise<Production> {
@@ -191,6 +213,12 @@ export class ProductionService {
       },
       relations: ['productionOutLines', 'productionInLines'],
     });
+
+    if (!production) {
+      throw new NotFoundException(
+        `Production with id: ${productionId} not found`,
+      );
+    }
 
     production.status = !production.status;
 
