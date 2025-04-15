@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { GoodsService } from '../../goods';
 import { ReceiveService } from '../receive';
@@ -35,9 +35,14 @@ export class ShipmentService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getShipments(): Promise<Shipment[]> {
-    const shipments = await this.shipmentsRepository
-      .createQueryBuilder('shipment')
+  private createBaseQueryBuilder(): SelectQueryBuilder<Shipment> {
+    return this.shipmentsRepository.createQueryBuilder('shipment');
+  }
+
+  private applyShipmentListSelect(
+    qb: SelectQueryBuilder<Shipment>,
+  ): SelectQueryBuilder<Shipment> {
+    return qb
       .leftJoin('shipment.seller', 'seller')
       .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('shipment.invoice', 'invoice')
@@ -53,20 +58,23 @@ export class ShipmentService {
         'buyer.name',
         'invoice.invoiceNumber',
         'currency.name',
-      ])
-      .orderBy('shipment.id', 'DESC')
-      .getMany();
-
-    return shipments;
+      ]);
   }
 
-  async getShipmentById(shipmentId: number): Promise<GetShipmentResponseDTO> {
-    const shipment = await this.shipmentsRepository
-      .createQueryBuilder('shipment')
+  private applyShipmentDetailSelect(
+    qb: SelectQueryBuilder<Shipment>,
+  ): SelectQueryBuilder<Shipment> {
+    return qb
       .leftJoin('shipment.seller', 'seller')
       .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('shipment.invoice', 'invoice')
       .leftJoin('shipment.currency', 'currency')
+      .leftJoin('shipment.shipmentLines', 'shipmentLine')
+      .leftJoin('shipmentLine.product', 'product')
+      .leftJoin('shipmentLine.batch', 'batch')
+      .leftJoin('shipmentLine.package', 'package')
+      .leftJoin('shipment.shipmentServiceLines', 'shipmentServiceLine')
+      .leftJoin('shipmentServiceLine.service', 'service')
       .select([
         'shipment.id',
         'shipment.status',
@@ -81,12 +89,6 @@ export class ShipmentService {
         'invoice.id',
         'invoice.invoiceNumber',
         'currency.name',
-      ])
-      .leftJoin('shipment.shipmentLines', 'shipmentLine')
-      .leftJoin('shipmentLine.product', 'product')
-      .leftJoin('shipmentLine.batch', 'batch')
-      .leftJoin('shipmentLine.package', 'package')
-      .addSelect([
         'shipmentLine',
         'product.id',
         'product.name',
@@ -95,19 +97,30 @@ export class ShipmentService {
         'package.id',
         'package.name',
         'package.capacity',
-      ])
-      .leftJoin('shipment.shipmentServiceLines', 'shipmentServiceLine')
-      .leftJoin('shipmentServiceLine.service', 'service')
-      .addSelect([
         'shipmentServiceLine.id',
         'shipmentServiceLine.qty',
         'shipmentServiceLine.price',
         'service.id',
         'service.name',
-      ])
+      ]);
+  }
 
+  async getShipments(): Promise<Shipment[]> {
+    return await this.applyShipmentListSelect(this.createBaseQueryBuilder())
+      .orderBy('shipment.id', 'DESC')
+      .getMany();
+  }
+
+  async getShipmentById(shipmentId: number): Promise<GetShipmentResponseDTO> {
+    const shipment = await this.applyShipmentDetailSelect(
+      this.createBaseQueryBuilder(),
+    )
       .where('shipment.id = :shipmentId', { shipmentId })
       .getOne();
+
+    if (!shipment) {
+      throw new NotFoundException(`Shipment with id: ${shipmentId} not found`);
+    }
 
     const receives =
       await this.receiveService.getReceivesByShipmentId(shipmentId);
@@ -131,27 +144,25 @@ export class ShipmentService {
       .select(['shipmentLine.id', 'shipmentLine.qty', 'product.id'])
       .getMany();
 
-    const res = shippedLines.reduce((acc, { product: { id }, qty }) => {
+    return shippedLines.reduce((acc, { product: { id }, qty }) => {
       acc[id] = (acc[id] || 0) + qty;
       return acc;
     }, {});
-
-    return res;
   }
 
-  async getShipmentsByInvoiceId(invoiceId: number) {
-    const shipments = await this.shipmentsRepository
-      .createQueryBuilder('shipment')
+  async getShipmentsByInvoiceId(invoiceId: number): Promise<Shipment[]> {
+    const shipments = await this.createBaseQueryBuilder()
       .where('shipment.invoiceId = :invoiceId', { invoiceId })
       .select(['shipment.id', 'shipment.status'])
       .orderBy('shipment.id', 'ASC')
       .getMany();
 
-    for await (const shipment of shipments) {
-      shipment['receives'] = await this.receiveService.getReceivesByShipmentId(
-        shipment.id,
-      );
-    }
+    await Promise.all(
+      shipments.map(async (shipment) => {
+        shipment['receives'] =
+          await this.receiveService.getReceivesByShipmentId(shipment.id);
+      }),
+    );
 
     return shipments;
   }
@@ -159,26 +170,29 @@ export class ShipmentService {
   async createShipment(
     createShipmentDTO: CreateShipmentDTO,
   ): Promise<Shipment> {
-    createShipmentDTO['technicalProcesses'] =
-      await this.getTechnicalProcesses(createShipmentDTO);
-
     const newShipment = new Shipment(createShipmentDTO);
     newShipment.createdAt = new Date();
     newShipment.comment = newShipment.comment || '';
     newShipment.transportPlace = newShipment.transportPlace || '';
     newShipment.status = false;
+    newShipment.technicalProcesses =
+      await this.getTechnicalProcesses(createShipmentDTO);
+    newShipment.documentSum = this.calculateDocumentSum(createShipmentDTO);
 
-    newShipment.documentSum =
-      newShipment.shipmentLines.reduce(
+    return await this.shipmentsRepository.save(newShipment);
+  }
+
+  private calculateDocumentSum(createShipmentDTO: CreateShipmentDTO): number {
+    return (
+      createShipmentDTO.shipmentLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
       ) +
-      newShipment.shipmentServiceLines.reduce(
+      createShipmentDTO.shipmentServiceLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
-      );
-
-    return await this.shipmentsRepository.save(newShipment);
+      )
+    );
   }
 
   private async getTechnicalProcesses(
@@ -207,8 +221,7 @@ export class ShipmentService {
     shipmentId: number,
     updateShipmentDTO: UpdateShipmentDTO,
   ): Promise<Shipment> {
-    const shipment = await this.shipmentsRepository
-      .createQueryBuilder('shipment')
+    const shipment = await this.createBaseQueryBuilder()
       .where('shipment.id = :shipmentId', { shipmentId })
       .andWhere('shipment.status = FALSE')
       .leftJoinAndSelect('shipment.shipmentLines', 'shipmentLines')
@@ -219,34 +232,35 @@ export class ShipmentService {
       .leftJoinAndSelect('shipment.technicalProcesses', 'technicalProcesses')
       .getOne();
 
-    const updatedShipmentLinesIds = [];
-    for (const line of updateShipmentDTO.shipmentLines) {
-      if (line['id']) {
-        updatedShipmentLinesIds.push(line['id']);
-      }
+    if (!shipment) {
+      throw new NotFoundException(
+        `Shipment with id: ${shipmentId} and status: false not found`,
+      );
     }
+
+    const updatedShipmentLinesIds = updateShipmentDTO.shipmentLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const shipmentLinesToDelete = shipment.shipmentLines.filter(
       (line) => !updatedShipmentLinesIds.includes(line.id),
     );
 
-    const updatedShipmentServiceLinesIds = [];
-    for (const line of updateShipmentDTO.shipmentServiceLines) {
-      if (line['id']) {
-        updatedShipmentServiceLinesIds.push(line['id']);
-      }
-    }
+    const updatedShipmentServiceLinesIds =
+      updateShipmentDTO.shipmentServiceLines
+        .filter((line) => line['id'])
+        .map((line) => line['id']);
     const shipmentServiceLinesToDelete = shipment.shipmentServiceLines.filter(
       (line) => !updatedShipmentServiceLinesIds.includes(line.id),
     );
 
     const updated = Object.assign(shipment, updateShipmentDTO);
+    updated.technicalProcesses =
+      await this.getTechnicalProcesses(updateShipmentDTO);
+    updated.documentSum = this.calculateDocumentSum(updated);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    updated.technicalProcesses =
-      await this.getTechnicalProcesses(updateShipmentDTO);
 
     try {
       if (shipmentLinesToDelete.length) {
@@ -271,15 +285,18 @@ export class ShipmentService {
   }
 
   async removeShipment(shipmentId: number): Promise<Shipment> {
-    try {
-      const invoice = await this.shipmentsRepository.findOne({
-        where: { id: shipmentId, status: false },
-        relations: ['shipmentLines', 'shipmentServiceLines'],
-      });
-      return await this.shipmentsRepository.remove(invoice);
-    } catch (e) {
-      throw new NotFoundException(e);
+    const shipment = await this.shipmentsRepository.findOne({
+      where: { id: shipmentId, status: false },
+      relations: ['shipmentLines', 'shipmentServiceLines'],
+    });
+
+    if (!shipment) {
+      throw new NotFoundException(
+        `Shipment with id: ${shipmentId} and status: false not found`,
+      );
     }
+
+    return await this.shipmentsRepository.remove(shipment);
   }
 
   async changeShipmentStatus(shipmentId: number): Promise<Shipment> {
@@ -288,23 +305,30 @@ export class ShipmentService {
       relations: ['shipmentLines'],
     });
 
-    // TODO: make transaction
-
-    await this.updateWarehouseAccounting(shipment);
+    if (!shipment) {
+      throw new NotFoundException(`Shipment with id: ${shipmentId} not found`);
+    }
 
     shipment.status = !shipment.status;
 
-    const updatedShipment = await this.shipmentsRepository.save(shipment);
+    await this.updateWarehouseAccounting(shipment);
+    await this.updateTransitLines(shipment);
 
-    await this.updateTransitLines(updatedShipment);
-
-    return updatedShipment;
+    return await this.shipmentsRepository.save(shipment);
   }
 
   private async updateWarehouseAccounting(shipment: Shipment): Promise<void> {
-    if (!shipment.status) {
-      for await (const line of shipment.shipmentLines) {
-        await this.warehouseService.decreaseShipGoodsCount({
+    const warehousePromises = shipment.shipmentLines.map((line) => {
+      if (!shipment.status) {
+        return this.warehouseService.decreaseShipGoodsCount({
+          companyId: shipment.sellerId,
+          warehouseId: shipment.sellerWarehouseId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+          qty: line.qty,
+        });
+      } else {
+        return this.warehouseService.returnShipGoodsCount({
           companyId: shipment.sellerId,
           warehouseId: shipment.sellerWarehouseId,
           batchId: line.batchId,
@@ -312,17 +336,9 @@ export class ShipmentService {
           qty: line.qty,
         });
       }
-    } else {
-      for await (const line of shipment.shipmentLines) {
-        await this.warehouseService.returnShipGoodsCount({
-          companyId: shipment.sellerId,
-          warehouseId: shipment.sellerWarehouseId,
-          batchId: line.batchId,
-          packageId: line.packageId,
-          qty: line.qty,
-        });
-      }
-    }
+    });
+
+    await Promise.all(warehousePromises);
   }
 
   private async updateTransitLines(shipment: Shipment): Promise<void> {
