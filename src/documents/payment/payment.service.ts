@@ -6,8 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
 import { InvoiceService } from '../invoice';
@@ -15,6 +14,7 @@ import { LibsService } from '../../libs';
 
 import { Payment } from './entities';
 import { CreatePaymentDTO, UpdatePaymentDTO } from './dto';
+import { PaymentLine } from './entities/payment-line.entity';
 
 @Injectable()
 export class PaymentService {
@@ -28,9 +28,14 @@ export class PaymentService {
     private readonly libsService: LibsService,
   ) {}
 
-  async getPayments(): Promise<Payment[]> {
-    const payments = await this.paymentsRepository
-      .createQueryBuilder('payment')
+  private createBaseQueryBuilder(): SelectQueryBuilder<Payment> {
+    return this.paymentsRepository.createQueryBuilder('payment');
+  }
+
+  private applyPaymentListSelect(
+    qb: SelectQueryBuilder<Payment>,
+  ): SelectQueryBuilder<Payment> {
+    return qb
       .leftJoin('payment.seller', 'seller')
       .leftJoin('payment.buyer', 'buyer')
       .leftJoin('payment.paymentLines', 'paymentLine')
@@ -39,63 +44,88 @@ export class PaymentService {
         'payment.id',
         'payment.status',
         'payment.documentSum',
-        'payment.expected_date',
+        'payment.expectedDate',
         'seller.name',
         'buyer.name',
         'paymentLine.id',
         'invoice.invoiceNumber',
-      ])
-      .orderBy('payment.id', 'DESC')
-      .getMany();
-
-    return payments;
+      ]);
   }
 
-  async getPaymentById(paymentId: number): Promise<Payment> {
-    const payment = await this.paymentsRepository
-      .createQueryBuilder('payment')
+  private applyPaymentDetailSelect(
+    qb: SelectQueryBuilder<Payment>,
+  ): SelectQueryBuilder<Payment> {
+    return qb
       .leftJoin('payment.seller', 'seller')
       .leftJoin('payment.buyer', 'buyer')
       .leftJoin('payment.paymentLines', 'paymentLine')
       .leftJoin('paymentLine.invoice', 'invoice')
-      .where('payment.id = :paymentId', { paymentId })
       .select([
         'payment.id',
         'payment.status',
         'payment.documentSum',
-        'payment.expected_date',
+        'payment.expectedDate',
         'seller.name',
         'buyer.name',
         'paymentLine.id',
         'paymentLine.amount',
         'invoice.id',
         'invoice.invoiceNumber',
-      ])
+      ]);
+  }
+
+  async getPayments(): Promise<Payment[]> {
+    return await this.applyPaymentListSelect(this.createBaseQueryBuilder())
       .orderBy('payment.id', 'DESC')
+      .getMany();
+  }
+
+  async getPaymentById(paymentId: number): Promise<Payment> {
+    const payment = await this.applyPaymentDetailSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .where('payment.id = :paymentId', { paymentId })
       .getOne();
+
+    if (!payment) {
+      throw new NotFoundException(`Payment with id: ${paymentId} not found`);
+    }
 
     return payment;
   }
 
   async getPaymentsByInvoiceId(invoiceId: number): Promise<Payment[]> {
-    const payments = await this.paymentsRepository
-      .createQueryBuilder('payment')
+    return await this.createBaseQueryBuilder()
       .leftJoin('payment.paymentLines', 'paymentLine')
       .where('paymentLine.invoiceId = :invoiceId', { invoiceId })
       .select(['payment.id', 'payment.status'])
       .orderBy('payment.id', 'ASC')
       .getMany();
-
-    return payments;
   }
 
   async createPayment(createPaymentDTO: CreatePaymentDTO): Promise<Payment> {
-    const newPayment = new Payment(createPaymentDTO);
+    const newPayment = this.paymentsRepository.create(createPaymentDTO);
+
     newPayment.createdAt = new Date();
     newPayment.comment = newPayment.comment || '';
     newPayment.status = false;
 
-    const paymentLinesData = newPayment.paymentLines.reduce(
+    const { invoiceIds, documentSum } = this.extractPaymentLinesData(
+      newPayment.paymentLines,
+    );
+
+    newPayment.documentSum = documentSum;
+    newPayment.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByInvoiceIds(invoiceIds);
+
+    return await this.paymentsRepository.save(newPayment);
+  }
+
+  private extractPaymentLinesData(paymentLines: Partial<PaymentLine>[]): {
+    invoiceIds: number[];
+    documentSum: number;
+  } {
+    return paymentLines.reduce(
       (acc, cur) => {
         acc.invoiceIds.push(cur.invoiceId);
         acc.documentSum += cur.amount;
@@ -103,47 +133,39 @@ export class PaymentService {
       },
       { invoiceIds: [], documentSum: 0 },
     );
-
-    newPayment.documentSum = paymentLinesData.documentSum;
-    newPayment.technicalProcesses =
-      await this.libsService.getTechnicalProcessesByInvoiceIds(
-        paymentLinesData.invoiceIds,
-      );
-
-    return await this.paymentsRepository.save(newPayment);
   }
 
   async updatePayment(
     paymentId: number,
     updatePaymentDTO: UpdatePaymentDTO,
   ): Promise<Payment> {
-    const payment = await this.paymentsRepository
-      .createQueryBuilder('payment')
-      .leftJoinAndSelect('payment.paymentLines', 'paymentLine')
+    const payment = await this.createBaseQueryBuilder()
       .where('payment.id = :paymentId', { paymentId })
       .andWhere('payment.status = false')
+      .leftJoinAndSelect('payment.paymentLines', 'paymentLine')
       .getOne();
 
-    const updatedPaymentLinesIds = [];
-    let paymentLinesToDelete = [];
-
-    if (updatePaymentDTO.paymentLines && updatePaymentDTO.paymentLines.length) {
-      for (const line of updatePaymentDTO.paymentLines) {
-        if (line['id']) {
-          updatedPaymentLinesIds.push(line['id']);
-        }
-      }
-      paymentLinesToDelete = payment.paymentLines.filter(
-        (line) => !updatedPaymentLinesIds.includes(line.id),
+    if (!payment) {
+      throw new NotFoundException(
+        `Payment with id: ${paymentId} and status: false not found`,
       );
     }
 
+    const updatedPaymentLinesIds = updatePaymentDTO.paymentLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
+    const paymentLinesToDelete = payment.paymentLines.filter(
+      (line) => !updatedPaymentLinesIds.includes(line.id),
+    );
+
     const updated = Object.assign(payment, updatePaymentDTO);
 
+    const { invoiceIds, documentSum } = this.extractPaymentLinesData(
+      updated.paymentLines,
+    );
+    updated.documentSum = documentSum;
     updated.technicalProcesses =
-      await this.libsService.getTechnicalProcessesByInvoiceIds(
-        updated.paymentLines.map((line) => line.invoiceId),
-      );
+      await this.libsService.getTechnicalProcessesByInvoiceIds(invoiceIds);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -168,24 +190,29 @@ export class PaymentService {
   }
 
   async removePayment(paymentId: number): Promise<Payment> {
-    try {
-      const invoice = await this.paymentsRepository.findOne({
-        where: { id: paymentId, status: false },
-        relations: ['paymentLines'],
-      });
-      return await this.paymentsRepository.remove(invoice);
-    } catch (e) {
-      throw new NotFoundException(e);
+    const payment = await this.paymentsRepository.findOne({
+      where: { id: paymentId, status: false },
+      relations: ['paymentLines'],
+    });
+
+    if (!payment) {
+      throw new NotFoundException(
+        `Payment with id: ${paymentId} and status: false not found`,
+      );
     }
+
+    return await this.paymentsRepository.remove(payment);
   }
 
-  async changePaymentStatus(paymentId: number) {
+  async changePaymentStatus(paymentId: number): Promise<Payment> {
     const payment = await this.paymentsRepository.findOne({
       where: { id: paymentId },
       relations: ['paymentLines'],
     });
 
-    // TODO: make transaction
+    if (!payment) {
+      throw new NotFoundException(`Payment with id: ${paymentId} not found`);
+    }
 
     payment.status = !payment.status;
 

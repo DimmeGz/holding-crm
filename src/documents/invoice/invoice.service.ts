@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
 import { GoodsService } from '../../goods';
@@ -20,7 +20,7 @@ import {
   getServiceIdsFromServiceLines,
 } from '../../common/utils';
 
-import { Invoice, InvoiceLine } from './entities';
+import { Invoice, InvoiceLine, InvoiceServiceLine } from './entities';
 import {
   CreateInvoiceByContractDTO,
   CreateInvoiceDTO,
@@ -49,9 +49,14 @@ export class InvoiceService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getInvoices(): Promise<Invoice[]> {
-    const invoices = await this.invoiceRepository
-      .createQueryBuilder('invoice')
+  private createBaseQueryBuilder(): SelectQueryBuilder<Invoice> {
+    return this.invoiceRepository.createQueryBuilder('invoice');
+  }
+
+  private applyInvoiceListSelect(
+    qb: SelectQueryBuilder<Invoice>,
+  ): SelectQueryBuilder<Invoice> {
+    return qb
       .leftJoin('invoice.seller', 'seller')
       .leftJoin('invoice.buyer', 'buyer')
       .leftJoin('invoice.recipient', 'recipient')
@@ -69,16 +74,13 @@ export class InvoiceService {
         'invoice.documentSum',
         'parent.id',
         'parent.number',
-      ])
-      .orderBy('invoice.id', 'DESC')
-      .getMany();
-
-    return invoices;
+      ]);
   }
 
-  async getInvoiceById(invoiceId: number): Promise<GetInvoiceResponseDTO> {
-    const invoice = await this.invoiceRepository
-      .createQueryBuilder('invoice')
+  private applyInvoiceDetailSelect(
+    qb: SelectQueryBuilder<Invoice>,
+  ): SelectQueryBuilder<Invoice> {
+    return qb
       .leftJoin('invoice.seller', 'seller')
       .leftJoin('invoice.sellerWarehouse', 'sellerWarehouse')
       .leftJoin('invoice.buyer', 'buyer')
@@ -92,7 +94,9 @@ export class InvoiceService {
       .leftJoin('invoiceLine.batch', 'batch')
       .leftJoin('invoiceLine.countryOfOrigin', 'countryOfOrigin')
       .leftJoin('invoiceLine.package', 'package')
-      .where('invoice.id = :invoiceId', { invoiceId })
+      .leftJoin('invoice.commissionInvoices', 'commissionInvoice')
+      .leftJoin('commissionInvoice.commissionPayments', 'commissionPayment')
+      .leftJoin('invoice.children', 'children')
       .select([
         'invoice.invoiceNumber',
         'invoice.status',
@@ -125,19 +129,31 @@ export class InvoiceService {
         'countryOfOrigin.name',
         'package.name',
         'package.capacity',
-      ])
-      .leftJoin('invoice.commissionInvoices', 'commissionInvoice')
-      .leftJoin('commissionInvoice.commissionPayments', 'commissionPayment')
-      .leftJoin('invoice.children', 'children')
-      .addSelect([
         'commissionInvoice.id',
         'commissionInvoice.status',
         'commissionPayment.id',
         'commissionPayment.status',
         'children.id',
         'children.status',
-      ])
+      ]);
+  }
+
+  async getInvoices(): Promise<Invoice[]> {
+    return await this.applyInvoiceListSelect(this.createBaseQueryBuilder())
+      .orderBy('invoice.id', 'DESC')
+      .getMany();
+  }
+
+  async getInvoiceById(invoiceId: number): Promise<GetInvoiceResponseDTO> {
+    const invoice = await this.applyInvoiceDetailSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .where('invoice.id = :invoiceId', { invoiceId })
       .getOne();
+
+    if (!invoice) {
+      throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
+    }
 
     const shipments =
       await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
@@ -152,30 +168,31 @@ export class InvoiceService {
   }
 
   async getInvoicesByOrderId(orderId: number): Promise<Invoice[]> {
-    const invoices = await this.invoiceRepository
-      .createQueryBuilder('invoice')
+    const invoices = await this.createBaseQueryBuilder()
       .where('invoiceLine.orderId = :orderId', { orderId })
       .select(['invoice.id', 'invoice.status', 'invoice.invoiceNumber'])
       .leftJoinAndSelect('invoice.invoiceLines', 'invoiceLine')
       .orderBy('invoice.id', 'ASC')
       .getMany();
 
-    for await (const invoice of invoices) {
-      invoice['shipments'] =
-        await this.shipmentsService.getShipmentsByInvoiceId(invoice.id);
-      invoice['payments'] = await this.paymentsService.getPaymentsByInvoiceId(
-        invoice.id,
-      );
-    }
+    await Promise.all(
+      invoices.map(async (invoice) => {
+        invoice['shipments'] =
+          await this.shipmentsService.getShipmentsByInvoiceId(invoice.id);
+        invoice['payments'] = await this.paymentsService.getPaymentsByInvoiceId(
+          invoice.id,
+        );
+      }),
+    );
 
     return invoices;
   }
 
   async createInvoice(createInvoiceDTO: CreateInvoiceDTO): Promise<Invoice> {
-    createInvoiceDTO['technicalProcesses'] =
-      await this.getTechnicalProcesses(createInvoiceDTO);
-    const newInvoice = new Invoice(createInvoiceDTO);
+    const newInvoice = this.invoiceRepository.create(createInvoiceDTO);
 
+    newInvoice.technicalProcesses =
+      await this.getTechnicalProcesses(createInvoiceDTO);
     newInvoice.status = false;
     newInvoice.createdAt = new Date();
     newInvoice.reportPeriod = newInvoice.reportPeriod || newInvoice.createdAt;
@@ -185,15 +202,7 @@ export class InvoiceService {
     newInvoice.vat = newInvoice.vat || 0;
     newInvoice.separation = newInvoice.separation || false;
 
-    newInvoice.documentSum =
-      createInvoiceDTO.invoiceLines.reduce(
-        (acc, cur) => (acc += cur.price * cur.qty),
-        0,
-      ) +
-      createInvoiceDTO.invoiceServiceLines.reduce(
-        (acc, cur) => (acc += cur.price * cur.qty),
-        0,
-      );
+    newInvoice.documentSum = this.calculateDocumentSum(createInvoiceDTO);
     newInvoice.paymentBalance = newInvoice.documentSum;
     newInvoice.invoiceLines = await this.populateLinesCosts(
       newInvoice.invoiceLines,
@@ -207,6 +216,19 @@ export class InvoiceService {
     );
 
     return await this.invoiceRepository.save(newInvoice);
+  }
+
+  private calculateDocumentSum(invoiceData): number {
+    return (
+      invoiceData.invoiceLines.reduce(
+        (acc: number, cur: InvoiceLine) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      invoiceData.invoiceServiceLines.reduce(
+        (acc: number, cur: InvoiceServiceLine) => (acc += cur.price * cur.qty),
+        0,
+      )
+    );
   }
 
   private async getTechnicalProcesses(
@@ -235,16 +257,18 @@ export class InvoiceService {
     warehouseId: number,
     currencyId: number,
   ): Promise<Partial<InvoiceLine>[]> {
-    for await (const line of invoiceLines) {
-      if (!line.cost) {
-        line.cost = await this.warehouseService.getWareCost({
-          ...line,
-          companyId,
-          warehouseId,
-          currencyId,
-        });
-      }
-    }
+    await Promise.all(
+      invoiceLines.map(async (line) => {
+        if (!line.cost) {
+          line.cost = await this.warehouseService.getWareCost({
+            ...line,
+            companyId,
+            warehouseId,
+            currencyId,
+          });
+        }
+      }),
+    );
 
     return invoiceLines;
   }
@@ -306,8 +330,7 @@ export class InvoiceService {
     invoiceId: number,
     updateInvoiceDTO: UpdateInvoiceDTO,
   ): Promise<Invoice> {
-    const invoice = await this.invoiceRepository
-      .createQueryBuilder('invoice')
+    const invoice = await this.createBaseQueryBuilder()
       .where('invoice.id = :invoiceId', { invoiceId })
       .andWhere('invoice.status = FALSE')
       .leftJoinAndSelect('invoice.invoiceLines', 'invoiceLines')
@@ -315,41 +338,29 @@ export class InvoiceService {
       .leftJoinAndSelect('invoice.technicalProcesses', 'technicalProcesses')
       .getOne();
 
-    const updatedInvoiceLinesIds = [];
-    for (const line of updateInvoiceDTO.invoiceLines) {
-      if (line['id']) {
-        updatedInvoiceLinesIds.push(line['id']);
-      }
+    if (!invoice) {
+      throw new NotFoundException(
+        `Invoice with id: ${invoiceId} and status: false not found`,
+      );
     }
+
+    const updatedInvoiceLinesIds = updateInvoiceDTO.invoiceLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const invoiceLinesToDelete = invoice.invoiceLines.filter(
       (line) => !updatedInvoiceLinesIds.includes(line.id),
     );
 
-    const updatedInvoiceServiceLinesIds = [];
-    for (const line of updateInvoiceDTO.invoiceServiceLines) {
-      if (line['id']) {
-        updatedInvoiceServiceLinesIds.push(line['id']);
-      }
-    }
+    const updatedInvoiceServiceLinesIds = updateInvoiceDTO.invoiceServiceLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const invoiceServiceLinesToDelete = invoice.invoiceServiceLines.filter(
       (line) => !updatedInvoiceServiceLinesIds.includes(line.id),
     );
 
-    updateInvoiceDTO.grossWeight = this.countInvoiceGrossWeight(
-      updateInvoiceDTO.invoiceLines,
-    );
-
     const updated = Object.assign(invoice, updateInvoiceDTO) as Invoice;
 
-    updated.documentSum =
-      updated.invoiceLines.reduce(
-        (acc, cur) => (acc += cur.price * cur.qty),
-        0,
-      ) +
-      updated.invoiceServiceLines.reduce(
-        (acc, cur) => (acc += cur.price * cur.qty),
-        0,
-      );
+    updated.documentSum = this.calculateDocumentSum(updated);
 
     updated.technicalProcesses =
       await this.getTechnicalProcesses(updateInvoiceDTO);
@@ -360,6 +371,8 @@ export class InvoiceService {
       updated.sellerWarehouseId,
       updated.currencyId,
     );
+
+    updated.grossWeight = this.countInvoiceGrossWeight(updated.invoiceLines);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -388,21 +401,28 @@ export class InvoiceService {
   }
 
   async removeInvoice(invoiceId: number): Promise<Invoice> {
-    try {
-      const invoice = await this.invoiceRepository.findOne({
-        where: { id: invoiceId, status: false },
-        relations: ['invoiceLines', 'invoiceServiceLines'],
-      });
-      return await this.invoiceRepository.remove(invoice);
-    } catch (e) {
-      throw new NotFoundException(e);
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoiceId, status: false },
+      relations: ['invoiceLines', 'invoiceServiceLines'],
+    });
+
+    if (!invoice) {
+      throw new NotFoundException(
+        `Invoice with id: ${invoiceId} and status: false not found`,
+      );
     }
+
+    return await this.invoiceRepository.remove(invoice);
   }
 
   async changeInvoiceStatus(invoiceId: number): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id: invoiceId },
     });
+
+    if (!invoice) {
+      throw new NotFoundException(`Invoice with id: ${invoiceId} not found`);
+    }
 
     invoice.status = !invoice.status;
 
@@ -418,8 +438,7 @@ export class InvoiceService {
   }
 
   async getInvoiceDataForCommission(invoiceId: number): Promise<Invoice> {
-    const invoice = await this.invoiceRepository
-      .createQueryBuilder('invoice')
+    const invoice = await this.createBaseQueryBuilder()
       .where('invoice.id = :invoiceId', { invoiceId })
       .andWhere('invoice.status = true')
       .leftJoin('invoice.children', 'children')
@@ -466,8 +485,7 @@ export class InvoiceService {
       {},
     );
 
-    const invoices = await this.invoiceRepository
-      .createQueryBuilder('invoice')
+    const invoices = await this.createBaseQueryBuilder()
       .where('invoice.id IN (:...invoiceIds)', {
         invoiceIds: Object.keys(changeBalanceData),
       })

@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { WarehouseAccounting } from './entities';
 import {
@@ -22,16 +18,22 @@ export class WarehouseService {
     private readonly warehouseAccountingRepository: Repository<WarehouseAccounting>,
   ) {}
 
-  async getWarehouseAccountings(): Promise<WarehouseAccounting[]> {
-    const warehouseAccounting = await this.warehouseAccountingRepository
-      .createQueryBuilder('warehouseAccounting')
+  private createBaseQueryBuilder(): SelectQueryBuilder<WarehouseAccounting> {
+    return this.warehouseAccountingRepository.createQueryBuilder(
+      'warehouseAccounting',
+    );
+  }
+
+  private applyWarehouseAccountingListSelect(
+    qb: SelectQueryBuilder<WarehouseAccounting>,
+  ): SelectQueryBuilder<WarehouseAccounting> {
+    return qb
       .leftJoin('warehouseAccounting.batch', 'batch')
       .leftJoin('batch.product', 'product')
       .leftJoin('warehouseAccounting.package', 'package')
       .leftJoin('warehouseAccounting.warehouse', 'warehouse')
       .leftJoin('warehouseAccounting.company', 'company')
       .leftJoin('warehouseAccounting.currency', 'currency')
-      .where('warehouseAccounting.qty != 0')
       .select([
         'warehouseAccounting.id',
         'warehouseAccounting.qty',
@@ -46,187 +48,167 @@ export class WarehouseService {
         'company.id',
         'company.name',
         'currency.name',
-      ])
+      ]);
+  }
+
+  async getWarehouseAccountings(): Promise<WarehouseAccounting[]> {
+    return await this.applyWarehouseAccountingListSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .where('warehouseAccounting.qty != 0')
       .orderBy('product.name', 'ASC')
       .getMany();
-
-    return warehouseAccounting;
   }
 
   async getWareCost(wareData: GetWareCostDTO): Promise<number> {
-    try {
-      const warehouseAccounting = await this.warehouseAccountingRepository
-        .createQueryBuilder('warehouseAccounting')
-        .andWhere('warehouseAccounting.batchId = :batchId', {
-          batchId: wareData.batchId,
-        })
-        .andWhere('warehouseAccounting.packageId = :packageId', {
-          packageId: wareData.packageId,
-        })
-        .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
-          warehouseId: wareData.warehouseId,
-        })
-        .andWhere('warehouseAccounting.companyId = :companyId', {
-          companyId: wareData.companyId,
-        })
-        .andWhere('warehouseAccounting.currencyId = :currencyId', {
-          currencyId: wareData.currencyId,
-        })
-        .getOneOrFail();
+    const warehouseAccounting = await this.createBaseQueryBuilder()
+      .where('warehouseAccounting.batchId = :batchId', {
+        batchId: wareData.batchId,
+      })
+      .andWhere('warehouseAccounting.packageId = :packageId', {
+        packageId: wareData.packageId,
+      })
+      .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+        warehouseId: wareData.warehouseId,
+      })
+      .andWhere('warehouseAccounting.companyId = :companyId', {
+        companyId: wareData.companyId,
+      })
+      .andWhere('warehouseAccounting.currencyId = :currencyId', {
+        currencyId: wareData.currencyId,
+      })
+      .getOne();
 
-      if (warehouseAccounting.cost) {
-        return warehouseAccounting.cost;
-      } else {
-        return 0;
-      }
-    } catch (e) {
-      return 0;
+    return warehouseAccounting?.cost || 0;
+  }
+
+  private async changeGoodsCount(
+    changeGoodsCountDTO: ChangeShipGoodsCountDTO | ChangeReceiveGoodsCountDTO,
+    isIncrease: boolean,
+  ): Promise<void> {
+    const { companyId, warehouseId, batchId, packageId } = changeGoodsCountDTO;
+
+    const queryBuilder = this.createBaseQueryBuilder()
+      .where('warehouseAccounting.companyId = :companyId', { companyId })
+      .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+        warehouseId,
+      })
+      .andWhere('warehouseAccounting.batchId = :batchId', { batchId })
+      .andWhere('warehouseAccounting.packageId = :packageId', { packageId });
+
+    if ('currencyId' in changeGoodsCountDTO) {
+      queryBuilder.andWhere('warehouseAccounting.currencyId = :currencyId', {
+        currencyId: changeGoodsCountDTO.currencyId,
+      });
     }
+
+    const warehouseAccounting = await queryBuilder.getOne();
+
+    if (!warehouseAccounting) {
+      return;
+    }
+
+    if (isIncrease) {
+      if ('price' in changeGoodsCountDTO) {
+        const totalCost =
+          warehouseAccounting.cost * warehouseAccounting.qty +
+          changeGoodsCountDTO.price * changeGoodsCountDTO.qty;
+
+        warehouseAccounting.qty += changeGoodsCountDTO.qty;
+        warehouseAccounting.cost = totalCost / warehouseAccounting.qty;
+      } else {
+        warehouseAccounting.qty += changeGoodsCountDTO.qty;
+      }
+    } else {
+      if ('price' in changeGoodsCountDTO) {
+        const newTotalCost =
+          warehouseAccounting.cost * warehouseAccounting.qty -
+          changeGoodsCountDTO.price * changeGoodsCountDTO.qty;
+
+        warehouseAccounting.qty -= changeGoodsCountDTO.qty;
+
+        if (!warehouseAccounting.qty) {
+          await this.warehouseAccountingRepository.remove(warehouseAccounting);
+          return;
+        }
+
+        warehouseAccounting.cost = newTotalCost / warehouseAccounting.qty;
+      } else {
+        warehouseAccounting.qty -= changeGoodsCountDTO.qty;
+      }
+    }
+
+    await this.warehouseAccountingRepository.save(warehouseAccounting);
   }
 
   async decreaseShipGoodsCount(
     decreaseGoodsCountDTO: ChangeShipGoodsCountDTO,
   ): Promise<void> {
-    try {
-      const warehouseAccounting = await this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.companyId = :companyId', {
-          companyId: decreaseGoodsCountDTO.companyId,
-        })
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: decreaseGoodsCountDTO.warehouseId,
-        })
-        .andWhere('ware.batchId = :batchId', {
-          batchId: decreaseGoodsCountDTO.batchId,
-        })
-        .andWhere('ware.packageId = :packageId', {
-          packageId: decreaseGoodsCountDTO.packageId,
-        })
-        .getOneOrFail();
-
-      warehouseAccounting.qty -= decreaseGoodsCountDTO.qty;
-      await this.warehouseAccountingRepository.save(warehouseAccounting);
-    } catch (e) {}
+    await this.changeGoodsCount(decreaseGoodsCountDTO, false);
   }
 
   async returnShipGoodsCount(
     returnGoodsCountDTO: ChangeShipGoodsCountDTO,
   ): Promise<void> {
-    try {
-      const warehouseAccounting = await this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.companyId = :companyId', {
-          companyId: returnGoodsCountDTO.companyId,
-        })
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: returnGoodsCountDTO.warehouseId,
-        })
-        .andWhere('ware.batchId = :batchId', {
-          batchId: returnGoodsCountDTO.batchId,
-        })
-        .andWhere('ware.packageId = :packageId', {
-          packageId: returnGoodsCountDTO.packageId,
-        })
-        .getOneOrFail();
-
-      warehouseAccounting.qty += returnGoodsCountDTO.qty;
-      await this.warehouseAccountingRepository.save(warehouseAccounting);
-    } catch (e) {}
+    await this.changeGoodsCount(returnGoodsCountDTO, true);
   }
 
   async increaseReceiveGoodsCount(
     increaseGoodsCountDTO: ChangeReceiveGoodsCountDTO,
   ): Promise<void> {
-    try {
-      let warehouseAccounting = await this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.companyId = :companyId', {
-          companyId: increaseGoodsCountDTO.companyId,
-        })
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: increaseGoodsCountDTO.warehouseId,
-        })
-        .andWhere('ware.batchId = :batchId', {
-          batchId: increaseGoodsCountDTO.batchId,
-        })
-        .andWhere('ware.packageId = :packageId', {
-          packageId: increaseGoodsCountDTO.packageId,
-        })
-        .andWhere('ware.currencyId = :currencyId', {
-          currencyId: increaseGoodsCountDTO.currencyId,
-        })
-        .getOne();
+    let warehouseAccounting = await this.createBaseQueryBuilder()
+      .where('warehouseAccounting.companyId = :companyId', {
+        companyId: increaseGoodsCountDTO.companyId,
+      })
+      .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+        warehouseId: increaseGoodsCountDTO.warehouseId,
+      })
+      .andWhere('warehouseAccounting.batchId = :batchId', {
+        batchId: increaseGoodsCountDTO.batchId,
+      })
+      .andWhere('warehouseAccounting.packageId = :packageId', {
+        packageId: increaseGoodsCountDTO.packageId,
+      })
+      .andWhere('warehouseAccounting.currencyId = :currencyId', {
+        currencyId: increaseGoodsCountDTO.currencyId,
+      })
+      .getOne();
 
-      if (warehouseAccounting) {
-        const totalCost =
-          warehouseAccounting.cost * warehouseAccounting.qty +
-          increaseGoodsCountDTO.price * increaseGoodsCountDTO.qty;
+    if (!warehouseAccounting) {
+      warehouseAccounting = new WarehouseAccounting(increaseGoodsCountDTO);
+      warehouseAccounting.cost = increaseGoodsCountDTO.price;
+      warehouseAccounting.qty = increaseGoodsCountDTO.qty;
+    } else {
+      await this.changeGoodsCount(increaseGoodsCountDTO, true);
+      return;
+    }
 
-        warehouseAccounting.qty += increaseGoodsCountDTO.qty;
-        warehouseAccounting.cost = totalCost / warehouseAccounting.qty;
-      } else {
-        warehouseAccounting = new WarehouseAccounting({
-          ...increaseGoodsCountDTO,
-          cost: increaseGoodsCountDTO.price,
-        });
-      }
-
-      await this.warehouseAccountingRepository.save(warehouseAccounting);
-    } catch (e) {}
+    await this.warehouseAccountingRepository.save(warehouseAccounting);
   }
 
   async returnReceiveGoodsCount(
     returnGoodsCountDTO: ChangeReceiveGoodsCountDTO,
   ): Promise<void> {
-    try {
-      const warehouseAccounting = await this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.companyId = :companyId', {
-          companyId: returnGoodsCountDTO.companyId,
-        })
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: returnGoodsCountDTO.warehouseId,
-        })
-        .andWhere('ware.batchId = :batchId', {
-          batchId: returnGoodsCountDTO.batchId,
-        })
-        .andWhere('ware.packageId = :packageId', {
-          packageId: returnGoodsCountDTO.packageId,
-        })
-        .andWhere('ware.currencyId = :currencyId', {
-          currencyId: returnGoodsCountDTO.currencyId,
-        })
-        .getOne();
-
-      const newTotalCost =
-        warehouseAccounting.cost * warehouseAccounting.qty -
-        returnGoodsCountDTO.price * returnGoodsCountDTO.qty;
-
-      warehouseAccounting.qty -= returnGoodsCountDTO.qty;
-
-      if (!warehouseAccounting.qty) {
-        await this.warehouseAccountingRepository.remove(warehouseAccounting);
-      } else {
-        warehouseAccounting.cost = newTotalCost / warehouseAccounting.qty;
-
-        await this.warehouseAccountingRepository.save(warehouseAccounting);
-      }
-    } catch (e) {}
+    await this.changeGoodsCount(returnGoodsCountDTO, false);
   }
 
   async transportProducts(transportDTO: TransportProductsDTO): Promise<void> {
     const linesToSave: WarehouseAccounting[] = [];
-    for await (const line of transportDTO.transportLines) {
-      const baseQueryBuilder = this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.companyId = :companyId', {
+
+    const transportPromises = transportDTO.transportLines.map(async (line) => {
+      const baseQueryBuilder = this.createBaseQueryBuilder()
+        .where('warehouseAccounting.companyId = :companyId', {
           companyId: transportDTO.companyId,
         })
-        .andWhere('ware.batchId = :batchId', { batchId: line.batchId })
-        .andWhere('ware.packageId = :packageId', { packageId: line.packageId });
+        .andWhere('warehouseAccounting.batchId = :batchId', {
+          batchId: line.batchId,
+        })
+        .andWhere('warehouseAccounting.packageId = :packageId', {
+          packageId: line.packageId,
+        });
 
       const fromLine = await baseQueryBuilder
-        .andWhere('ware.warehouseId = :warehouseId', {
+        .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
           warehouseId: transportDTO.warehouseSenderId,
         })
         .getOne();
@@ -236,7 +218,7 @@ export class WarehouseService {
       }
 
       let toLine = await baseQueryBuilder
-        .andWhere('ware.warehouseId = :warehouseId', {
+        .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
           warehouseId: transportDTO.warehouseReceiveId,
         })
         .getOne();
@@ -260,105 +242,122 @@ export class WarehouseService {
         toLine.cost = totalCost / toLine.qty + transportDTO.transportCost;
       }
       linesToSave.push(toLine);
-    }
+    });
 
+    await Promise.all(transportPromises);
     await this.warehouseAccountingRepository.save(linesToSave);
   }
 
   async unTransportProducts(transportDTO: TransportProductsDTO): Promise<void> {
     const linesToSave: WarehouseAccounting[] = [];
-    for await (const line of transportDTO.transportLines) {
-      const baseQueryBuilder = this.warehouseAccountingRepository
-        .createQueryBuilder('ware')
-        .where('ware.companyId = :companyId', {
-          companyId: transportDTO.companyId,
-        })
-        .andWhere('ware.batchId = :batchId', { batchId: line.batchId })
-        .andWhere('ware.packageId = :packageId', { packageId: line.packageId });
 
-      const fromLine = await baseQueryBuilder
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: transportDTO.warehouseSenderId,
-        })
-        .getOne();
+    const unTransportPromises = transportDTO.transportLines.map(
+      async (line) => {
+        const baseQueryBuilder = this.createBaseQueryBuilder()
+          .where('warehouseAccounting.companyId = :companyId', {
+            companyId: transportDTO.companyId,
+          })
+          .andWhere('warehouseAccounting.batchId = :batchId', {
+            batchId: line.batchId,
+          })
+          .andWhere('warehouseAccounting.packageId = :packageId', {
+            packageId: line.packageId,
+          });
 
-      const toLine = await baseQueryBuilder
-        .andWhere('ware.warehouseId = :warehouseId', {
-          warehouseId: transportDTO.warehouseReceiveId,
-        })
-        .getOne();
+        const fromLine = await baseQueryBuilder
+          .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+            warehouseId: transportDTO.warehouseSenderId,
+          })
+          .getOne();
 
-      if (!fromLine || !toLine) {
-        throw new NotFoundException('WarehouseAccounting not found');
-      }
+        const toLine = await baseQueryBuilder
+          .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+            warehouseId: transportDTO.warehouseReceiveId,
+          })
+          .getOne();
 
-      fromLine.qty += line.qty;
-      toLine.qty -= line.qty;
-      toLine.cost =
-        (toLine.cost - transportDTO.transportCost) * toLine.qty -
-        fromLine.cost * line.qty;
+        if (!fromLine || !toLine) {
+          throw new NotFoundException('WarehouseAccounting not found');
+        }
 
-      linesToSave.push(fromLine, toLine);
-    }
+        fromLine.qty += line.qty;
+        toLine.qty -= line.qty;
+        toLine.cost =
+          (toLine.cost * toLine.qty -
+            fromLine.cost * line.qty -
+            transportDTO.transportCost * line.qty) /
+          toLine.qty;
 
+        linesToSave.push(fromLine, toLine);
+      },
+    );
+
+    await Promise.all(unTransportPromises);
     await this.warehouseAccountingRepository.save(linesToSave);
   }
 
   async makeProduction(makeProductionDTO: MakeProductionDTO): Promise<void> {
-    try {
-      const outLines: WarehouseAccounting[] = [];
-      for (const line of makeProductionDTO.outLines) {
-        const outLine = await this.warehouseAccountingRepository
-          .createQueryBuilder('ware')
-          .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
-          .andWhere('ware.packageId = :warePackageId', {
-            warePackageId: line.packageId,
-          })
-          .andWhere('ware.companyId = :companyId', {
-            companyId: makeProductionDTO.companyId,
-          })
-          .andWhere('ware.warehouseId = :warehouseId', {
-            warehouseId: makeProductionDTO.warehouseId,
-          })
-          .getOne();
+    const linesToSave: WarehouseAccounting[] = [];
 
-        if (makeProductionDTO.status) {
-          outLine.qty -= line.qty;
-        } else {
-          outLine.qty += line.qty;
-        }
+    const outLinePromises = makeProductionDTO.outLines.map(async (line) => {
+      const outLine = await this.createBaseQueryBuilder()
+        .where('warehouseAccounting.batchId = :batchId', {
+          batchId: line.batchId,
+        })
+        .andWhere('warehouseAccounting.packageId = :packageId', {
+          packageId: line.packageId,
+        })
+        .andWhere('warehouseAccounting.companyId = :companyId', {
+          companyId: makeProductionDTO.companyId,
+        })
+        .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+          warehouseId: makeProductionDTO.warehouseId,
+        })
+        .getOne();
 
-        outLines.push(outLine);
+      if (!outLine) {
+        throw new NotFoundException('WarehouseAccounting not found');
       }
 
-      const inLines: WarehouseAccounting[] = [];
-      for (const line of makeProductionDTO.inLines) {
-        const inline = await this.warehouseAccountingRepository
-          .createQueryBuilder('ware')
-          .where('ware.batchId = :wareBatchId', { wareBatchId: line.batchId })
-          .andWhere('ware.packageId = :warePackageId', {
-            warePackageId: line.packageId,
-          })
-          .andWhere('ware.companyId = :companyId', {
-            companyId: makeProductionDTO.companyId,
-          })
-          .andWhere('ware.warehouseId = :warehouseId', {
-            warehouseId: makeProductionDTO.warehouseId,
-          })
-          .getOne();
+      outLine.qty += makeProductionDTO.status ? -line.qty : line.qty;
+      return outLine;
+    });
 
-        if (makeProductionDTO.status) {
-          inline.qty += line.qty;
-        } else {
-          inline.qty -= line.qty;
-        }
+    const inLinePromises = makeProductionDTO.inLines.map(async (line) => {
+      let inLine = await this.createBaseQueryBuilder()
+        .where('warehouseAccounting.batchId = :batchId', {
+          batchId: line.batchId,
+        })
+        .andWhere('warehouseAccounting.packageId = :packageId', {
+          packageId: line.packageId,
+        })
+        .andWhere('warehouseAccounting.companyId = :companyId', {
+          companyId: makeProductionDTO.companyId,
+        })
+        .andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+          warehouseId: makeProductionDTO.warehouseId,
+        })
+        .getOne();
 
-        inLines.push(inline);
+      if (!inLine) {
+        inLine = new WarehouseAccounting({
+          ...line,
+          companyId: makeProductionDTO.companyId,
+          warehouseId: makeProductionDTO.warehouseId,
+        });
       }
 
-      await this.warehouseAccountingRepository.save([...outLines, ...inLines]);
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+      inLine.qty += makeProductionDTO.status ? line.qty : -line.qty;
+      return inLine;
+    });
+
+    const [outLines, inLines] = await Promise.all([
+      Promise.all(outLinePromises),
+      Promise.all(inLinePromises),
+    ]);
+
+    linesToSave.push(...outLines, ...inLines);
+
+    await this.warehouseAccountingRepository.save(linesToSave);
   }
 }
