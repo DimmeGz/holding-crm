@@ -1,14 +1,15 @@
 import { IsInt, IsPositive } from 'class-validator';
 
-export class ProductLine {
+export class GetSellerBuyerAccountsDTO {
   @IsPositive()
   @IsInt()
-  batchId: number;
+  sellerId: number;
 
   @IsPositive()
   @IsInt()
-  packageId: number;
+  buyerId: number;
 
   @IsPositive()
-  qty: number;
+  @IsInt()
+  currencyId: number;
 }
