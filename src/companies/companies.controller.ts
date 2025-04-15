@@ -6,7 +6,7 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Get()
-  getCompanies(): any {
+  getCompanies(): Promise<any> {
     return this.companiesService.getCompanies();
   }
 }
