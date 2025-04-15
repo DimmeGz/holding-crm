@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { ContractsService } from '../contracts';
 import { GoodsService } from '../../goods';
@@ -36,9 +36,14 @@ export class OrdersService {
     private readonly orderConfirmationsService: OrdersConfirmationService,
   ) {}
 
-  async getOrders(): Promise<Order[]> {
-    const orders = await this.ordersRepository
-      .createQueryBuilder('order')
+  private createBaseQueryBuilder(): SelectQueryBuilder<Order> {
+    return this.ordersRepository.createQueryBuilder('order');
+  }
+
+  private applyOrderListSelect(
+    qb: SelectQueryBuilder<Order>,
+  ): SelectQueryBuilder<Order> {
+    return qb
       .leftJoin('order.seller', 'seller')
       .leftJoin('order.buyer', 'buyer')
       .leftJoin('order.recipient', 'recipient')
@@ -57,7 +62,13 @@ export class OrdersService {
         'product.name',
         'orderConfirmation.id',
         'orderConfirmation.expectedDate',
-      ])
+      ]);
+  }
+
+  async getOrders(): Promise<Order[]> {
+    const orders = await this.applyOrderListSelect(
+      this.createBaseQueryBuilder(),
+    )
       .orderBy('order.id', 'DESC')
       .getMany();
 
@@ -81,27 +92,18 @@ export class OrdersService {
     return [...products].sort();
   }
 
-  private getOrderConfirmationDate(order: Order): Date {
-    if (order.orderConfirmations.length) {
-      if (order.orderConfirmations.length > 1) {
-        let id = 0;
-        let confirmDate: Date;
-        for (const confirmation of order.orderConfirmations) {
-          if (confirmation.id > id) {
-            id = confirmation.id;
-            confirmDate = confirmation.expectedDate;
-          }
-        }
-        return confirmDate;
-      } else {
-        return order.orderConfirmations[0].expectedDate;
-      }
+  private getOrderConfirmationDate(order: Order): Date | undefined {
+    if (!order.orderConfirmations?.length) {
+      return undefined;
     }
+
+    return order.orderConfirmations.reduce((latest, current) =>
+      current.id > latest.id ? current : latest,
+    ).expectedDate;
   }
 
   async getOrderById(orderId: number): Promise<GetOrderResponseDTO> {
-    const order = await this.ordersRepository
-      .createQueryBuilder('order')
+    const order = await this.createBaseQueryBuilder()
       .leftJoinAndMapOne(
         'order.confirmation',
         'order.orderConfirmations',
@@ -113,6 +115,10 @@ export class OrdersService {
       .where('order.id = :orderId', { orderId })
       .getOne();
 
+    if (!order) {
+      throw new NotFoundException(`Order with id: ${orderId} not found`);
+    }
+
     const invoices = await this.invoiceService.getInvoicesByOrderId(orderId);
     const orderConfirmations =
       await this.orderConfirmationsService.getConfirmationsByOrderId(orderId);
@@ -121,31 +127,29 @@ export class OrdersService {
   }
 
   async getOrdersByContractId(contractId: number): Promise<Order[]> {
-    const orders = await this.ordersRepository
-      .createQueryBuilder('order')
+    const orders = await this.createBaseQueryBuilder()
       .where('order.contractId = :contractId', { contractId })
       .select(['order.id', 'order.status'])
       .orderBy('order.id', 'ASC')
       .getMany();
 
-    for await (const order of orders) {
-      order['invoices'] = await this.invoiceService.getInvoicesByOrderId(
-        order.id,
-      );
-    }
+    await Promise.all(
+      orders.map(async (order) => {
+        order['invoices'] = await this.invoiceService.getInvoicesByOrderId(
+          order.id,
+        );
+      }),
+    );
 
     return orders;
   }
 
   async createOrder(createOrderDTO: CreateOrderDTO): Promise<Order> {
-    createOrderDTO['technicalProcesses'] =
+    const newOrder = this.ordersRepository.create(createOrderDTO);
+
+    newOrder.technicalProcesses =
       await this.getTechnicalProcesses(createOrderDTO);
-
-    const newOrder = new Order(createOrderDTO);
-
-    newOrder.isHidden = createOrderDTO.isHidden
-      ? createOrderDTO.isHidden
-      : false;
+    newOrder.isHidden = createOrderDTO.isHidden || false;
     newOrder.createdAt = new Date();
     newOrder.signatureDate = newOrder.signatureDate || newOrder.createdAt;
     newOrder.comment = newOrder.comment || '';
@@ -160,7 +164,13 @@ export class OrdersService {
         newOrder.sellerId,
       ));
 
-    newOrder.documentSum =
+    newOrder.documentSum = this.calculateDocumentSum(createOrderDTO);
+
+    return await this.ordersRepository.save(newOrder);
+  }
+
+  private calculateDocumentSum(createOrderDTO: CreateOrderDTO): number {
+    return (
       createOrderDTO.orderLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
@@ -168,9 +178,8 @@ export class OrdersService {
       createOrderDTO.orderServiceLines.reduce(
         (acc, cur) => (acc += cur.price * cur.qty),
         0,
-      );
-
-    return await this.ordersRepository.save(newOrder);
+      )
+    );
   }
 
   private async getTechnicalProcesses(
@@ -199,8 +208,7 @@ export class OrdersService {
     orderId: number,
     updateOrderDTO: UpdateOrderDTO,
   ): Promise<Order> {
-    const order = await this.ordersRepository
-      .createQueryBuilder('order')
+    const order = await this.createBaseQueryBuilder()
       .where('order.id = :orderId', { orderId })
       .andWhere('order.status = FALSE')
       .leftJoinAndSelect('order.orderLines', 'orderLines')
@@ -208,22 +216,22 @@ export class OrdersService {
       .leftJoinAndSelect('order.technicalProcesses', 'technicalProcesses')
       .getOne();
 
-    const updatedOrderLinesIds = [];
-    for (const line of updateOrderDTO.orderLines) {
-      if (line['id']) {
-        updatedOrderLinesIds.push(line['id']);
-      }
+    if (!order) {
+      throw new NotFoundException(
+        `Order with id: ${orderId} and status: false not found`,
+      );
     }
+
+    const updatedOrderLinesIds = updateOrderDTO.orderLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const orderLinesToDelete = order.orderLines.filter(
       (line) => !updatedOrderLinesIds.includes(line.id),
     );
 
-    const updatedOrderServiceLinesIds = [];
-    for (const line of updateOrderDTO.orderServiceLines) {
-      if (line['id']) {
-        updatedOrderServiceLinesIds.push(line['id']);
-      }
-    }
+    const updatedOrderServiceLinesIds = updateOrderDTO.orderServiceLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const orderServiceLinesToDelete = order.orderServiceLines.filter(
       (line) => !updatedOrderServiceLinesIds.includes(line.id),
     );
@@ -232,6 +240,8 @@ export class OrdersService {
 
     updated.technicalProcesses =
       await this.getTechnicalProcesses(updateOrderDTO);
+
+    updated.documentSum = this.calculateDocumentSum(updated);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -260,21 +270,28 @@ export class OrdersService {
   }
 
   async removeOrder(orderId: number): Promise<Order> {
-    try {
-      const order = await this.ordersRepository.findOne({
-        where: { id: orderId, status: false },
-        relations: ['orderLines', 'orderServiceLines'],
-      });
-      return await this.ordersRepository.remove(order);
-    } catch (e) {
-      throw new NotFoundException(e);
+    const order = await this.ordersRepository.findOne({
+      where: { id: orderId, status: false },
+      relations: ['orderLines', 'orderServiceLines'],
+    });
+
+    if (!order) {
+      throw new NotFoundException(
+        `Order with id: ${orderId} and status: false not found`,
+      );
     }
+
+    return await this.ordersRepository.remove(order);
   }
 
   async changeOrderStatus(orderId: number): Promise<Order> {
     const order = await this.ordersRepository.findOne({
       where: { id: orderId },
     });
+
+    if (!order) {
+      throw new NotFoundException(`Order with id: ${orderId} not found`);
+    }
 
     order.status = !order.status;
 
@@ -290,8 +307,7 @@ export class OrdersService {
 
     const regexPattern = `^${orderPrefix}[0-9]+$`;
 
-    const orders = await this.ordersRepository
-      .createQueryBuilder('order')
+    const orders = await this.createBaseQueryBuilder()
       .where('order.sellerId = :sellerId', { sellerId })
       .andWhere('order.orderNumber ~ :regexPattern', {
         regexPattern,
@@ -310,6 +326,6 @@ export class OrdersService {
       numbers = orders.map((order) => +order.orderNumber);
     }
 
-    return orderPrefix + (Math.max(...numbers) + 1);
+    return orderPrefix + (Math.max(...numbers, 0) + 1);
   }
 }
