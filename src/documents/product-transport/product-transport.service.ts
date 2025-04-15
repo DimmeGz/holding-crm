@@ -4,8 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { LibsService } from '../../libs';
 import { WarehouseService } from '../../warehouse';
@@ -23,13 +22,19 @@ export class ProductTransportService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getProductTransports(): Promise<ProductTransport[]> {
-    const productTransports = await this.productTransportRepository
-      .createQueryBuilder('productTransport')
+  private createBaseQueryBuilder(): SelectQueryBuilder<ProductTransport> {
+    return this.productTransportRepository.createQueryBuilder(
+      'productTransport',
+    );
+  }
+
+  private applyProductTransportListSelect(
+    qb: SelectQueryBuilder<ProductTransport>,
+  ): SelectQueryBuilder<ProductTransport> {
+    return qb
       .leftJoin('productTransport.company', 'company')
       .leftJoin('productTransport.warehouseSender', 'warehouseSender')
       .leftJoin('productTransport.warehouseReceive', 'warehouseReceive')
-      .orderBy('productTransport.id', 'DESC')
       .select([
         'productTransport.id',
         'productTransport.status',
@@ -37,17 +42,13 @@ export class ProductTransportService {
         'company.name',
         'warehouseSender.name',
         'warehouseReceive.name',
-      ])
-      .getMany();
-
-    return productTransports;
+      ]);
   }
 
-  async getProductTransportById(
-    productTransportId: number,
-  ): Promise<ProductTransport> {
-    const productTransport = await this.productTransportRepository
-      .createQueryBuilder('productTransport')
+  private applyProductTransportDetailSelect(
+    qb: SelectQueryBuilder<ProductTransport>,
+  ): SelectQueryBuilder<ProductTransport> {
+    return qb
       .leftJoin('productTransport.company', 'company')
       .leftJoin('productTransport.warehouseSender', 'warehouseSender')
       .leftJoin('productTransport.warehouseReceive', 'warehouseReceive')
@@ -58,9 +59,6 @@ export class ProductTransportService {
       .leftJoin('productTransportLine.product', 'product')
       .leftJoin('productTransportLine.batch', 'batch')
       .leftJoin('productTransportLine.package', 'package')
-      .where('productTransport.id = :productTransportId', {
-        productTransportId,
-      })
       .select([
         'productTransport.id',
         'productTransport.status',
@@ -73,8 +71,33 @@ export class ProductTransportService {
         'product.name',
         'batch.name',
         'package.name',
-      ])
+      ]);
+  }
+
+  async getProductTransports(): Promise<ProductTransport[]> {
+    return await this.applyProductTransportListSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .orderBy('productTransport.id', 'DESC')
+      .getMany();
+  }
+
+  async getProductTransportById(
+    productTransportId: number,
+  ): Promise<ProductTransport> {
+    const productTransport = await this.applyProductTransportDetailSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .where('productTransport.id = :productTransportId', {
+        productTransportId,
+      })
       .getOne();
+
+    if (!productTransport) {
+      throw new NotFoundException(
+        `Product transport with id: ${productTransportId} not found`,
+      );
+    }
 
     return productTransport;
   }
@@ -82,7 +105,8 @@ export class ProductTransportService {
   async createProductTransport(
     createTransportDTO: CreateProductTransportDTO,
   ): Promise<ProductTransport> {
-    const newTransport = new ProductTransport(createTransportDTO);
+    const newTransport =
+      this.productTransportRepository.create(createTransportDTO);
     newTransport.status = false;
     newTransport.createdAt = new Date();
     newTransport.expectedDate =
@@ -103,42 +127,45 @@ export class ProductTransportService {
     productTransportId: number,
     updateTransportDTO: UpdateProductTransportDTO,
   ): Promise<ProductTransport> {
-    const transport = await this.productTransportRepository
-      .createQueryBuilder('transport')
-      .where('transport.id = :productTransportId', {
+    const transport = await this.createBaseQueryBuilder()
+      .where('productTransport.id = :productTransportId', {
         productTransportId,
       })
-      .andWhere('transport.status = FALSE')
+      .andWhere('productTransport.status = FALSE')
       .leftJoinAndSelect(
-        'transport.productTransportLines',
+        'productTransport.productTransportLines',
         'productTransportLines',
       )
       .leftJoinAndSelect(
-        'transport.productTransportServiceLines',
+        'productTransport.productTransportServiceLines',
         'productTransportServiceLines',
       )
-      .leftJoinAndSelect('transport.technicalProcesses', 'technicalProcesses')
+      .leftJoinAndSelect(
+        'productTransport.technicalProcesses',
+        'technicalProcesses',
+      )
       .getOne();
 
-    const updatedTranportLinesIds = [];
-    for (const line of updateTransportDTO.productTransportLines) {
-      if (line['id']) {
-        updatedTranportLinesIds.push(line['id']);
-      }
+    if (!transport) {
+      throw new NotFoundException(
+        `Product transport with id: ${productTransportId} and status: false not found`,
+      );
     }
-    const tranportLinesToDelete = transport.productTransportLines.filter(
-      (line) => !updatedTranportLinesIds.includes(line.id),
+
+    const updatedTransportLinesIds = updateTransportDTO.productTransportLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
+    const transportLinesToDelete = transport.productTransportLines.filter(
+      (line) => !updatedTransportLinesIds.includes(line.id),
     );
 
-    const updatedTranportServiceLinesIds = [];
-    for (const line of updateTransportDTO.productTransportServiceLines) {
-      if (line['id']) {
-        updatedTranportServiceLinesIds.push(line['id']);
-      }
-    }
-    const tranportServiceLinesToDelete =
+    const updatedTransportServiceLinesIds =
+      updateTransportDTO.productTransportServiceLines
+        .filter((line) => line['id'])
+        .map((line) => line['id']);
+    const transportServiceLinesToDelete =
       transport.productTransportServiceLines.filter(
-        (line) => !updatedTranportServiceLinesIds.includes(line.id),
+        (line) => !updatedTransportServiceLinesIds.includes(line.id),
       );
 
     const updated = Object.assign(transport, updateTransportDTO);
@@ -155,12 +182,12 @@ export class ProductTransportService {
     await queryRunner.startTransaction();
 
     try {
-      if (tranportLinesToDelete.length) {
-        await queryRunner.manager.remove(tranportLinesToDelete);
+      if (transportLinesToDelete.length) {
+        await queryRunner.manager.remove(transportLinesToDelete);
       }
 
-      if (tranportServiceLinesToDelete.length) {
-        await queryRunner.manager.remove(tranportServiceLinesToDelete);
+      if (transportServiceLinesToDelete.length) {
+        await queryRunner.manager.remove(transportServiceLinesToDelete);
       }
 
       await queryRunner.manager.save(updated);
@@ -179,16 +206,18 @@ export class ProductTransportService {
   async removeProductTransport(
     productTransportId: number,
   ): Promise<ProductTransport> {
-    try {
-      const transport = await this.productTransportRepository.findOneByOrFail({
-        id: productTransportId,
-        status: false,
-      });
+    const transport = await this.productTransportRepository.findOne({
+      where: { id: productTransportId, status: false },
+      relations: ['productTransportLines', 'productTransportServiceLines'],
+    });
 
-      return await this.productTransportRepository.remove(transport);
-    } catch (e) {
-      throw new NotFoundException(e);
+    if (!transport) {
+      throw new NotFoundException(
+        `Product transport with id: ${productTransportId} and status: false not found`,
+      );
     }
+
+    return await this.productTransportRepository.remove(transport);
   }
 
   async changeProductTransportStatus(
@@ -196,8 +225,14 @@ export class ProductTransportService {
   ): Promise<ProductTransport> {
     const transport = await this.productTransportRepository.findOne({
       where: { id: productTransportId },
-      relations: ['productTransportLines'],
+      relations: ['productTransportLines', 'productTransportServiceLines'],
     });
+
+    if (!transport) {
+      throw new NotFoundException(
+        `Product transport with id: ${productTransportId} not found`,
+      );
+    }
 
     transport.status = !transport.status;
 

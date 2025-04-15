@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { GoodsService } from '../../goods';
 import { OrdersService } from '../orders';
@@ -36,100 +36,40 @@ export class ContractsService {
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async getContracts(): Promise<GetContractsResponseDTO> {
-    const actualContracts: Contract[] = await this.contractsRepository
-      .createQueryBuilder('actualContract')
-      .where('actualContract.isArchived = false')
-      .andWhere('actualContract.parent IS NULL')
-      .leftJoin('actualContract.seller', 'seller')
-      .leftJoin('actualContract.buyer', 'buyer')
-      .leftJoin('actualContract.children', 'children')
-      .andWhere('children.isArchived = false')
-      .leftJoin('children.seller', 'childSeller')
-      .leftJoin('children.buyer', 'childBuyer')
-      .select([
-        'actualContract.id',
-        'actualContract.name',
-        'seller.name',
-        'buyer.name',
-        'actualContract.signatureDate',
-        'actualContract.term',
-        'children.id',
-        'children.name',
-        'childSeller.name',
-        'childBuyer.name',
-        'children.signatureDate',
-        'children.term',
-      ])
-      .getMany();
-
-    let archivedContracts: Contract[] = await this.contractsRepository
-      .createQueryBuilder('archivedContract')
-      .where('archivedContract.isArchived = true')
-      .andWhere('archivedContract.parent IS NULL')
-      .leftJoin('archivedContract.seller', 'seller')
-      .leftJoin('archivedContract.buyer', 'buyer')
-      .leftJoin('archivedContract.children', 'children')
-      .leftJoin('children.seller', 'childSeller')
-      .leftJoin('children.buyer', 'childBuyer')
-      .select([
-        'archivedContract.id',
-        'archivedContract.name',
-        'seller.name',
-        'buyer.name',
-        'archivedContract.signatureDate',
-        'archivedContract.term',
-        'children.id',
-        'children.name',
-        'childSeller.name',
-        'childBuyer.name',
-        'children.signatureDate',
-        'children.term',
-      ])
-      .getMany();
-
-    const archivedChildContracts: Contract[] = await this.contractsRepository
-      .createQueryBuilder('archivedChildContract')
-      .where('archivedChildContract.isArchived = false')
-      .andWhere('archivedChildContract.parent IS NULL')
-      .leftJoin('archivedChildContract.seller', 'seller')
-      .leftJoin('archivedChildContract.buyer', 'buyer')
-      .leftJoin('archivedChildContract.children', 'children')
-      .andWhere('children.isArchived = true')
-      .leftJoin('children.seller', 'childSeller')
-      .leftJoin('children.buyer', 'childBuyer')
-      .select([
-        'archivedChildContract.id',
-        'archivedChildContract.name',
-        'seller.name',
-        'buyer.name',
-        'archivedChildContract.signatureDate',
-        'archivedChildContract.term',
-        'children.id',
-        'children.name',
-        'childSeller.name',
-        'childBuyer.name',
-        'children.signatureDate',
-        'children.term',
-      ])
-      .getMany();
-
-    archivedContracts = archivedContracts.concat(archivedChildContracts);
-
-    return {
-      actualContracts,
-      archivedContracts,
-    };
+  private createBaseQueryBuilder(): SelectQueryBuilder<Contract> {
+    return this.contractsRepository.createQueryBuilder('contract');
   }
 
-  async getContractById(contractId: number): Promise<GetContractResponseDTO> {
-    const contract = await this.contractsRepository
-      .createQueryBuilder('contract')
-      .where('contract.id = :contractId', { contractId })
+  private applyContractListSelect(
+    qb: SelectQueryBuilder<Contract>,
+    alias = 'contract',
+  ): SelectQueryBuilder<Contract> {
+    return qb
+      .leftJoin(`${alias}.seller`, 'seller')
+      .leftJoin(`${alias}.buyer`, 'buyer')
+      .select([
+        `${alias}.id`,
+        `${alias}.name`,
+        'seller.name',
+        'buyer.name',
+        `${alias}.signatureDate`,
+        `${alias}.term`,
+      ]);
+  }
+
+  private applyContractDetailSelect(
+    qb: SelectQueryBuilder<Contract>,
+  ): SelectQueryBuilder<Contract> {
+    return qb
       .leftJoin('contract.seller', 'seller')
       .leftJoin('contract.buyer', 'buyer')
       .leftJoin('contract.currency', 'currency')
       .leftJoin('contract.incoterms', 'incoterms')
+      .leftJoin('contract.contractLines', 'contractLine')
+      .leftJoin('contractLine.product', 'product')
+      .leftJoin('contractLine.package', 'package')
+      .leftJoin('contract.contractServiceLines', 'contractServiceLine')
+      .leftJoin('contractServiceLine.service', 'service')
       .select([
         'contract.id',
         'contract.name',
@@ -145,11 +85,6 @@ export class ContractsService {
         'buyer.name',
         'currency.name',
         'incoterms.name',
-      ])
-      .leftJoin('contract.contractLines', 'contractLine')
-      .leftJoin('contractLine.product', 'product')
-      .leftJoin('contractLine.package', 'package')
-      .addSelect([
         'contractLine.id',
         'contractLine.qty',
         'contractLine.shipQty',
@@ -157,16 +92,64 @@ export class ContractsService {
         'product.id',
         'product.name',
         'package.name',
-      ])
-      .leftJoin('contract.contractServiceLines', 'contractServiceLine')
-      .leftJoin('contractServiceLine.service', 'service')
-      .addSelect([
         'contractServiceLine.id',
         'contractServiceLine.price',
         'contractServiceLine.qty',
         'service.name',
-      ])
+      ]);
+  }
+
+  async getContracts(): Promise<GetContractsResponseDTO> {
+    const actualContractsQuery = this.applyContractListSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .where('contract.isArchived = false')
+      .andWhere('contract.parent IS NULL');
+
+    const archivedContractsQuery = this.applyContractListSelect(
+      this.createBaseQueryBuilder(),
+      'archivedContract',
+    )
+      .where('archivedContract.isArchived = true')
+      .andWhere('archivedContract.parent IS NULL');
+
+    const actualContractsWithArchivedChildrenQuery =
+      this.createBaseQueryBuilder()
+        .where('contract.isArchived = false')
+        .andWhere('contract.parent IS NULL')
+        .leftJoin('contract.children', 'children')
+        .andWhere('children.isArchived = true');
+
+    const actualContracts = await actualContractsQuery.getMany();
+
+    const archivedContracts = await archivedContractsQuery.getMany();
+
+    const archivedChildContracts = await this.applyContractListSelect(
+      actualContractsWithArchivedChildrenQuery,
+      'contract',
+    ).getMany();
+
+    const allArchivedContracts = [
+      ...archivedContracts,
+      ...archivedChildContracts,
+    ];
+
+    return {
+      actualContracts,
+      archivedContracts: allArchivedContracts,
+    };
+  }
+
+  async getContractById(contractId: number): Promise<GetContractResponseDTO> {
+    const contract = await this.applyContractDetailSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .where('contract.id = :contractId', { contractId })
       .getOne();
+
+    if (!contract) {
+      throw new NotFoundException(`Contract with id ${contractId} not found`);
+    }
 
     const shippedProducts =
       await this.shipmentsService.getShippedProductsByContract(contractId);
@@ -185,10 +168,10 @@ export class ContractsService {
   async createContract(
     createContractDTO: CreateContractDTO,
   ): Promise<Contract> {
-    createContractDTO['technicalProcesses'] =
-      await this.getTechnicalProcesses(createContractDTO);
-    const newContract = new Contract(createContractDTO);
+    const newContract = this.contractsRepository.create(createContractDTO);
 
+    newContract.technicalProcesses =
+      await this.getTechnicalProcesses(createContractDTO);
     newContract.status = false;
     newContract.isArchived = false;
     newContract.createdAt = new Date();
@@ -201,7 +184,9 @@ export class ContractsService {
     return await this.contractsRepository.save(newContract);
   }
 
-  private async getTechnicalProcesses(createContractDTO: CreateContractDTO) {
+  private async getTechnicalProcesses(
+    createContractDTO: CreateContractDTO,
+  ): Promise<{ id: number }[]> {
     const productIds = getProductIdsFromProductLines(
       createContractDTO.contractLines,
     );
@@ -225,8 +210,7 @@ export class ContractsService {
     contractId: number,
     updateContractDTO: UpdateContractDTO,
   ): Promise<Contract> {
-    const contract = await this.contractsRepository
-      .createQueryBuilder('contract')
+    const contract = await this.createBaseQueryBuilder()
       .where('contract.id = :contractId', { contractId })
       .andWhere('contract.status = FALSE')
       .leftJoinAndSelect('contract.contractLines', 'contractLines')
@@ -237,22 +221,23 @@ export class ContractsService {
       .leftJoinAndSelect('contract.technicalProcesses', 'technicalProcesses')
       .getOne();
 
-    const updatedContractLinesIds = [];
-    for (const line of updateContractDTO.contractLines) {
-      if (line['id']) {
-        updatedContractLinesIds.push(line['id']);
-      }
+    if (!contract) {
+      throw new NotFoundException(
+        `Contract with id: ${contractId} and status: false not found`,
+      );
     }
+
+    const updatedContractLinesIds = updateContractDTO.contractLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const contractLinesToDelete = contract.contractLines.filter(
       (line) => !updatedContractLinesIds.includes(line.id),
     );
 
-    const updatedContractServiceLinesIds = [];
-    for (const line of updateContractDTO.contractServiceLines) {
-      if (line['id']) {
-        updatedContractServiceLinesIds.push(line['id']);
-      }
-    }
+    const updatedContractServiceLinesIds =
+      updateContractDTO.contractServiceLines
+        .filter((line) => line['id'])
+        .map((line) => line['id']);
     const contractServiceLinesToDelete = contract.contractServiceLines.filter(
       (line) => !updatedContractServiceLinesIds.includes(line.id),
     );
@@ -289,15 +274,16 @@ export class ContractsService {
   }
 
   async removeContract(contractId: number): Promise<Contract> {
-    try {
-      const contract = await this.contractsRepository.findOne({
-        where: { id: contractId },
-        relations: ['contractLines', 'contractServiceLines'],
-      });
-      return await this.contractsRepository.remove(contract);
-    } catch (e) {
-      throw new NotFoundException(e);
+    const contract = await this.contractsRepository.findOne({
+      where: { id: contractId },
+      relations: ['contractLines', 'contractServiceLines'],
+    });
+
+    if (!contract) {
+      throw new NotFoundException(`Contract with id: ${contractId} not found`);
     }
+
+    return await this.contractsRepository.remove(contract);
   }
 
   async changeContractStatus(contractId: number): Promise<Contract> {
@@ -305,17 +291,24 @@ export class ContractsService {
       where: { id: contractId },
     });
 
+    if (!contract) {
+      throw new NotFoundException(`Contract with id: ${contractId} not found`);
+    }
+
     contract.status = !contract.status;
 
     return await this.contractsRepository.save(contract);
   }
 
   async getOrderPrefix(contractId: number): Promise<string> {
-    const contract = await this.contractsRepository
-      .createQueryBuilder('contract')
+    const contract = await this.createBaseQueryBuilder()
       .where('contract.id = :contractId', { contractId })
       .select(['contract.id', 'contract.orderPrefix'])
       .getOne();
+
+    if (!contract) {
+      throw new NotFoundException(`Contract with id: ${contractId} not found`);
+    }
 
     return contract.orderPrefix || '';
   }

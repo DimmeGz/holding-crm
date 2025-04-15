@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { LibsService } from '../../libs';
 
@@ -19,9 +19,14 @@ export class TransitService {
     private readonly libsService: LibsService,
   ) {}
 
-  async getTransitLines(): Promise<TransitLine[]> {
-    const transitLines = await this.transitLinesRepository
-      .createQueryBuilder('transitLine')
+  private createBaseQueryBuilder(): SelectQueryBuilder<TransitLine> {
+    return this.transitLinesRepository.createQueryBuilder('transitLine');
+  }
+
+  private applyTransitLineListSelect(
+    qb: SelectQueryBuilder<TransitLine>,
+  ): SelectQueryBuilder<TransitLine> {
+    return qb
       .leftJoin('transitLine.shipment', 'shipment')
       .leftJoin('shipment.seller', 'seller')
       .leftJoin('transitLine.receive', 'receive')
@@ -29,7 +34,6 @@ export class TransitService {
       .leftJoin('transitLine.batch', 'batch')
       .leftJoin('batch.product', 'product')
       .leftJoin('transitLine.package', 'package')
-      .where('transitLine.qty != 0')
       .select([
         'transitLine.id',
         'transitLine.qty',
@@ -47,10 +51,13 @@ export class TransitService {
         'batch.name',
         'package.id',
         'package.name',
-      ])
-      .getMany();
+      ]);
+  }
 
-    return transitLines;
+  async getTransitLines(): Promise<TransitLine[]> {
+    return await this.applyTransitLineListSelect(this.createBaseQueryBuilder())
+      .where('transitLine.qty != 0')
+      .getMany();
   }
 
   async createTransitLine(
@@ -59,7 +66,7 @@ export class TransitService {
     const newTransitLines: TransitLine[] = [];
 
     for (const line of createTransitLineDTO.lines) {
-      const newTransitLine = new TransitLine({
+      const newTransitLine = this.transitLinesRepository.create({
         shipmentId: createTransitLineDTO.shipmentId,
         ...line,
       });
@@ -74,62 +81,53 @@ export class TransitService {
   }
 
   async removeTransitLines(shipmentId: number): Promise<void> {
-    const transitLines = await this.transitLinesRepository.findBy({
-      shipmentId,
-    });
-
-    await this.transitLinesRepository.remove(transitLines);
+    await this.transitLinesRepository.delete({ shipmentId });
   }
 
   async addReceiveToTransitLines(
     addReceiveDTO: AddReceiveToTransitLineDTO,
   ): Promise<void> {
-    const linesToUpdate: TransitLine[] = [];
-
-    for (const line of addReceiveDTO.lines) {
-      const transitLine = await this.transitLinesRepository.findOneBy({
-        shipmentId: addReceiveDTO.shipmentId,
-        batchId: line.batchId,
-        packageId: line.packageId,
-      });
-      transitLine.receiveId = addReceiveDTO.receiveId;
-      linesToUpdate.push(transitLine);
-    }
+    const linesToUpdate = await Promise.all(
+      addReceiveDTO.lines.map(async (line) => {
+        const transitLine = await this.transitLinesRepository.findOneBy({
+          shipmentId: addReceiveDTO.shipmentId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+        });
+        transitLine.receiveId = addReceiveDTO.receiveId;
+        return transitLine;
+      }),
+    );
 
     await this.transitLinesRepository.save(linesToUpdate);
   }
 
   async receiveTransitLines(receiveDTO: ReceiveTransitLinesDTO): Promise<void> {
-    const linesToUpdate: TransitLine[] = [];
-
-    for (const line of receiveDTO.lines) {
-      const transitLine = await this.transitLinesRepository.findOneBy({
-        receiveId: receiveDTO.receiveId,
-        batchId: line.batchId,
-        packageId: line.packageId,
-      });
-
-      transitLine.qty -= line.qty;
-      linesToUpdate.push(transitLine);
-    }
-
-    await this.transitLinesRepository.save(linesToUpdate);
+    await this.updateTransitLinesQty(receiveDTO, false);
   }
 
   async cancelReceiveTransitLines(
     receiveDTO: ReceiveTransitLinesDTO,
   ): Promise<void> {
-    const linesToUpdate: TransitLine[] = [];
+    await this.updateTransitLinesQty(receiveDTO, true);
+  }
 
-    for (const line of receiveDTO.lines) {
-      const transitLine = await this.transitLinesRepository.findOneBy({
-        receiveId: receiveDTO.receiveId,
-        batchId: line.batchId,
-        packageId: line.packageId,
-      });
-      transitLine.qty += line.qty;
-      linesToUpdate.push(transitLine);
-    }
+  private async updateTransitLinesQty(
+    receiveDTO: ReceiveTransitLinesDTO,
+    isCancel: boolean,
+  ): Promise<void> {
+    const linesToUpdate = await Promise.all(
+      receiveDTO.lines.map(async (line) => {
+        const transitLine = await this.transitLinesRepository.findOneBy({
+          receiveId: receiveDTO.receiveId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+        });
+
+        transitLine.qty += isCancel ? line.qty : -line.qty;
+        return transitLine;
+      }),
+    );
 
     await this.transitLinesRepository.save(linesToUpdate);
   }
