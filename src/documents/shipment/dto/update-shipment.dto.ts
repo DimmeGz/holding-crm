@@ -3,7 +3,6 @@ import { Type } from 'class-transformer';
 
 import { IsOneOfDtos } from '../../../common/decorators';
 
-import { PartialType } from '@nestjs/mapped-types';
 import { BaseShipmentDTO } from './base-shipment.dto';
 import { CreateServiceLineDTO, UpdateServiceLineDTO } from '../../common/dto';
 import { CreateShipmentLineDTO } from './create-shipment-line.dto';
