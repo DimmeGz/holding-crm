@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import {
   getProductIdsFromProductLines,
@@ -29,9 +29,14 @@ export class ReceiveService {
     private readonly warehouseService: WarehouseService,
   ) {}
 
-  async getReceives(): Promise<Receive[]> {
-    const receives = await this.receivesRepository
-      .createQueryBuilder('receive')
+  private createBaseQueryBuilder(): SelectQueryBuilder<Receive> {
+    return this.receivesRepository.createQueryBuilder('receive');
+  }
+
+  private applyReceiveListSelect(
+    qb: SelectQueryBuilder<Receive>,
+  ): SelectQueryBuilder<Receive> {
+    return qb
       .leftJoin('receive.seller', 'seller')
       .leftJoin('receive.buyer', 'buyer')
       .leftJoin('receive.shipment', 'shipment')
@@ -45,16 +50,13 @@ export class ReceiveService {
         'buyer.name',
         'shipment.id',
         'currency.name',
-      ])
-      .orderBy('receive.id', 'DESC')
-      .getMany();
-
-    return receives;
+      ]);
   }
 
-  async getReceiveById(receiveId: number): Promise<Receive> {
-    const receive = await this.receivesRepository
-      .createQueryBuilder('receive')
+  private applyReceiveDetailSelect(
+    qb: SelectQueryBuilder<Receive>,
+  ): SelectQueryBuilder<Receive> {
+    return qb
       .leftJoin('receive.seller', 'seller')
       .leftJoin('receive.buyer', 'buyer')
       .leftJoin('receive.buyerWarehouse', 'buyerWarehouse')
@@ -65,7 +67,6 @@ export class ReceiveService {
       .leftJoin('receiveLine.product', 'product')
       .leftJoin('receiveLine.batch', 'batch')
       .leftJoin('receiveLine.package', 'package')
-      .where('receive.id = :receiveId', { receiveId })
       .select([
         'receive.id',
         'receive.expectedDate',
@@ -88,43 +89,47 @@ export class ReceiveService {
         'batch.name',
         'package.name',
         'package.capacity',
-      ])
+      ]);
+  }
+
+  async getReceives(): Promise<Receive[]> {
+    return await this.applyReceiveListSelect(this.createBaseQueryBuilder())
+      .orderBy('receive.id', 'DESC')
+      .getMany();
+  }
+
+  async getReceiveById(receiveId: number): Promise<Receive> {
+    const receive = await this.applyReceiveDetailSelect(
+      this.createBaseQueryBuilder(),
+    )
+      .where('receive.id = :receiveId', { receiveId })
       .getOne();
+
+    if (!receive) {
+      throw new NotFoundException(`Receive with id: ${receiveId} not found`);
+    }
 
     return receive;
   }
 
   async getReceivesByShipmentId(shipmentId: number): Promise<Receive[]> {
-    const receives = await this.receivesRepository
-      .createQueryBuilder('receive')
+    return await this.createBaseQueryBuilder()
       .where('receive.shipmentId = :shipmentId', { shipmentId })
       .select(['receive.id', 'receive.status'])
       .orderBy('receive.id', 'ASC')
       .getMany();
-
-    return receives;
   }
 
   async createReceive(createReceiveDTO: CreateReveiveDTO): Promise<Receive> {
-    createReceiveDTO['technicalProcesses'] =
-      await this.getTechnicalProcesses(createReceiveDTO);
-
     const newReceive = new Receive(createReceiveDTO);
     newReceive.status = false;
     newReceive.createdAt = new Date();
     newReceive.comment = newReceive.comment || '';
     newReceive.transportPlace = newReceive.transportPlace || '';
     newReceive.transportAmount = newReceive.transportAmount || 0;
-
-    newReceive.documentSum =
-      newReceive.receiveLines.reduce(
-        (acc, cur) => (acc += cur.price * cur.qty),
-        0,
-      ) +
-      newReceive.receiveServiceLines.reduce(
-        (acc, cur) => (acc += cur.price * cur.qty),
-        0,
-      );
+    newReceive.documentSum = this.calculateDocumentSum(createReceiveDTO);
+    newReceive.technicalProcesses =
+      await this.getTechnicalProcesses(createReceiveDTO);
 
     const createdReceive = await this.receivesRepository.save(newReceive);
 
@@ -135,6 +140,19 @@ export class ReceiveService {
     });
 
     return createdReceive;
+  }
+
+  private calculateDocumentSum(createReceiveDTO: CreateReveiveDTO): number {
+    return (
+      createReceiveDTO.receiveLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      ) +
+      createReceiveDTO.receiveServiceLines.reduce(
+        (acc, cur) => (acc += cur.price * cur.qty),
+        0,
+      )
+    );
   }
 
   private async getTechnicalProcesses(
@@ -163,8 +181,7 @@ export class ReceiveService {
     receiveId: number,
     updateReceiveDTO: UpdateReceiveDTO,
   ): Promise<Receive> {
-    const receive = await this.receivesRepository
-      .createQueryBuilder('receive')
+    const receive = await this.createBaseQueryBuilder()
       .where('receive.id = :receiveId', { receiveId })
       .andWhere('receive.status = FALSE')
       .leftJoinAndSelect('receive.receiveLines', 'receiveLines')
@@ -172,34 +189,33 @@ export class ReceiveService {
       .leftJoinAndSelect('receive.technicalProcesses', 'technicalProcesses')
       .getOne();
 
-    const updatedReceiveLinesIds = [];
-    for (const line of updateReceiveDTO.receiveLines) {
-      if (line['id']) {
-        updatedReceiveLinesIds.push(line['id']);
-      }
+    if (!receive) {
+      throw new NotFoundException(
+        `Receive with id: ${receiveId} and status: false not found`,
+      );
     }
+
+    const updatedReceiveLinesIds = updateReceiveDTO.receiveLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const receiveLinesToDelete = receive.receiveLines.filter(
       (line) => !updatedReceiveLinesIds.includes(line.id),
     );
 
-    const updatedReceiveServiceLinesIds = [];
-    for (const line of updateReceiveDTO.receiveServiceLines) {
-      if (line['id']) {
-        updatedReceiveServiceLinesIds.push(line['id']);
-      }
-    }
+    const updatedReceiveServiceLinesIds = updateReceiveDTO.receiveServiceLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const receiveServiceLinesToDelete = receive.receiveServiceLines.filter(
       (line) => !updatedReceiveServiceLinesIds.includes(line.id),
     );
 
     const updated = Object.assign(receive, updateReceiveDTO);
+    updated.documentSum = this.calculateDocumentSum(updated);
+    updated.technicalProcesses = await this.getTechnicalProcesses(updated);
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    updated.technicalProcesses =
-      await this.getTechnicalProcesses(updateReceiveDTO);
 
     try {
       if (receiveLinesToDelete.length) {
@@ -224,15 +240,18 @@ export class ReceiveService {
   }
 
   async removeReceive(receiveId: number): Promise<Receive> {
-    try {
-      const invoice = await this.receivesRepository.findOne({
-        where: { id: receiveId, status: false },
-        relations: ['receiveLines', 'receiveServiceLines'],
-      });
-      return await this.receivesRepository.remove(invoice);
-    } catch (e) {
-      throw new NotFoundException(e);
+    const receive = await this.receivesRepository.findOne({
+      where: { id: receiveId, status: false },
+      relations: ['receiveLines', 'receiveServiceLines'],
+    });
+
+    if (!receive) {
+      throw new NotFoundException(
+        `Receive with id: ${receiveId} and status: false not found`,
+      );
     }
+
+    return await this.receivesRepository.remove(receive);
   }
 
   async changeReceiveStatus(receiveId: number): Promise<Receive> {
@@ -241,7 +260,9 @@ export class ReceiveService {
       relations: ['receiveLines'],
     });
 
-    // TODO: make transaction
+    if (!receive) {
+      throw new NotFoundException(`Receive with id: ${receiveId} not found`);
+    }
 
     receive.status = !receive.status;
 
@@ -252,9 +273,19 @@ export class ReceiveService {
   }
 
   private async updateWarehouseAccounting(receive: Receive): Promise<void> {
-    if (receive.status) {
-      for await (const line of receive.receiveLines) {
-        await this.warehouseService.increaseReceiveGoodsCount({
+    const warehousePromises = receive.receiveLines.map((line) => {
+      if (receive.status) {
+        return this.warehouseService.increaseReceiveGoodsCount({
+          companyId: receive.buyerId,
+          warehouseId: receive.buyerWarehouseId,
+          batchId: line.batchId,
+          packageId: line.packageId,
+          qty: line.qty,
+          price: line.price,
+          currencyId: receive.currencyId,
+        });
+      } else {
+        return this.warehouseService.returnReceiveGoodsCount({
           companyId: receive.buyerId,
           warehouseId: receive.buyerWarehouseId,
           batchId: line.batchId,
@@ -264,19 +295,9 @@ export class ReceiveService {
           currencyId: receive.currencyId,
         });
       }
-    } else {
-      for await (const line of receive.receiveLines) {
-        await this.warehouseService.returnReceiveGoodsCount({
-          companyId: receive.buyerId,
-          warehouseId: receive.buyerWarehouseId,
-          batchId: line.batchId,
-          packageId: line.packageId,
-          qty: line.qty,
-          price: line.price,
-          currencyId: receive.currencyId,
-        });
-      }
-    }
+    });
+
+    await Promise.all(warehousePromises);
   }
 
   private async updateTransitLines(receive: Receive): Promise<void> {
