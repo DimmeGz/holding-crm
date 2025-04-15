@@ -1,7 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Account, Company } from './entities';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompanyType } from './enums';
 import { ChangeInvoiceStatusBalanceDTO, MakePaymentDTO } from './dto';
@@ -15,89 +19,109 @@ export class CompaniesService {
     private readonly accountsRepository: Repository<Account>,
   ) {}
 
-  async getCompanies(): Promise<Company[]> {
-    return await this.companiesRepository
+  private createBaseCompanyQueryBuilder(): SelectQueryBuilder<Company> {
+    return this.companiesRepository
       .createQueryBuilder('company')
       .where('company.companyType = :companyType', {
         companyType: CompanyType.INNER_COMPANY,
-      })
+      });
+  }
+
+  private applyCompanyListSelect(
+    qb: SelectQueryBuilder<Company>,
+  ): SelectQueryBuilder<Company> {
+    return qb
       .leftJoinAndSelect('company.accounts', 'accounts')
       .leftJoinAndSelect('accounts.currency', 'currency')
       .leftJoinAndSelect('company.defaultWarehouse', 'defaultWarehouse')
-      .leftJoinAndSelect('company.warehousesUsage', 'warehousesUsage')
-      .getMany();
+      .leftJoinAndSelect('company.warehousesUsage', 'warehousesUsage');
   }
 
-  async changeInvoiceStatusBalances(
-    changeInvoiceStatusBalanceDTO: ChangeInvoiceStatusBalanceDTO,
-  ): Promise<void> {
-    try {
-      const [sellerAccount, buyerAccount] = await this.getSellerBuyerAccounts(
-        changeInvoiceStatusBalanceDTO,
-      );
-
-      if (changeInvoiceStatusBalanceDTO.status) {
-        sellerAccount.wait += changeInvoiceStatusBalanceDTO.amount;
-        buyerAccount.debt -= changeInvoiceStatusBalanceDTO.amount;
-      } else {
-        sellerAccount.wait -= changeInvoiceStatusBalanceDTO.amount;
-        buyerAccount.debt += changeInvoiceStatusBalanceDTO.amount;
-      }
-
-      await this.accountsRepository.save([sellerAccount, buyerAccount]);
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+  private createBaseAccountQueryBuilder(): SelectQueryBuilder<Account> {
+    return this.accountsRepository.createQueryBuilder('account');
   }
 
-  async changeAccountsBalances(makePaymentDTO: MakePaymentDTO): Promise<void> {
-    try {
-      const [sellerAccount, buyerAccount] =
-        await this.getSellerBuyerAccounts(makePaymentDTO);
-
-      if (makePaymentDTO.status) {
-        sellerAccount.wait -= makePaymentDTO.amount;
-        sellerAccount.balance += makePaymentDTO.amount;
-
-        buyerAccount.debt -= makePaymentDTO.amount;
-        buyerAccount.balance -= makePaymentDTO.amount;
-      } else {
-        sellerAccount.wait += makePaymentDTO.amount;
-        sellerAccount.balance -= makePaymentDTO.amount;
-
-        buyerAccount.debt += makePaymentDTO.amount;
-        buyerAccount.balance += makePaymentDTO.amount;
-      }
-
-      await this.accountsRepository.save([sellerAccount, buyerAccount]);
-    } catch (e) {
-      throw new BadRequestException(e);
-    }
+  async getCompanies(): Promise<Company[]> {
+    return await this.applyCompanyListSelect(
+      this.createBaseCompanyQueryBuilder(),
+    ).getMany();
   }
 
   private async getSellerBuyerAccounts(
-    makePaymentDTO: Partial<MakePaymentDTO>,
-  ): Promise<Account[]> {
-    const sellerAccount = await this.accountsRepository
-      .createQueryBuilder('account')
+    dto: Partial<ChangeInvoiceStatusBalanceDTO | MakePaymentDTO>,
+  ): Promise<[Account, Account]> {
+    const sellerAccount = await this.createBaseAccountQueryBuilder()
       .where('account.companyId = :companyId', {
-        companyId: makePaymentDTO.sellerId,
+        companyId: dto.sellerId,
       })
       .andWhere('account.currencyId = :currencyId', {
-        currencyId: makePaymentDTO.currencyId,
+        currencyId: dto.currencyId,
       })
       .getOne();
 
-    const buyerAccount = await this.accountsRepository
-      .createQueryBuilder('account')
+    if (!sellerAccount) {
+      throw new NotFoundException(`Seller account not found`);
+    }
+
+    const buyerAccount = await this.createBaseAccountQueryBuilder()
       .where('account.companyId = :companyId', {
-        companyId: makePaymentDTO.buyerId,
+        companyId: dto.buyerId,
       })
       .andWhere('account.currencyId = :currencyId', {
-        currencyId: makePaymentDTO.currencyId,
+        currencyId: dto.currencyId,
       })
       .getOne();
+
+    if (!buyerAccount) {
+      throw new NotFoundException(`Buyer account not found`);
+    }
 
     return [sellerAccount, buyerAccount];
+  }
+
+  async changeInvoiceStatusBalances(
+    dto: ChangeInvoiceStatusBalanceDTO,
+  ): Promise<void> {
+    try {
+      const [sellerAccount, buyerAccount] =
+        await this.getSellerBuyerAccounts(dto);
+
+      if (dto.status) {
+        sellerAccount.wait += dto.amount;
+        buyerAccount.debt -= dto.amount;
+      } else {
+        sellerAccount.wait -= dto.amount;
+        buyerAccount.debt += dto.amount;
+      }
+
+      await this.accountsRepository.save([sellerAccount, buyerAccount]);
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
+  }
+
+  async changeAccountsBalances(dto: MakePaymentDTO): Promise<void> {
+    try {
+      const [sellerAccount, buyerAccount] =
+        await this.getSellerBuyerAccounts(dto);
+
+      if (dto.status) {
+        sellerAccount.wait -= dto.amount;
+        sellerAccount.balance += dto.amount;
+
+        buyerAccount.debt -= dto.amount;
+        buyerAccount.balance -= dto.amount;
+      } else {
+        sellerAccount.wait += dto.amount;
+        sellerAccount.balance -= dto.amount;
+
+        buyerAccount.debt += dto.amount;
+        buyerAccount.balance += dto.amount;
+      }
+
+      await this.accountsRepository.save([sellerAccount, buyerAccount]);
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
   }
 }
