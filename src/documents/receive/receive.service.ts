@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { Brackets, DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import {
   getProductIdsFromProductLines,
@@ -17,6 +17,9 @@ import { WarehouseService } from '../../warehouse';
 
 import { Receive } from './entities';
 import { CreateReveiveDTO, UpdateReceiveDTO } from './dto';
+import { GetReceivesQueryDTO } from './dto/query-dto';
+import { DocumentTypeEnum } from '../common/enums';
+import { MONTHS_BY_QUATER, OLD_RECORDS_LIMIT } from '../common/constants';
 
 @Injectable()
 export class ReceiveService {
@@ -92,8 +95,66 @@ export class ReceiveService {
       ]);
   }
 
-  async getReceives(): Promise<Receive[]> {
-    return await this.applyReceiveListSelect(this.createBaseQueryBuilder())
+  private applyQueryFiler(
+    qb: SelectQueryBuilder<Receive>,
+    query?: GetReceivesQueryDTO,
+  ): SelectQueryBuilder<Receive> {
+    if (query.company) {
+      if (query.type) {
+        if (query.type === DocumentTypeEnum.BUYER) {
+          qb.andWhere('receive.buyerId = :companyId', {
+            companyId: query.company,
+          });
+        } else if (query.type === DocumentTypeEnum.SELLER) {
+          qb.andWhere('receive.sellerId = :companyId', {
+            companyId: query.company,
+          });
+        }
+      } else {
+        qb.andWhere(
+          new Brackets((subQb) => {
+            subQb
+              .where('receive.sellerId = :companyId', {
+                companyId: query.company,
+              })
+              .orWhere('receive.buyerId = :companyId', {
+                companyId: query.company,
+              });
+          }),
+        );
+      }
+    }
+
+    // query.date have formet YYYY-Q or "old"
+    if (query.date) {
+      if (query.date === 'old') {
+        qb.andWhere('EXTRACT(YEAR FROM receive.expectedDate) < :maxYear', {
+          maxYear: OLD_RECORDS_LIMIT,
+        });
+      } else {
+        const [year, quarter] = query.date.split('-');
+        const startDate = new Date(
+          +year,
+          MONTHS_BY_QUATER[quarter].start - 1,
+          1,
+        );
+        const endDate = new Date(+year, MONTHS_BY_QUATER[quarter].end);
+
+        qb.andWhere('receive.expectedDate BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        });
+      }
+    }
+
+    return qb;
+  }
+
+  async getReceives(query?: GetReceivesQueryDTO): Promise<Receive[]> {
+    return await this.applyQueryFiler(
+      this.applyReceiveListSelect(this.createBaseQueryBuilder()),
+      query,
+    )
       .orderBy('receive.id', 'DESC')
       .getMany();
   }
