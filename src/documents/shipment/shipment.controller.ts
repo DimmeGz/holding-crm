@@ -6,19 +6,20 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { ShipmentService } from './shipment.service';
-import { CreateShipmentDTO } from './dto/create-shipment.dto';
-import { UpdateShipmentDTO } from './dto';
+import { CreateShipmentDTO, UpdateShipmentDTO } from './dto';
+import { GetShipmentsQueryDTO } from './dto/query-dto';
 
 @Controller('shipment')
 export class ShipmentController {
   constructor(private readonly shipmentService: ShipmentService) {}
 
   @Get()
-  getShipments() {
-    return this.shipmentService.getShipments();
+  getShipments(@Query() query?: GetShipmentsQueryDTO) {
+    return this.shipmentService.getShipments(query);
   }
 
   @Get(':shipmentId')

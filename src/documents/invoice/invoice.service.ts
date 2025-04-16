@@ -148,19 +148,13 @@ export class InvoiceService {
     if (query.company) {
       if (query.type) {
         if (query.type === DocumentTypeEnum.BUYER) {
-          qb.andWhere(
-            'invoice.buyerId = :companyId OR invoice.parent.buyerId = :companyId',
-            {
-              companyId: query.company,
-            },
-          );
+          qb.andWhere('invoice.buyerId = :companyId', {
+            companyId: query.company,
+          });
         } else if (query.type === DocumentTypeEnum.SELLER) {
-          qb.andWhere(
-            'invoice.sellerId = :companyId OR invoice.parent.sellerId = :companyId',
-            {
-              companyId: query.company,
-            },
-          );
+          qb.andWhere('invoice.sellerId = :companyId', {
+            companyId: query.company,
+          });
         }
       } else {
         qb.andWhere(
