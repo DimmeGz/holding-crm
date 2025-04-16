@@ -112,6 +112,10 @@ export class ShipmentService {
     qb: SelectQueryBuilder<Shipment>,
     query?: GetShipmentsQueryDTO,
   ): SelectQueryBuilder<Shipment> {
+    if (!query || Object.keys(query).length === 0) {
+      return qb; // Return the query builder unmodified if query is empty
+    }
+
     if (query.company) {
       if (query.type) {
         if (query.type === DocumentTypeEnum.BUYER) {

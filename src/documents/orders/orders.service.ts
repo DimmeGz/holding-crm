@@ -72,6 +72,10 @@ export class OrdersService {
     qb: SelectQueryBuilder<Order>,
     query?: GetOrdersQueryDTO,
   ): SelectQueryBuilder<Order> {
+    if (!query || Object.keys(query).length === 0) {
+      return qb; // Return the query builder unmodified if query is empty
+    }
+
     if (query.status) {
       qb.andWhere('order.status = :orderStatus', { orderStatus: query.status });
     }
