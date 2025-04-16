@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { Brackets, DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
 import { GoodsService } from '../../goods';
@@ -32,6 +32,9 @@ import {
 
 import { CreateOrderDTO, CreateOrderLineDTO } from '../orders/dto';
 import { GetInvoiceResponseDTO } from './dto/response-dto';
+import { GetInvoicesQueryDTO } from './dto/query-dto';
+import { DocumentTypeEnum } from '../common/enums';
+import { MONTHS_BY_QUATER, OLD_RECORDS_LIMIT } from '../common/constants';
 
 @Injectable()
 export class InvoiceService {
@@ -138,8 +141,84 @@ export class InvoiceService {
       ]);
   }
 
-  async getInvoices(): Promise<Invoice[]> {
-    return await this.applyInvoiceListSelect(this.createBaseQueryBuilder())
+  private applyQueryFilter(
+    qb: SelectQueryBuilder<Invoice>,
+    query?: GetInvoicesQueryDTO,
+  ): SelectQueryBuilder<Invoice> {
+    if (query.company) {
+      if (query.type) {
+        if (query.type === DocumentTypeEnum.BUYER) {
+          qb.andWhere(
+            'invoice.buyerId = :companyId OR invoice.parent.buyerId = :companyId',
+            {
+              companyId: query.company,
+            },
+          );
+        } else if (query.type === DocumentTypeEnum.SELLER) {
+          qb.andWhere(
+            'invoice.sellerId = :companyId OR invoice.parent.sellerId = :companyId',
+            {
+              companyId: query.company,
+            },
+          );
+        }
+      } else {
+        qb.andWhere(
+          'invoice.sellerId = :companyId OR invoice.buyerId = :companyId',
+          {
+            companyId: query.company,
+          },
+        );
+      }
+    }
+
+    // query.date have formet YYYY-Q or "old"
+    if (query.date) {
+      if (query.date == 'old') {
+        qb.andWhere('EXTRACT(YEAR FROM invoice.expectedDate) < :maxYear', {
+          maxYear: OLD_RECORDS_LIMIT,
+        });
+      } else {
+        const [year, quater] = query.date.split('-');
+        const startDate = new Date(
+          +year,
+          MONTHS_BY_QUATER[quater].start - 1,
+          1,
+        );
+        const endDate = new Date(+year, MONTHS_BY_QUATER[quater].end);
+
+        qb.andWhere('invoice.expectedDate BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        });
+      }
+    }
+
+    if (query.is_ship) {
+      qb.leftJoin('invoice.shipments', 'shipment');
+      if (query.is_ship === 'true') {
+        qb.andWhere('shipment.status = true');
+      } else {
+        qb.andWhere(
+          new Brackets((subQb) => {
+            subQb
+              .where('shipment.id IS NULL')
+              .orWhere(
+                `NOT EXISTS (SELECT 1 FROM documents_shipment s WHERE s.invoice_id = invoice.id AND s.status = true)`,
+              );
+          }),
+        );
+      }
+    }
+
+    return qb;
+  }
+
+  async getInvoices(query?: GetInvoicesQueryDTO): Promise<Invoice[]> {
+    return await this.applyQueryFilter(
+      this.applyInvoiceListSelect(this.createBaseQueryBuilder()),
+      query,
+    )
       .orderBy('invoice.id', 'DESC')
       .getMany();
   }

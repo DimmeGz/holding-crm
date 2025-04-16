@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { InvoiceService } from './invoice.service';
@@ -14,14 +15,15 @@ import {
   CreateInvoiceDTO,
   UpdateInvoiceDTO,
 } from './dto';
+import { GetInvoicesQueryDTO } from './dto/query-dto';
 
 @Controller('invoices')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
   @Get()
-  getInvoices() {
-    return this.invoiceService.getInvoices();
+  getInvoices(@Query() query?: GetInvoicesQueryDTO) {
+    return this.invoiceService.getInvoices(query);
   }
 
   @Get(':invoiceId')

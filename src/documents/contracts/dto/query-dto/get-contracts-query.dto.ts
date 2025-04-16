@@ -1,24 +1,9 @@
-import {
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsPositive,
-  ValidateIf,
-} from 'class-validator';
+import { IsInt, IsOptional, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';
-import { DocumentTypeEnum } from '../../../common/enums';
 
-export class GetContractsQueryDTO {
-  @ValidateIf((o) => o.type !== undefined)
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  company: number;
+import { BaseDocumentsQueryDTO } from '../../../common/dto/query-dto';
 
-  @IsOptional()
-  @IsEnum(DocumentTypeEnum)
-  type?: DocumentTypeEnum;
-
+export class GetContractsQueryDTO extends BaseDocumentsQueryDTO {
   @IsOptional()
   @IsPositive()
   @IsInt()
