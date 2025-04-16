@@ -24,7 +24,7 @@ import {
   GetContractsResponseDTO,
 } from './dto/response-dto';
 import { GetContractsQueryDTO } from './dto/query-dto';
-import { ContractTypeEnum } from './enums';
+import { DocumentTypeEnum } from '../common/enums';
 
 @Injectable()
 export class ContractsService {
@@ -109,7 +109,7 @@ export class ContractsService {
     }
 
     if (query.type) {
-      if (query.type === ContractTypeEnum.SELLER) {
+      if (query.type === DocumentTypeEnum.SELLER) {
         qb.andWhere('contract.sellerId = :sellerId', {
           sellerId: query.company,
         });
