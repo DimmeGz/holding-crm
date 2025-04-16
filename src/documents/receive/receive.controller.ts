@@ -6,19 +6,21 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { ReceiveService } from './receive.service';
 
 import { CreateReveiveDTO, UpdateReceiveDTO } from './dto';
+import { GetReceivesQueryDTO } from './dto/query-dto';
 
 @Controller('receive')
 export class ReceiveController {
   constructor(private readonly receiveService: ReceiveService) {}
 
   @Get()
-  getReceives() {
-    return this.receiveService.getReceives();
+  getReceives(@Query() query?: GetReceivesQueryDTO) {
+    return this.receiveService.getReceives(query);
   }
 
   @Get(':receiveId')
