@@ -1,0 +1,2 @@
+export const MIN_VALIDATION_YEAR = 2010;
+export const MAX_VALIDATION_YEAR = 2100;
