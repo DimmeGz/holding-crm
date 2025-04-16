@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { Brackets, DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { GoodsService } from '../../goods';
 import { ReceiveService } from '../receive';
@@ -125,28 +125,33 @@ export class ShipmentService {
         }
       } else {
         qb.andWhere(
-          'shipment.sellerId = :companyId OR shipment.buyerId = :companyId',
-          {
-            companyId: query.company,
-          },
+          new Brackets((subQb) => {
+            subQb
+              .where('shipment.sellerId = :companyId', {
+                companyId: query.company,
+              })
+              .orWhere('shipment.buyerId = :companyId', {
+                companyId: query.company,
+              });
+          }),
         );
       }
     }
 
     // query.date have formet YYYY-Q or "old"
     if (query.date) {
-      if (query.date == 'old') {
+      if (query.date === 'old') {
         qb.andWhere('EXTRACT(YEAR FROM shipment.expectedDate) < :maxYear', {
           maxYear: OLD_RECORDS_LIMIT,
         });
       } else {
-        const [year, quater] = query.date.split('-');
+        const [year, quarter] = query.date.split('-');
         const startDate = new Date(
           +year,
-          MONTHS_BY_QUATER[quater].start - 1,
+          MONTHS_BY_QUATER[quarter].start - 1,
           1,
         );
-        const endDate = new Date(+year, MONTHS_BY_QUATER[quater].end);
+        const endDate = new Date(+year, MONTHS_BY_QUATER[quarter].end);
 
         qb.andWhere('shipment.expectedDate BETWEEN :startDate AND :endDate', {
           startDate,

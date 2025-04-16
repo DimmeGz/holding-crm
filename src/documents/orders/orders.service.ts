@@ -71,7 +71,7 @@ export class OrdersService {
   private applyQueryFilter(
     qb: SelectQueryBuilder<Order>,
     query?: GetOrdersQueryDTO,
-  ) {
+  ): SelectQueryBuilder<Order> {
     if (query.status) {
       qb.andWhere('order.status = :orderStatus', { orderStatus: query.status });
     }
