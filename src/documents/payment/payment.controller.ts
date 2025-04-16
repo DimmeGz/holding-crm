@@ -6,18 +6,20 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { PaymentService } from './payment.service';
 import { CreatePaymentDTO, UpdatePaymentDTO } from './dto';
+import { BaseDocumentsQueryDTO } from '../common/dto/query-dto';
 
 @Controller('payments')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Get()
-  getPayments() {
-    return this.paymentService.getPayments();
+  getPayments(@Query() query?: BaseDocumentsQueryDTO) {
+    return this.paymentService.getPayments(query);
   }
 
   @Get(':paymentId')
