@@ -158,28 +158,33 @@ export class InvoiceService {
         }
       } else {
         qb.andWhere(
-          'invoice.sellerId = :companyId OR invoice.buyerId = :companyId',
-          {
-            companyId: query.company,
-          },
+          new Brackets((subQb) => {
+            subQb
+              .where('invoice.sellerId = :companyId', {
+                companyId: query.company,
+              })
+              .orWhere('invoice.buyerId = :companyId', {
+                companyId: query.company,
+              });
+          }),
         );
       }
     }
 
     // query.date have formet YYYY-Q or "old"
     if (query.date) {
-      if (query.date == 'old') {
+      if (query.date === 'old') {
         qb.andWhere('EXTRACT(YEAR FROM invoice.expectedDate) < :maxYear', {
           maxYear: OLD_RECORDS_LIMIT,
         });
       } else {
-        const [year, quater] = query.date.split('-');
+        const [year, quarter] = query.date.split('-');
         const startDate = new Date(
           +year,
-          MONTHS_BY_QUATER[quater].start - 1,
+          MONTHS_BY_QUATER[quarter].start - 1,
           1,
         );
-        const endDate = new Date(+year, MONTHS_BY_QUATER[quater].end);
+        const endDate = new Date(+year, MONTHS_BY_QUATER[quarter].end);
 
         qb.andWhere('invoice.expectedDate BETWEEN :startDate AND :endDate', {
           startDate,
