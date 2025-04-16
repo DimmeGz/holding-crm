@@ -6,18 +6,20 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { OrdersService } from './orders.service';
 import { CreateOrderDTO, UpdateOrderDTO } from './dto';
+import { GetOrdersQueryDTO } from './dto/query-dto';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
-  getOrders() {
-    return this.ordersService.getOrders();
+  getOrders(@Query() query?: GetOrdersQueryDTO) {
+    return this.ordersService.getOrders(query);
   }
 
   @Get('/:orderId')

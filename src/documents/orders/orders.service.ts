@@ -21,6 +21,9 @@ import {
 import { Order } from './entities';
 import { CreateOrderDTO, UpdateOrderDTO } from './dto';
 import { GetOrderResponseDTO } from './dto/respone-dto';
+import { GetOrdersQueryDTO } from './dto/query-dto';
+import { CompanyType } from '../../companies/enums';
+import { DocumentTypeEnum } from '../common/enums';
 
 @Injectable()
 export class OrdersService {
@@ -65,9 +68,52 @@ export class OrdersService {
       ]);
   }
 
-  async getOrders(): Promise<Order[]> {
-    const orders = await this.applyOrderListSelect(
-      this.createBaseQueryBuilder(),
+  private applyQueryFilter(
+    qb: SelectQueryBuilder<Order>,
+    query?: GetOrdersQueryDTO,
+  ): SelectQueryBuilder<Order> {
+    if (!query || Object.keys(query).length === 0) {
+      return qb; // Return the query builder unmodified if query is empty
+    }
+
+    if (query.status) {
+      qb.andWhere('order.status = :orderStatus', { orderStatus: query.status });
+    }
+
+    if (query.process) {
+      qb.leftJoin('order.technicalProcesses', 'technicalProcess').andWhere(
+        'technicalProcess.id = :processId',
+        {
+          processId: query.process,
+        },
+      );
+    }
+
+    if (query.type) {
+      if (query.type === DocumentTypeEnum.SELLER) {
+        qb.andWhere('seller.companyType = :companyType', {
+          companyType: CompanyType.INNER_COMPANY,
+        });
+      } else {
+        qb.andWhere('buyer.companyType = :companyType', {
+          companyType: CompanyType.INNER_COMPANY,
+        });
+      }
+    }
+
+    if (query.year) {
+      qb.andWhere('EXTRACT(YEAR FROM order.expectedDate) = :year', {
+        year: query.year,
+      });
+    }
+
+    return qb;
+  }
+
+  async getOrders(query?: GetOrdersQueryDTO): Promise<Order[]> {
+    const orders = await this.applyQueryFilter(
+      this.applyOrderListSelect(this.createBaseQueryBuilder()),
+      query,
     )
       .orderBy('order.id', 'DESC')
       .getMany();

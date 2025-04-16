@@ -15,6 +15,8 @@ import { LibsService } from '../../libs';
 import { Payment } from './entities';
 import { CreatePaymentDTO, UpdatePaymentDTO } from './dto';
 import { PaymentLine } from './entities/payment-line.entity';
+import { BaseDocumentsQueryDTO } from '../common/dto/query-dto';
+import { DocumentTypeEnum } from '../common/enums';
 
 @Injectable()
 export class PaymentService {
@@ -74,8 +76,39 @@ export class PaymentService {
       ]);
   }
 
-  async getPayments(): Promise<Payment[]> {
-    return await this.applyPaymentListSelect(this.createBaseQueryBuilder())
+  private applyQueryFilter(
+    qb: SelectQueryBuilder<Payment>,
+    query?: BaseDocumentsQueryDTO,
+  ) {
+    if (!query || Object.keys(query).length === 0) {
+      return qb; // Return the query builder unmodified if query is empty
+    }
+
+    if (query.type) {
+      if (query.type === DocumentTypeEnum.SELLER) {
+        qb.andWhere('contract.sellerId = :sellerId', {
+          sellerId: query.company,
+        });
+      } else {
+        qb.andWhere('contract.buyerId = :buyerId', {
+          buyerId: query.company,
+        });
+      }
+    } else if (query.company) {
+      qb.andWhere(
+        '(contract.sellerId = :company OR contract.buyerId = :company)',
+        { company: query.company },
+      );
+    }
+
+    return qb;
+  }
+
+  async getPayments(query?: BaseDocumentsQueryDTO): Promise<Payment[]> {
+    return await this.applyQueryFilter(
+      this.applyPaymentListSelect(this.createBaseQueryBuilder()),
+      query,
+    )
       .orderBy('payment.id', 'DESC')
       .getMany();
   }

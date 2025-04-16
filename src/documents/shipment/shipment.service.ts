@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { Brackets, DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { GoodsService } from '../../goods';
 import { ReceiveService } from '../receive';
@@ -20,6 +20,9 @@ import { Shipment, ShipmentLine } from './entities';
 
 import { CreateShipmentDTO, UpdateShipmentDTO } from './dto';
 import { GetShipmentResponseDTO } from './dto/response-dto';
+import { GetShipmentsQueryDTO } from './dto/query-dto';
+import { DocumentTypeEnum } from '../common/enums';
+import { MONTHS_BY_QUATER, OLD_RECORDS_LIMIT } from '../common/constants';
 
 @Injectable()
 export class ShipmentService {
@@ -105,8 +108,70 @@ export class ShipmentService {
       ]);
   }
 
-  async getShipments(): Promise<Shipment[]> {
-    return await this.applyShipmentListSelect(this.createBaseQueryBuilder())
+  private applyQueryFilter(
+    qb: SelectQueryBuilder<Shipment>,
+    query?: GetShipmentsQueryDTO,
+  ): SelectQueryBuilder<Shipment> {
+    if (!query || Object.keys(query).length === 0) {
+      return qb; // Return the query builder unmodified if query is empty
+    }
+
+    if (query.company) {
+      if (query.type) {
+        if (query.type === DocumentTypeEnum.BUYER) {
+          qb.andWhere('shipment.buyerId = :companyId', {
+            companyId: query.company,
+          });
+        } else if (query.type === DocumentTypeEnum.SELLER) {
+          qb.andWhere('shipment.sellerId = :companyId', {
+            companyId: query.company,
+          });
+        }
+      } else {
+        qb.andWhere(
+          new Brackets((subQb) => {
+            subQb
+              .where('shipment.sellerId = :companyId', {
+                companyId: query.company,
+              })
+              .orWhere('shipment.buyerId = :companyId', {
+                companyId: query.company,
+              });
+          }),
+        );
+      }
+    }
+
+    // query.date have formet YYYY-Q or "old"
+    if (query.date) {
+      if (query.date === 'old') {
+        qb.andWhere('EXTRACT(YEAR FROM shipment.expectedDate) < :maxYear', {
+          maxYear: OLD_RECORDS_LIMIT,
+        });
+      } else {
+        const [year, quarter] = query.date.split('-');
+        const startDate = new Date(
+          +year,
+          MONTHS_BY_QUATER[quarter].start - 1,
+          1,
+        );
+        const endDate = new Date(+year, MONTHS_BY_QUATER[quarter].end);
+
+        qb.andWhere('shipment.expectedDate BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        });
+      }
+    }
+
+    return qb;
+  }
+
+  async getShipments(query?: GetShipmentsQueryDTO): Promise<Shipment[]> {
+    return await this.applyQueryFilter(
+      this.applyShipmentListSelect(this.createBaseQueryBuilder()),
+      query,
+    )
       .orderBy('shipment.id', 'DESC')
       .getMany();
   }
