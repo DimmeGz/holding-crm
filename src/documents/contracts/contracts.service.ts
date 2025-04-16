@@ -23,6 +23,8 @@ import {
   GetContractResponseDTO,
   GetContractsResponseDTO,
 } from './dto/response-dto';
+import { GetContractsQueryDTO } from './dto/query-dto';
+import { ContractTypeEnum } from './enums';
 
 @Injectable()
 export class ContractsService {
@@ -42,18 +44,17 @@ export class ContractsService {
 
   private applyContractListSelect(
     qb: SelectQueryBuilder<Contract>,
-    alias = 'contract',
   ): SelectQueryBuilder<Contract> {
     return qb
-      .leftJoin(`${alias}.seller`, 'seller')
-      .leftJoin(`${alias}.buyer`, 'buyer')
+      .leftJoin('contract.seller', 'seller')
+      .leftJoin('contract.buyer', 'buyer')
       .select([
-        `${alias}.id`,
-        `${alias}.name`,
+        'contract.id',
+        'contract.name',
         'seller.name',
         'buyer.name',
-        `${alias}.signatureDate`,
-        `${alias}.term`,
+        'contract.signatureDate',
+        'contract.term',
       ]);
   }
 
@@ -99,23 +100,54 @@ export class ContractsService {
       ]);
   }
 
-  async getContracts(): Promise<GetContractsResponseDTO> {
-    const actualContractsQuery = this.applyContractListSelect(
+  private ApplyQueryFilter(
+    qb: SelectQueryBuilder<Contract>,
+    query: GetContractsQueryDTO,
+  ) {
+    if (!query || Object.keys(query).length === 0) {
+      return qb; // Return the query builder unmodified if query is empty
+    }
+
+    if (query.type) {
+      if (query.type === ContractTypeEnum.SELLER) {
+        qb.andWhere('contract.sellerId = :sellerId', {
+          sellerId: query.company,
+        });
+      } else {
+        qb.andWhere('contract.buyerId = :buyerId', {
+          buyerId: query.company,
+        });
+      }
+    } else if (query.company) {
+      qb.andWhere(
+        '(contract.sellerId = :company OR contract.buyerId = :company)',
+        { company: query.company },
+      );
+    }
+    return qb;
+  }
+
+  async getContracts(
+    query: GetContractsQueryDTO,
+  ): Promise<GetContractsResponseDTO> {
+    const baseQuery = this.ApplyQueryFilter(
       this.createBaseQueryBuilder(),
-    )
-      .where('contract.isArchived = false')
+      query,
+    );
+
+    const actualContractsQuery = this.applyContractListSelect(baseQuery)
+      .andWhere('contract.isArchived = false')
       .andWhere('contract.parent IS NULL');
 
     const archivedContractsQuery = this.applyContractListSelect(
       this.createBaseQueryBuilder(),
-      'archivedContract',
     )
-      .where('archivedContract.isArchived = true')
-      .andWhere('archivedContract.parent IS NULL');
+      .andWhere('contract.isArchived = true')
+      .andWhere('contract.parent IS NULL');
 
     const actualContractsWithArchivedChildrenQuery =
       this.createBaseQueryBuilder()
-        .where('contract.isArchived = false')
+        .andWhere('contract.isArchived = false')
         .andWhere('contract.parent IS NULL')
         .leftJoin('contract.children', 'children')
         .andWhere('children.isArchived = true');
@@ -126,7 +158,6 @@ export class ContractsService {
 
     const archivedChildContracts = await this.applyContractListSelect(
       actualContractsWithArchivedChildrenQuery,
-      'contract',
     ).getMany();
 
     const allArchivedContracts = [

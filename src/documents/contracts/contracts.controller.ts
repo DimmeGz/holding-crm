@@ -6,19 +6,23 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 
 import { ContractsService } from './contracts.service';
-import { CreateContractDTO } from './dto';
-import { UpdateContractDTO } from './dto/update-contract.dto';
+import { CreateContractDTO, UpdateContractDTO } from './dto';
+import { GetContractsQueryDTO } from './dto/query-dto';
 
 @Controller('contracts')
 export class ContractsController {
   constructor(private readonly contractsService: ContractsService) {}
 
   @Get()
-  getContracts() {
-    return this.contractsService.getContracts();
+  getContracts(
+    @Query()
+    query?: GetContractsQueryDTO,
+  ) {
+    return this.contractsService.getContracts(query);
   }
 
   @Get('/:contractId')
