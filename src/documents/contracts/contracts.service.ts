@@ -124,33 +124,41 @@ export class ContractsService {
         { company: query.company },
       );
     }
+
+    if (query.process) {
+      qb.leftJoin('contract.technicalProcesses', 'technicalProcess').andWhere(
+        'technicalProcess.id = :processId',
+        {
+          processId: query.process,
+        },
+      );
+    }
     return qb;
   }
 
   async getContracts(
     query: GetContractsQueryDTO,
   ): Promise<GetContractsResponseDTO> {
-    const baseQuery = this.ApplyQueryFilter(
-      this.createBaseQueryBuilder(),
-      query,
-    );
-
-    const actualContractsQuery = this.applyContractListSelect(baseQuery)
+    const actualContractsQuery = this.applyContractListSelect(
+      this.ApplyQueryFilter(this.createBaseQueryBuilder(), query),
+    )
       .andWhere('contract.isArchived = false')
       .andWhere('contract.parent IS NULL');
 
     const archivedContractsQuery = this.applyContractListSelect(
-      this.createBaseQueryBuilder(),
+      this.ApplyQueryFilter(this.createBaseQueryBuilder(), query),
     )
       .andWhere('contract.isArchived = true')
       .andWhere('contract.parent IS NULL');
 
-    const actualContractsWithArchivedChildrenQuery =
-      this.createBaseQueryBuilder()
-        .andWhere('contract.isArchived = false')
-        .andWhere('contract.parent IS NULL')
-        .leftJoin('contract.children', 'children')
-        .andWhere('children.isArchived = true');
+    const actualContractsWithArchivedChildrenQuery = this.ApplyQueryFilter(
+      this.createBaseQueryBuilder(),
+      query,
+    )
+      .andWhere('contract.isArchived = false')
+      .andWhere('contract.parent IS NULL')
+      .leftJoin('contract.children', 'children')
+      .andWhere('children.isArchived = true');
 
     const actualContracts = await actualContractsQuery.getMany();
 
