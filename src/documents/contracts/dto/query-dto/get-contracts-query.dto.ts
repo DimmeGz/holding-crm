@@ -18,4 +18,10 @@ export class GetContractsQueryDTO {
   @IsOptional()
   @IsEnum(ContractTypeEnum)
   type?: ContractTypeEnum;
+
+  @IsOptional()
+  @IsPositive()
+  @IsInt()
+  @Type(() => Number)
+  process?: number;
 }
