@@ -10,6 +10,7 @@ import {
   MakeProductionDTO,
   TransportProductsDTO,
 } from './dto';
+import { GetWarehouseQueryDTO } from './dto/query-dto';
 
 @Injectable()
 export class WarehouseService {
@@ -19,9 +20,9 @@ export class WarehouseService {
   ) {}
 
   private createBaseQueryBuilder(): SelectQueryBuilder<WarehouseAccounting> {
-    return this.warehouseAccountingRepository.createQueryBuilder(
-      'warehouseAccounting',
-    );
+    return this.warehouseAccountingRepository
+      .createQueryBuilder('warehouseAccounting')
+      .where('warehouseAccounting.qty != 0');
   }
 
   private applyWarehouseAccountingListSelect(
@@ -51,11 +52,40 @@ export class WarehouseService {
       ]);
   }
 
-  async getWarehouseAccountings(): Promise<WarehouseAccounting[]> {
-    return await this.applyWarehouseAccountingListSelect(
-      this.createBaseQueryBuilder(),
+  private applyQueryFilter(
+    qb: SelectQueryBuilder<WarehouseAccounting>,
+    query?: GetWarehouseQueryDTO,
+  ) {
+    console.log(query);
+    if (query.company) {
+      qb.andWhere('warehouseAccounting.companyId = :companyId', {
+        companyId: query.company,
+      });
+    }
+
+    if (query.warehouse) {
+      qb.andWhere('warehouseAccounting.warehouseId = :warehouseId', {
+        warehouseId: query.warehouse,
+      });
+    }
+
+    if (query.process) {
+      qb.leftJoin('product.technicalProcesses', 'process').andWhere(
+        'process.id = :processId',
+        { processId: query.process },
+      );
+    }
+
+    return qb;
+  }
+
+  async getWarehouseAccountings(
+    query?: GetWarehouseQueryDTO,
+  ): Promise<WarehouseAccounting[]> {
+    return await this.applyQueryFilter(
+      this.applyWarehouseAccountingListSelect(this.createBaseQueryBuilder()),
+      query,
     )
-      .where('warehouseAccounting.qty != 0')
       .orderBy('product.name', 'ASC')
       .getMany();
   }
