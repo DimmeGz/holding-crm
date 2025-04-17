@@ -16,6 +16,7 @@ import { Warehouse } from '../../../warehouse/entities';
 import { Invoice } from '../../invoice/entities';
 import { ShipmentLine } from './shipment-line.entity';
 import { ShipmentServiceLine } from './shipment-service-line.entity';
+import { Receive } from '../../receive/entities';
 
 @Entity({ name: 'documents_shipment' })
 export class Shipment extends AbstractDocumentEntity<Shipment> {
@@ -109,4 +110,7 @@ export class Shipment extends AbstractDocumentEntity<Shipment> {
     },
   )
   shipmentServiceLines: Partial<ShipmentServiceLine>[];
+
+  @OneToMany(() => Receive, (receive) => receive.shipment)
+  receives: Receive[];
 }
