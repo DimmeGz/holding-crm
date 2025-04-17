@@ -1,8 +1,13 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 import { AbstractEntity } from '../../common/entities';
 import { CountryOfOrigin } from '../../libs/entities';
 import { Product } from './product.entity';
+import { InvoiceLine } from '../../documents/invoice/entities';
+import {
+  ProductionInLine,
+  ProductionOutLine,
+} from '../../documents/production/entities';
 
 @Entity({ name: 'warehouse_batch' })
 export class Batch extends AbstractEntity {
@@ -27,4 +32,19 @@ export class Batch extends AbstractEntity {
   })
   @JoinColumn({ name: 'default_country_of_origin_id' })
   countryOfOrigin: CountryOfOrigin;
+
+  @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.batch)
+  invoiceLines: InvoiceLine[];
+
+  @OneToMany(
+    () => ProductionInLine,
+    (productionInLine) => productionInLine.batch,
+  )
+  productionInLines: ProductionInLine[];
+
+  @OneToMany(
+    () => ProductionOutLine,
+    (productionOutLine) => productionOutLine.batch,
+  )
+  productionOutLines: ProductionOutLine[];
 }
