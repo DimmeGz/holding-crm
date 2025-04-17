@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { Batch, Product, Service } from './entities';
 import { TechnicalProcess } from '../libs/entities';
@@ -9,6 +9,8 @@ import {
   ProductionOutLine,
 } from '../documents/production/entities';
 import { InvoiceLine } from '../documents/invoice/entities';
+
+import { GetBatchDataResponseDTO, GetProductDataResponseDTO } from './dto';
 
 @Injectable()
 export class GoodsService {
@@ -21,7 +23,7 @@ export class GoodsService {
     private readonly servicesRepository: Repository<Service>,
   ) {}
 
-  async getBatchData(batchId: number) {
+  async getBatchData(batchId: number): Promise<GetBatchDataResponseDTO> {
     const batch = await this.batchesRepository.findOne({
       where: { id: batchId },
       relations: ['product'],
@@ -39,18 +41,24 @@ export class GoodsService {
       throw new NotFoundException(`Batch with id: ${batchId} not found`);
     }
 
-    const invoiceLines = await this.getBatchInvoiceLines(batchId);
-    const productionOutLines = await this.getBatchProductionOutLines(batchId);
-    const productionInLines = await this.getBatchProductionInLines(batchId);
+    const invoiceLines = await this.getInvoiceLinesByBatchIds(batchId);
+    const productionOutLines =
+      await this.getProductionOutLinesByBatchIds(batchId);
+    const productionInLines =
+      await this.getProductionInLinesByBatchIds(batchId);
 
     return { batch, invoiceLines, productionOutLines, productionInLines };
   }
 
-  private async getBatchInvoiceLines(batchId: number): Promise<InvoiceLine[]> {
+  private async getInvoiceLinesByBatchIds(
+    batchIds: number | number[],
+  ): Promise<InvoiceLine[]> {
     const invoiceLines = await this.batchesRepository.manager.find(
       InvoiceLine,
       {
-        where: { batch: { id: batchId } },
+        where: {
+          batch: { id: Array.isArray(batchIds) ? In(batchIds) : batchIds },
+        },
         relations: ['invoice', 'invoice.seller', 'invoice.buyer'],
         select: {
           id: true,
@@ -77,13 +85,15 @@ export class GoodsService {
     return invoiceLines;
   }
 
-  private async getBatchProductionOutLines(
-    batchId: number,
+  private async getProductionOutLinesByBatchIds(
+    batchIds: number | number[],
   ): Promise<ProductionOutLine[]> {
     const productionOutLines = await this.batchesRepository.manager.find(
       ProductionOutLine,
       {
-        where: { batch: { id: batchId } },
+        where: {
+          batch: { id: Array.isArray(batchIds) ? In(batchIds) : batchIds },
+        },
         relations: ['production', 'production.company'],
         select: {
           id: true,
@@ -104,13 +114,15 @@ export class GoodsService {
     return productionOutLines;
   }
 
-  private async getBatchProductionInLines(
-    batchId: number,
+  private async getProductionInLinesByBatchIds(
+    batchIds: number | number[],
   ): Promise<ProductionInLine[]> {
     const productionInLines = await this.batchesRepository.manager.find(
       ProductionInLine,
       {
-        where: { batch: { id: batchId } },
+        where: {
+          batch: { id: Array.isArray(batchIds) ? In(batchIds) : batchIds },
+        },
         relations: ['production', 'production.company'],
         select: {
           id: true,
@@ -129,6 +141,34 @@ export class GoodsService {
     );
 
     return productionInLines;
+  }
+
+  async getProductData(productId: number): Promise<GetProductDataResponseDTO> {
+    const product = await this.productsRepository.findOne({
+      where: { id: productId },
+      relations: ['batches'],
+      select: {
+        id: true,
+        name: true,
+        batches: {
+          id: true,
+        },
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product with id: ${productId} not found`);
+    }
+
+    const batchIds = product.batches.map((batch) => batch.id);
+
+    const invoiceLines = await this.getInvoiceLinesByBatchIds(batchIds);
+    const productionOutLines =
+      await this.getProductionOutLinesByBatchIds(batchIds);
+    const productionInLines =
+      await this.getProductionInLinesByBatchIds(batchIds);
+
+    return { product, invoiceLines, productionOutLines, productionInLines };
   }
 
   async getTechnicalProcessesFromProductIds(
