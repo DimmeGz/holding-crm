@@ -22,17 +22,26 @@ export class OrderConfirmation extends AbstractEntity {
   @JoinColumn({ name: 'seller_id' })
   seller: Company;
 
+  @Column({ name: 'seller_id' })
+  sellerId: number;
+
   @ManyToOne(() => Company, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'buyer_id' })
   buyer: Company;
 
+  @Column({ name: 'buyer_id' })
+  buyerId: number;
+
   @ManyToOne(() => Currency, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'currency_id' })
   currency: Currency;
+
+  @Column({ name: 'currency_id' })
+  currencyId: number;
 
   @Column({
     type: 'varchar',
@@ -58,11 +67,17 @@ export class OrderConfirmation extends AbstractEntity {
   @JoinColumn({ name: 'seller_warehouse_id' })
   sellerWarehouse: Warehouse;
 
+  @Column({ name: 'seller_warehouse_id' })
+  sellerWarehouseId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'buyer_warehouse_id' })
   buyerWarehouse: Warehouse;
+
+  @Column({ name: 'buyer_warehouse_id' })
+  buyerWarehouseId: number;
 
   @ManyToOne(() => Company, {
     onDelete: 'RESTRICT',
@@ -70,11 +85,17 @@ export class OrderConfirmation extends AbstractEntity {
   @JoinColumn({ name: 'recipient_id' })
   recipient: Company;
 
+  @Column({ name: 'recipient_id' })
+  recipientId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'recipient_warehouse_id' })
   recipientWarehouse: Warehouse;
+
+  @Column({ name: 'recipient_warehouse_id' })
+  recipientWarehouseId: number;
 
   @Column({
     name: 'payment_delay',
@@ -113,6 +134,9 @@ export class OrderConfirmation extends AbstractEntity {
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
 
+  @Column({ name: 'incoterms_id' })
+  incotermsId: number;
+
   @Column({
     name: 'transport_place',
     type: 'varchar',
@@ -134,8 +158,12 @@ export class OrderConfirmation extends AbstractEntity {
   })
   technicalProcesses: TechnicalProcess[];
 
+  // TODO: created by
+  @Column({ name: 'created_by_id' })
+  createdById: number;
+
   constructor(entity: Partial<OrderConfirmation>) {
     super();
-    Object.assign(this, entity);
+    Object.assign(this, { ...entity, createdById: 1 });
   }
 }
