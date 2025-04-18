@@ -9,6 +9,7 @@ import { CompaniesModule } from './companies/';
 import { DocumentsModule } from './documents';
 
 import { DB_CONFIG, VALIDATION_SCHEMA } from './config';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { DB_CONFIG, VALIDATION_SCHEMA } from './config';
     TypeOrmModule.forRoot(DB_CONFIG),
     CompaniesModule,
     DocumentsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
