@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ProductionReportService } from './production-report.service';
 import { ProductionReportQueryDTO } from './dto/query-dto';
 
@@ -10,7 +10,7 @@ export class ProductionReportController {
 
   @Get('production-report/:companyId')
   productionReport(
-    @Param('companyId') companyId: number,
+    @Param('companyId', new ParseIntPipe()) companyId: number,
     @Query() query?: ProductionReportQueryDTO,
   ) {
     return this.productionReportService.productionReport(companyId, query);

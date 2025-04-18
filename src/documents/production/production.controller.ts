@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  UsePipes,
 } from '@nestjs/common';
 
 import { ProductionService } from './production.service';
@@ -21,6 +23,7 @@ export class ProductionController {
   }
 
   @Get(':productionId')
+  @UsePipes(new ParseIntPipe())
   async getProductionById(@Param('productionId') productionId: number) {
     return this.productionService.getProductionById(productionId);
   }
@@ -32,7 +35,7 @@ export class ProductionController {
 
   @Patch(':productionId')
   updateProduction(
-    @Param('productionId') productionId: number,
+    @Param('productionId', new ParseIntPipe()) productionId: number,
     @Body() updateProductionDTO: UpdateProductionDTO,
   ) {
     return this.productionService.updateProduction(
@@ -42,11 +45,13 @@ export class ProductionController {
   }
 
   @Delete(':productionId')
+  @UsePipes(new ParseIntPipe())
   removeProduction(@Param('productionId') productionId: number) {
     return this.productionService.removeProduction(productionId);
   }
 
   @Patch('change-status/:productionId')
+  @UsePipes(new ParseIntPipe())
   changeProductionStatus(@Param('productionId') productionId: number) {
     return this.productionService.changeProductionStatus(productionId);
   }

@@ -4,9 +4,11 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 
 import { PaymentService } from './payment.service';
@@ -23,6 +25,7 @@ export class PaymentController {
   }
 
   @Get(':paymentId')
+  @UsePipes(new ParseIntPipe())
   getPaymentById(@Param('paymentId') paymentId: number) {
     return this.paymentService.getPaymentById(paymentId);
   }
@@ -34,18 +37,20 @@ export class PaymentController {
 
   @Patch(':paymentId')
   updatePayment(
-    @Param('paymentId') paymentId: number,
+    @Param('paymentId', new ParseIntPipe()) paymentId: number,
     @Body() updatePaymentDTO: UpdatePaymentDTO,
   ) {
     return this.paymentService.updatePayment(paymentId, updatePaymentDTO);
   }
 
   @Delete(':paymentId')
+  @UsePipes(new ParseIntPipe())
   removePayment(@Param('paymentId') paymentId: number) {
     return this.paymentService.removePayment(paymentId);
   }
 
   @Patch('change-status/:paymentId')
+  @UsePipes(new ParseIntPipe())
   changeInvoiceStatus(@Param('paymentId') paymentId: number) {
     return this.paymentService.changePaymentStatus(paymentId);
   }

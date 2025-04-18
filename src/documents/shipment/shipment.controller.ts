@@ -4,9 +4,11 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 
 import { ShipmentService } from './shipment.service';
@@ -23,6 +25,7 @@ export class ShipmentController {
   }
 
   @Get(':shipmentId')
+  @UsePipes(new ParseIntPipe())
   getShipmentById(@Param('shipmentId') shipmentId: number) {
     return this.shipmentService.getShipmentById(shipmentId);
   }
@@ -34,18 +37,20 @@ export class ShipmentController {
 
   @Patch(':shipmentId')
   updateShipment(
-    @Param('shipmentId') shipmentId: number,
+    @Param('shipmentId', new ParseIntPipe()) shipmentId: number,
     @Body() updateShipmentDTO: UpdateShipmentDTO,
   ) {
     return this.shipmentService.updateShipment(shipmentId, updateShipmentDTO);
   }
 
   @Delete(':shipmentId')
+  @UsePipes(new ParseIntPipe())
   removeShipment(@Param('shipmentId') shipmentId: number) {
     return this.shipmentService.removeShipment(shipmentId);
   }
 
   @Patch('change-status/:shipmentId')
+  @UsePipes(new ParseIntPipe())
   changeShipmentStatus(@Param('shipmentId') shipmentId: number) {
     return this.shipmentService.changeShipmentStatus(shipmentId);
   }

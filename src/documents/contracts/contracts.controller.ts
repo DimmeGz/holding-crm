@@ -4,9 +4,11 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 
 import { ContractsService } from './contracts.service';
@@ -26,6 +28,7 @@ export class ContractsController {
   }
 
   @Get('/:contractId')
+  @UsePipes(new ParseIntPipe())
   getContractById(@Param('contractId') contractId: number) {
     return this.contractsService.getContractById(+contractId);
   }
@@ -37,18 +40,20 @@ export class ContractsController {
 
   @Patch(':contractId')
   updateContract(
-    @Param('contractId') contractId: number,
+    @Param('contractId', new ParseIntPipe()) contractId: number,
     @Body() updateContractDTO: UpdateContractDTO,
   ) {
     return this.contractsService.updateContract(contractId, updateContractDTO);
   }
 
   @Delete(':contractId')
+  @UsePipes(new ParseIntPipe())
   removeContract(@Param('contractId') contractId: number) {
     return this.contractsService.removeContract(contractId);
   }
 
   @Patch('change-status/:contractId')
+  @UsePipes(new ParseIntPipe())
   changeContractStatus(@Param('contractId') contractId: number) {
     return this.contractsService.changeContractStatus(contractId);
   }

@@ -4,9 +4,11 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
+  UsePipes,
 } from '@nestjs/common';
 
 import { ReceiveService } from './receive.service';
@@ -24,6 +26,7 @@ export class ReceiveController {
   }
 
   @Get(':receiveId')
+  @UsePipes(new ParseIntPipe())
   getReceiveById(@Param('receiveId') receiveId: number) {
     return this.receiveService.getReceiveById(receiveId);
   }
@@ -35,18 +38,20 @@ export class ReceiveController {
 
   @Patch(':receiveId')
   updateReceive(
-    @Param('receiveId') receiveId: number,
+    @Param('receiveId', new ParseIntPipe()) receiveId: number,
     @Body() updateReceiveDTO: UpdateReceiveDTO,
   ) {
     return this.receiveService.updateReceive(receiveId, updateReceiveDTO);
   }
 
   @Delete(':receiveId')
+  @UsePipes(new ParseIntPipe())
   removeReceive(@Param('receiveId') receiveId: number) {
     return this.receiveService.removeReceive(receiveId);
   }
 
   @Patch('change-status/:receiveId')
+  @UsePipes(new ParseIntPipe())
   changeShipmentStatus(@Param('receiveId') receiveId: number) {
     return this.receiveService.changeReceiveStatus(receiveId);
   }
