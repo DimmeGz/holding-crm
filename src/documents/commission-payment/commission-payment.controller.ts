@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  UsePipes,
 } from '@nestjs/common';
 
 import { CommissionPaymentService } from './commission-payment.service';
@@ -24,6 +26,7 @@ export class CommissionPaymentController {
   }
 
   @Get(':commissionPaymentId')
+  @UsePipes(new ParseIntPipe())
   getCommisionPaymentById(
     @Param('commissionPaymentId') commissionPaymentId: number,
   ) {
@@ -44,7 +47,8 @@ export class CommissionPaymentController {
 
   @Patch(':commissionPaymentId')
   updateCommissionPayment(
-    @Param('commissionPaymentId') commissionPaymentId: number,
+    @Param('commissionPaymentId', new ParseIntPipe())
+    commissionPaymentId: number,
     @Body() updateCommissionPaymentDTO: UpdateCommissionPaymentDTO,
   ) {
     return this.commissionPaymentService.updateCommissionPayment(
@@ -54,6 +58,7 @@ export class CommissionPaymentController {
   }
 
   @Delete(':commissionPaymentId')
+  @UsePipes(new ParseIntPipe())
   removeCommissionPayment(
     @Param('commissionPaymentId') commissionPaymentId: number,
   ) {
@@ -63,6 +68,7 @@ export class CommissionPaymentController {
   }
 
   @Patch('change-status/:commissionPaymentId')
+  @UsePipes(new ParseIntPipe())
   changeCommissionPaymentStatus(
     @Param('commissionPaymentId') commissionPaymentId: number,
   ) {

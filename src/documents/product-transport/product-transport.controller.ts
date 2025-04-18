@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  UsePipes,
 } from '@nestjs/common';
 
 import { ProductTransportService } from './product-transport.service';
@@ -23,6 +25,7 @@ export class ProductTransportController {
   }
 
   @Get(':productTransportId')
+  @UsePipes(new ParseIntPipe())
   async getProductTransportById(
     @Param('productTransportId') productTransportId: number,
   ) {
@@ -42,7 +45,7 @@ export class ProductTransportController {
 
   @Patch(':productTransportId')
   updateProductTransport(
-    @Param('productTransportId') productTransportId: number,
+    @Param('productTransportId', new ParseIntPipe()) productTransportId: number,
     @Body() updateProductTransportDTO: UpdateProductTransportDTO,
   ) {
     return this.productTransportService.updateProductTransport(
@@ -52,6 +55,7 @@ export class ProductTransportController {
   }
 
   @Delete(':productTransportId')
+  @UsePipes(new ParseIntPipe())
   removeProductTransport(
     @Param('productTransportId') productTransportId: number,
   ) {
@@ -61,6 +65,7 @@ export class ProductTransportController {
   }
 
   @Patch('change-status/:productTransportId')
+  @UsePipes(new ParseIntPipe())
   changeProductTransportStatus(
     @Param('productTransportId') productTransportId: number,
   ) {
