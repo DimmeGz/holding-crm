@@ -12,6 +12,7 @@ import { CompanyType } from '../enums';
 import { AbstractEntity } from '../../common/entities';
 import { Account } from './account.entity';
 import { Warehouse } from '../../warehouse/entities';
+import { Production } from '../../documents/production/entities';
 
 @Entity({ name: 'companies_company' })
 export class Company extends AbstractEntity {
@@ -166,4 +167,7 @@ export class Company extends AbstractEntity {
 
   @OneToMany(() => Account, (account) => account.company)
   accounts: Account[];
+
+  @OneToMany(() => Production, (production) => production.company)
+  productions: Production[];
 }
