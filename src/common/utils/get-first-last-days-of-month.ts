@@ -4,12 +4,6 @@ export function getFirstAndLastDaysOfMonth(dateString?: string): {
   lastMonthDay: Date;
 } {
   if (dateString) {
-    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(dateString)) {
-      throw new Error(
-        `Invalid dateString format: ${dateString}. Expected YYYY-MM`,
-      );
-    }
-
     const [year, month] = dateString.split('-');
     return {
       firstMonthDay: new Date(+year, +month - 1, 1),

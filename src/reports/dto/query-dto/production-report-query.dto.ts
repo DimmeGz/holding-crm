@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsInt,
   IsOptional,
@@ -10,6 +11,7 @@ export class ProductionReportQueryDTO {
   @IsOptional()
   @IsPositive()
   @IsInt()
+  @Type(() => Number)
   process?: number;
 
   @IsOptional()

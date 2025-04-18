@@ -9,4 +9,9 @@ export class GoodsController {
   getBatchData(@Param('batchId') batchId: number) {
     return this.goodsService.getBatchData(batchId);
   }
+
+  @Get('/product/:productId')
+  getProductData(@Param('productId') productId: number) {
+    return this.goodsService.getProductData(productId);
+  }
 }
