@@ -164,13 +164,13 @@ export class CompaniesService {
       .leftJoin(
         'company.incomeInvoices',
         'incomeInvoice',
-        'incomeInvoice.paymentBalance != 0',
+        'incomeInvoice.paymentBalance > 0',
       )
       .leftJoin('incomeInvoice.seller', 'seller')
       .leftJoin(
         'company.outcomeInvoices',
         'outcomeInvoice',
-        'outcomeInvoice.paymentBalance != 0',
+        'outcomeInvoice.paymentBalance > 0',
       )
       .leftJoin('outcomeInvoice.buyer', 'buyer')
       .select([
@@ -202,23 +202,21 @@ export class CompaniesService {
     }
 
     if (company.incomeInvoices.length) {
-      company.incomeInvoices = company.incomeInvoices.sort((a, b) => {
-        return (
+      company.incomeInvoices = company.incomeInvoices.sort(
+        (a, b) =>
           a.sellerId - b.sellerId ||
           new Date(b.expectedDate).getTime() -
-            new Date(a.expectedDate).getTime()
-        );
-      });
+            new Date(a.expectedDate).getTime(),
+      );
     }
 
     if (company.outcomeInvoices.length) {
-      company.outcomeInvoices = company.outcomeInvoices.sort((a, b) => {
-        return (
+      company.outcomeInvoices = company.outcomeInvoices.sort(
+        (a, b) =>
           a.buyerId - b.buyerId ||
           new Date(b.expectedDate).getTime() -
-            new Date(a.expectedDate).getTime()
-        );
-      });
+            new Date(a.expectedDate).getTime(),
+      );
     }
 
     return company;
