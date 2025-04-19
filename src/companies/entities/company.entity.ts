@@ -13,6 +13,7 @@ import { AbstractEntity } from '../../common/entities';
 import { Account } from './account.entity';
 import { Warehouse } from '../../warehouse/entities';
 import { Production } from '../../documents/production/entities';
+import { Invoice } from '../../documents/invoice/entities';
 
 @Entity({ name: 'companies_company' })
 export class Company extends AbstractEntity {
@@ -170,4 +171,10 @@ export class Company extends AbstractEntity {
 
   @OneToMany(() => Production, (production) => production.company)
   productions: Production[];
+
+  @OneToMany(() => Invoice, (invoice) => invoice.buyer)
+  incomeInvoices: Invoice[];
+
+  @OneToMany(() => Invoice, (invoice) => invoice.seller)
+  outcomeInvoices: Invoice[];
 }
