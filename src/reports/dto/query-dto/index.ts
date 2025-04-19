@@ -1,1 +1,1 @@
-export * from './production-report-query.dto';
+export * from './report-query.dto';
