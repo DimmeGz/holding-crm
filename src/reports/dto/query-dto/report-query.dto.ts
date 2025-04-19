@@ -7,7 +7,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
-export class ProductionReportQueryDTO {
+export class ReportQueryDTO {
   @IsOptional()
   @IsPositive()
   @IsInt()

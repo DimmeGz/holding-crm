@@ -164,13 +164,13 @@ export class CompaniesService {
       .leftJoin(
         'company.incomeInvoices',
         'incomeInvoice',
-        'incomeInvoice.paymentBalance > 0',
+        'incomeInvoice.status = true AND incomeInvoice.paymentBalance > 0',
       )
       .leftJoin('incomeInvoice.seller', 'seller')
       .leftJoin(
         'company.outcomeInvoices',
         'outcomeInvoice',
-        'outcomeInvoice.paymentBalance > 0',
+        'outcomeInvoice.status = true AND outcomeInvoice.paymentBalance > 0',
       )
       .leftJoin('outcomeInvoice.buyer', 'buyer')
       .select([
