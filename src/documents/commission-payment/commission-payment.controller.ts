@@ -13,6 +13,7 @@ import {
 import { CommissionPaymentService } from './commission-payment.service';
 
 import { CreateCommissionPaymentDTO, UpdateCommissionPaymentDTO } from './dto';
+import { CommissionPayment } from './entities';
 
 @Controller('commission_payment')
 export class CommissionPaymentController {
@@ -21,7 +22,7 @@ export class CommissionPaymentController {
   ) {}
 
   @Get()
-  getCommisionPayments() {
+  getCommisionPayments(): Promise<CommissionPayment[]> {
     return this.commissionPaymentService.getCommisionPayments();
   }
 
@@ -29,7 +30,7 @@ export class CommissionPaymentController {
   @UsePipes(new ParseIntPipe())
   getCommisionPaymentById(
     @Param('commissionPaymentId') commissionPaymentId: number,
-  ) {
+  ): Promise<CommissionPayment> {
     return this.commissionPaymentService.getCommisionPaymentById(
       commissionPaymentId,
     );
@@ -39,7 +40,7 @@ export class CommissionPaymentController {
   createCommissionPayment(
     @Body()
     createCommissionPaymentDTO: CreateCommissionPaymentDTO,
-  ) {
+  ): Promise<CommissionPayment> {
     return this.commissionPaymentService.createCommissionPayment(
       createCommissionPaymentDTO,
     );
@@ -50,7 +51,7 @@ export class CommissionPaymentController {
     @Param('commissionPaymentId', new ParseIntPipe())
     commissionPaymentId: number,
     @Body() updateCommissionPaymentDTO: UpdateCommissionPaymentDTO,
-  ) {
+  ): Promise<CommissionPayment> {
     return this.commissionPaymentService.updateCommissionPayment(
       commissionPaymentId,
       updateCommissionPaymentDTO,
@@ -61,7 +62,7 @@ export class CommissionPaymentController {
   @UsePipes(new ParseIntPipe())
   removeCommissionPayment(
     @Param('commissionPaymentId') commissionPaymentId: number,
-  ) {
+  ): Promise<CommissionPayment> {
     return this.commissionPaymentService.removeCommissionPayment(
       commissionPaymentId,
     );
@@ -71,7 +72,7 @@ export class CommissionPaymentController {
   @UsePipes(new ParseIntPipe())
   changeCommissionPaymentStatus(
     @Param('commissionPaymentId') commissionPaymentId: number,
-  ) {
+  ): Promise<CommissionPayment> {
     return this.commissionPaymentService.changeCommissionPaymentStatus(
       commissionPaymentId,
     );

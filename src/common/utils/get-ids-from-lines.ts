@@ -9,7 +9,7 @@ export function getProductIdsFromOrderProductLines(
     string,
     any
   >)[],
-) {
+): number[] {
   const productManIds = lines.map((line) => line.productManId);
   const productBuyIds = lines.map((line) => line.productBuyId);
   return [...new Set([...productManIds, ...productBuyIds])];

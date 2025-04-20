@@ -1,8 +1,7 @@
+import { DatePeriodDTO } from '../dto';
+
 // dateString should be YYYY-MM
-export function getFirstAndLastDaysOfMonth(dateString?: string): {
-  firstMonthDay: Date;
-  lastMonthDay: Date;
-} {
+export function getFirstAndLastDaysOfMonth(dateString?: string): DatePeriodDTO {
   if (dateString) {
     const [year, month] = dateString.split('-');
     return {

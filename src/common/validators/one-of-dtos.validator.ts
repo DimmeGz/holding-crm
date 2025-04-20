@@ -8,7 +8,7 @@ import { plainToInstance } from 'class-transformer';
 
 @ValidatorConstraint({ name: 'IsOneOfDtos', async: false })
 export class IsOneOfDtosConstraint implements ValidatorConstraintInterface {
-  validate(values: any[], args: ValidationArguments) {
+  validate(values: any[], args: ValidationArguments): boolean {
     const dtoClasses = args.constraints as any[];
 
     for (const value of values) {
@@ -28,7 +28,7 @@ export class IsOneOfDtosConstraint implements ValidatorConstraintInterface {
     return true;
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(args: ValidationArguments): string {
     const dtoNames = (args.constraints as any[])
       .map((dto) => dto.name)
       .join(', ');

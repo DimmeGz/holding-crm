@@ -11,6 +11,9 @@ import {
 } from '@nestjs/common';
 
 import { ProductTransportService } from './product-transport.service';
+
+import { ProductTransport } from './entities';
+
 import { CreateProductTransportDTO, UpdateProductTransportDTO } from './dto';
 
 @Controller('transport')
@@ -20,7 +23,7 @@ export class ProductTransportController {
   ) {}
 
   @Get()
-  async getProductTransports() {
+  async getProductTransports(): Promise<ProductTransport[]> {
     return this.productTransportService.getProductTransports();
   }
 
@@ -28,7 +31,7 @@ export class ProductTransportController {
   @UsePipes(new ParseIntPipe())
   async getProductTransportById(
     @Param('productTransportId') productTransportId: number,
-  ) {
+  ): Promise<ProductTransport> {
     return this.productTransportService.getProductTransportById(
       productTransportId,
     );
@@ -37,7 +40,7 @@ export class ProductTransportController {
   @Post()
   createProductTransport(
     @Body() createProductTransportDTO: CreateProductTransportDTO,
-  ) {
+  ): Promise<ProductTransport> {
     return this.productTransportService.createProductTransport(
       createProductTransportDTO,
     );
@@ -47,7 +50,7 @@ export class ProductTransportController {
   updateProductTransport(
     @Param('productTransportId', new ParseIntPipe()) productTransportId: number,
     @Body() updateProductTransportDTO: UpdateProductTransportDTO,
-  ) {
+  ): Promise<ProductTransport> {
     return this.productTransportService.updateProductTransport(
       productTransportId,
       updateProductTransportDTO,
@@ -58,7 +61,7 @@ export class ProductTransportController {
   @UsePipes(new ParseIntPipe())
   removeProductTransport(
     @Param('productTransportId') productTransportId: number,
-  ) {
+  ): Promise<ProductTransport> {
     return this.productTransportService.removeProductTransport(
       productTransportId,
     );
@@ -68,7 +71,7 @@ export class ProductTransportController {
   @UsePipes(new ParseIntPipe())
   changeProductTransportStatus(
     @Param('productTransportId') productTransportId: number,
-  ) {
+  ): Promise<ProductTransport> {
     return this.productTransportService.changeProductTransportStatus(
       productTransportId,
     );
