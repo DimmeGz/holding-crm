@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderConfirmation } from './entities';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+
+import { OrderConfirmation } from './entities';
+
 import { CreateOrderConfirmationDTO } from './dto';
 
 @Injectable()
@@ -36,7 +38,7 @@ export class OrdersConfirmationService {
 
   async createOrderConfirmation(
     createOrderConfirmationDTO: CreateOrderConfirmationDTO,
-  ) {
+  ): Promise<OrderConfirmation> {
     const orderConfirmation = this.orderConfirmationsRepository.create({
       ...createOrderConfirmationDTO,
       createdAt: new Date(),

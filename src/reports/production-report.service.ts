@@ -6,7 +6,7 @@ import { Company } from '../companies/entities';
 
 import { getFirstAndLastDaysOfMonth } from '../common/utils';
 
-import { ProductionReportQueryDTO } from './dto/query-dto';
+import { ReportQueryDTO } from './dto/query-dto';
 import { ProductionReportResponseDTO } from './dto/response-dto';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class ProductionReportService {
 
   async productionReport(
     companyId: number,
-    query?: ProductionReportQueryDTO,
+    query?: ReportQueryDTO,
   ): Promise<ProductionReportResponseDTO> {
     const { firstMonthDay, lastMonthDay } = getFirstAndLastDaysOfMonth(
       query?.date,

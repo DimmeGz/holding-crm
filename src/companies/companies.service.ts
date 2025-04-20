@@ -150,4 +150,75 @@ export class CompaniesService {
       throw new BadRequestException(e);
     }
   }
+
+  async getCompanyById(companyId: number): Promise<Company> {
+    const company = await this.companiesRepository
+      .createQueryBuilder('company')
+      .where('company.id = :companyId', { companyId })
+      .leftJoin(
+        'company.accounts',
+        'account',
+        'account.balance != 0 OR account.debt != 0 OR account.wait != 0',
+      )
+      .leftJoin('account.currency', 'currency')
+      .leftJoin(
+        'company.incomeInvoices',
+        'incomeInvoice',
+        'incomeInvoice.status = true AND incomeInvoice.paymentBalance > 0',
+      )
+      .leftJoin('incomeInvoice.seller', 'seller')
+      .leftJoin(
+        'company.outcomeInvoices',
+        'outcomeInvoice',
+        'outcomeInvoice.status = true AND outcomeInvoice.paymentBalance > 0',
+      )
+      .leftJoin('outcomeInvoice.buyer', 'buyer')
+      .select([
+        'company.id',
+        'company.name',
+        'account.id',
+        'account.balance',
+        'account.debt',
+        'account.wait',
+        'currency.id',
+        'currency.name',
+        'incomeInvoice.id',
+        'incomeInvoice.invoiceNumber',
+        'incomeInvoice.paymentBalance',
+        'incomeInvoice.expectedDate',
+        'seller.id',
+        'seller.name',
+        'outcomeInvoice.id',
+        'outcomeInvoice.invoiceNumber',
+        'outcomeInvoice.paymentBalance',
+        'outcomeInvoice.expectedDate',
+        'buyer.id',
+        'buyer.name',
+      ])
+      .getOne();
+
+    if (!company) {
+      throw new NotFoundException(`Company with id ${companyId} not found`);
+    }
+
+    if (company.incomeInvoices.length) {
+      company.incomeInvoices = company.incomeInvoices.sort(
+        (a, b) =>
+          a.sellerId - b.sellerId ||
+          new Date(b.expectedDate).getTime() -
+            new Date(a.expectedDate).getTime(),
+      );
+    }
+
+    if (company.outcomeInvoices.length) {
+      company.outcomeInvoices = company.outcomeInvoices.sort(
+        (a, b) =>
+          a.buyerId - b.buyerId ||
+          new Date(b.expectedDate).getTime() -
+            new Date(a.expectedDate).getTime(),
+      );
+    }
+
+    return company;
+  }
 }

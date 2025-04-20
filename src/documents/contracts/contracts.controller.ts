@@ -12,8 +12,12 @@ import {
 } from '@nestjs/common';
 
 import { ContractsService } from './contracts.service';
+
+import { Contract } from './entities';
+
 import { CreateContractDTO, UpdateContractDTO } from './dto';
 import { GetContractsQueryDTO } from './dto/query-dto';
+import { GetContractResponseDTO } from './dto/response-dto';
 
 @Controller('contracts')
 export class ContractsController {
@@ -29,12 +33,16 @@ export class ContractsController {
 
   @Get('/:contractId')
   @UsePipes(new ParseIntPipe())
-  getContractById(@Param('contractId') contractId: number) {
-    return this.contractsService.getContractById(+contractId);
+  getContractById(
+    @Param('contractId') contractId: number,
+  ): Promise<GetContractResponseDTO> {
+    return this.contractsService.getContractById(contractId);
   }
 
   @Post()
-  createContract(@Body() createContractDTO: CreateContractDTO) {
+  createContract(
+    @Body() createContractDTO: CreateContractDTO,
+  ): Promise<Contract> {
     return this.contractsService.createContract(createContractDTO);
   }
 
@@ -42,19 +50,21 @@ export class ContractsController {
   updateContract(
     @Param('contractId', new ParseIntPipe()) contractId: number,
     @Body() updateContractDTO: UpdateContractDTO,
-  ) {
+  ): Promise<Contract> {
     return this.contractsService.updateContract(contractId, updateContractDTO);
   }
 
   @Delete(':contractId')
   @UsePipes(new ParseIntPipe())
-  removeContract(@Param('contractId') contractId: number) {
+  removeContract(@Param('contractId') contractId: number): Promise<Contract> {
     return this.contractsService.removeContract(contractId);
   }
 
   @Patch('change-status/:contractId')
   @UsePipes(new ParseIntPipe())
-  changeContractStatus(@Param('contractId') contractId: number) {
+  changeContractStatus(
+    @Param('contractId') contractId: number,
+  ): Promise<Contract> {
     return this.contractsService.changeContractStatus(contractId);
   }
 }
