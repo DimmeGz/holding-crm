@@ -12,6 +12,9 @@ import {
 } from '@nestjs/common';
 
 import { PaymentService } from './payment.service';
+
+import { Payment } from './entities';
+
 import { CreatePaymentDTO, UpdatePaymentDTO } from './dto';
 import { BaseDocumentsQueryDTO } from '../common/dto/query-dto';
 
@@ -20,18 +23,18 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Get()
-  getPayments(@Query() query?: BaseDocumentsQueryDTO) {
+  getPayments(@Query() query?: BaseDocumentsQueryDTO): Promise<Payment[]> {
     return this.paymentService.getPayments(query);
   }
 
   @Get(':paymentId')
   @UsePipes(new ParseIntPipe())
-  getPaymentById(@Param('paymentId') paymentId: number) {
+  getPaymentById(@Param('paymentId') paymentId: number): Promise<Payment> {
     return this.paymentService.getPaymentById(paymentId);
   }
 
   @Post()
-  createPayment(@Body() createPaymentDTO: CreatePaymentDTO) {
+  createPayment(@Body() createPaymentDTO: CreatePaymentDTO): Promise<Payment> {
     return this.paymentService.createPayment(createPaymentDTO);
   }
 
@@ -39,19 +42,19 @@ export class PaymentController {
   updatePayment(
     @Param('paymentId', new ParseIntPipe()) paymentId: number,
     @Body() updatePaymentDTO: UpdatePaymentDTO,
-  ) {
+  ): Promise<Payment> {
     return this.paymentService.updatePayment(paymentId, updatePaymentDTO);
   }
 
   @Delete(':paymentId')
   @UsePipes(new ParseIntPipe())
-  removePayment(@Param('paymentId') paymentId: number) {
+  removePayment(@Param('paymentId') paymentId: number): Promise<Payment> {
     return this.paymentService.removePayment(paymentId);
   }
 
   @Patch('change-status/:paymentId')
   @UsePipes(new ParseIntPipe())
-  changeInvoiceStatus(@Param('paymentId') paymentId: number) {
+  changeInvoiceStatus(@Param('paymentId') paymentId: number): Promise<Payment> {
     return this.paymentService.changePaymentStatus(paymentId);
   }
 }

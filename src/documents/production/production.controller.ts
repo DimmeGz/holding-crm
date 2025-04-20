@@ -11,6 +11,9 @@ import {
 } from '@nestjs/common';
 
 import { ProductionService } from './production.service';
+
+import { Production } from './entities';
+
 import { CreateProductionDTO, UpdateProductionDTO } from './dto';
 
 @Controller('production')
@@ -18,18 +21,22 @@ export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
 
   @Get()
-  async getProductions() {
+  async getProductions(): Promise<Production[]> {
     return this.productionService.getProductions();
   }
 
   @Get(':productionId')
   @UsePipes(new ParseIntPipe())
-  async getProductionById(@Param('productionId') productionId: number) {
+  async getProductionById(
+    @Param('productionId') productionId: number,
+  ): Promise<Production> {
     return this.productionService.getProductionById(productionId);
   }
 
   @Post()
-  createProduction(@Body() createProductionDTO: CreateProductionDTO) {
+  createProduction(
+    @Body() createProductionDTO: CreateProductionDTO,
+  ): Promise<Production> {
     return this.productionService.createProduction(createProductionDTO);
   }
 
@@ -37,7 +44,7 @@ export class ProductionController {
   updateProduction(
     @Param('productionId', new ParseIntPipe()) productionId: number,
     @Body() updateProductionDTO: UpdateProductionDTO,
-  ) {
+  ): Promise<Production> {
     return this.productionService.updateProduction(
       productionId,
       updateProductionDTO,
@@ -46,13 +53,17 @@ export class ProductionController {
 
   @Delete(':productionId')
   @UsePipes(new ParseIntPipe())
-  removeProduction(@Param('productionId') productionId: number) {
+  removeProduction(
+    @Param('productionId') productionId: number,
+  ): Promise<Production> {
     return this.productionService.removeProduction(productionId);
   }
 
   @Patch('change-status/:productionId')
   @UsePipes(new ParseIntPipe())
-  changeProductionStatus(@Param('productionId') productionId: number) {
+  changeProductionStatus(
+    @Param('productionId') productionId: number,
+  ): Promise<Production> {
     return this.productionService.changeProductionStatus(productionId);
   }
 }
