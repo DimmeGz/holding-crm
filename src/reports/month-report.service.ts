@@ -136,7 +136,7 @@ export class MonthReportService {
         });
     }
 
-    invoicesQuery.addSelect([
+    invoicesQuery.select([
       'invoice.id',
       'invoice.invoiceNumber',
       'invoice.expectedDate',

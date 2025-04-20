@@ -1,5 +1,8 @@
 import { Controller, Get, Param, ParseIntPipe, UsePipes } from '@nestjs/common';
+
 import { GoodsService } from './goods.service';
+
+import { GetBatchDataResponseDTO, GetProductDataResponseDTO } from './dto';
 
 @Controller('goods')
 export class GoodsController {
@@ -7,13 +10,17 @@ export class GoodsController {
 
   @Get('batch/:batchId')
   @UsePipes(new ParseIntPipe())
-  getBatchData(@Param('batchId') batchId: number) {
+  getBatchData(
+    @Param('batchId') batchId: number,
+  ): Promise<GetBatchDataResponseDTO> {
     return this.goodsService.getBatchData(batchId);
   }
 
   @Get('/product/:productId')
   @UsePipes(new ParseIntPipe())
-  getProductData(@Param('productId') productId: number) {
+  getProductData(
+    @Param('productId') productId: number,
+  ): Promise<GetProductDataResponseDTO> {
     return this.goodsService.getProductData(productId);
   }
 }
