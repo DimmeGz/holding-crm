@@ -10,6 +10,6 @@ async function bootstrap() {
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
 
-  await app.listen(+process.env.PORT);
+  await app.listen(+process.env.BACKEND_PORT);
 }
 bootstrap();
