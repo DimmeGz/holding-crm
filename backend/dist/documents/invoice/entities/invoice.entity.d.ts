@@ -1,0 +1,37 @@
+import { AbstractDocumentRecipientEntity } from '../../entities';
+import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
+import { InvoiceLine } from './invoice-line.entity';
+import { InvoiceServiceLine } from './invoice-service-line.entity';
+import { CommissionInvoice } from '../../commission-invoice/entities';
+import { Shipment } from '../../shipment/entities';
+import { PaymentLine } from '../../payment/entities';
+export declare class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
+    paymentDelay: number;
+    currency: Currency;
+    status: boolean;
+    vat: number;
+    documentSum: number;
+    paymentBalance: number;
+    carPlate: string;
+    invoiceNumber: string;
+    expectedDate: Date;
+    parent: Invoice;
+    parentId: number;
+    children: Invoice[];
+    separation: boolean;
+    reportPeriod: Date;
+    ponz: number;
+    grossWeight: number;
+    incoterms: Incoterms;
+    incotermsId: number;
+    transportPlace: string;
+    transportAmount: number;
+    technicalProcesses: Partial<TechnicalProcess>[];
+    contractInfo: string;
+    reportDuplicating: boolean;
+    invoiceLines: Partial<InvoiceLine>[];
+    invoiceServiceLines: Partial<InvoiceServiceLine>[];
+    shipments: Partial<Shipment>[];
+    commissionInvoices: Partial<CommissionInvoice>[];
+    paymentLines: Partial<PaymentLine>[];
+}

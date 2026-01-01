@@ -1,0 +1,33 @@
+import { DataSource, Repository } from 'typeorm';
+import { ContractsService } from '../contracts';
+import { GoodsService } from '../../goods';
+import { InvoiceService } from '../invoice';
+import { OrdersConfirmationService } from '../orders-confirmation';
+import { Order } from './entities';
+import { CreateOrderDTO, UpdateOrderDTO } from './dto';
+import { GetOrderResponseDTO } from './dto/respone-dto';
+import { GetOrdersQueryDTO } from './dto/query-dto';
+export declare class OrdersService {
+    private readonly ordersRepository;
+    private dataSource;
+    private readonly contractsService;
+    private readonly invoiceService;
+    private readonly goodsService;
+    private readonly orderConfirmationsService;
+    constructor(ordersRepository: Repository<Order>, dataSource: DataSource, contractsService: ContractsService, invoiceService: InvoiceService, goodsService: GoodsService, orderConfirmationsService: OrdersConfirmationService);
+    private createBaseQueryBuilder;
+    private applyOrderListSelect;
+    private applyQueryFilter;
+    getOrders(query?: GetOrdersQueryDTO): Promise<Order[]>;
+    private getOrderProductNames;
+    private getOrderConfirmationDate;
+    getOrderById(orderId: number): Promise<GetOrderResponseDTO>;
+    getOrdersByContractId(contractId: number): Promise<Order[]>;
+    createOrder(createOrderDTO: CreateOrderDTO): Promise<Order>;
+    private calculateDocumentSum;
+    private getTechnicalProcesses;
+    updateOrder(orderId: number, updateOrderDTO: UpdateOrderDTO): Promise<Order>;
+    removeOrder(orderId: number): Promise<Order>;
+    changeOrderStatus(orderId: number): Promise<Order>;
+    private createNextOrderNumber;
+}

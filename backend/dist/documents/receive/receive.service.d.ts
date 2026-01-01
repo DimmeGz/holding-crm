@@ -1,0 +1,30 @@
+import { DataSource, Repository } from 'typeorm';
+import { GoodsService } from '../../goods';
+import { TransitService } from '../transit';
+import { WarehouseService } from '../../warehouse';
+import { Receive } from './entities';
+import { CreateReveiveDTO, UpdateReceiveDTO } from './dto';
+import { GetReceivesQueryDTO } from './dto/query-dto';
+export declare class ReceiveService {
+    private readonly receivesRepository;
+    private dataSource;
+    private readonly goodsService;
+    private readonly transitService;
+    private readonly warehouseService;
+    constructor(receivesRepository: Repository<Receive>, dataSource: DataSource, goodsService: GoodsService, transitService: TransitService, warehouseService: WarehouseService);
+    private createBaseQueryBuilder;
+    private applyReceiveListSelect;
+    private applyReceiveDetailSelect;
+    private applyQueryFiler;
+    getReceives(query?: GetReceivesQueryDTO): Promise<Receive[]>;
+    getReceiveById(receiveId: number): Promise<Receive>;
+    getReceivesByShipmentId(shipmentId: number): Promise<Receive[]>;
+    createReceive(createReceiveDTO: CreateReveiveDTO): Promise<Receive>;
+    private calculateDocumentSum;
+    private getTechnicalProcesses;
+    updateReceive(receiveId: number, updateReceiveDTO: UpdateReceiveDTO): Promise<Receive>;
+    removeReceive(receiveId: number): Promise<Receive>;
+    changeReceiveStatus(receiveId: number): Promise<Receive>;
+    private updateWarehouseAccounting;
+    private updateTransitLines;
+}
