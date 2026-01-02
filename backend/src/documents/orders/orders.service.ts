@@ -60,6 +60,7 @@ export class OrdersService {
         'order.expectedDate',
         'order.confirmExpectedDate',
         'order.status',
+        'order.orderNumber',
         'currency.name',
         'seller.name',
         'buyer.name',
