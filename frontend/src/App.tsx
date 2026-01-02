@@ -7,7 +7,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<MainLayout />}>
-          <Route path='/' element={<></>} />
+          <Route path='/' element={<div className='w-full h-full'></div>} />
           {/* <Route path='/companies' element={<Companies />} />
           <Route path='/reports' element={<Reports />} /> */}
         </Route>
