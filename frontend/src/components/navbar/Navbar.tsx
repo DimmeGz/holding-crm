@@ -8,16 +8,17 @@ import {
 } from '@/components/navbar/mock-data';
 import classes from '@/components/navbar/Navbar.module.css';
 import { useTheme } from '@/hooks/useTheme';
+import type { NavLinkGroupProps } from '@/types/base-ui.types';
 
 export default function Navbar(): ReactNode {
   const { theme, toggleTheme } = useTheme(),
-    generalLinks = generalMenu.map(item => (
+    generalLinks: ReactNode[] = generalMenu.map((item: NavLinkGroupProps) => (
       <LinksGroup {...item} key={item.label} />
     )),
-    documentsLinks = documentsMenu.map(item => (
-      <LinksGroup {...item} key={item.label} />
-    )),
-    adminLinks = adminMenu.map(item => (
+    documentsLinks: ReactNode[] = documentsMenu.map(
+      (item: NavLinkGroupProps) => <LinksGroup {...item} key={item.label} />,
+    ),
+    adminLinks: ReactNode[] = adminMenu.map((item: NavLinkGroupProps) => (
       <LinksGroup {...item} key={item.label} />
     ));
 

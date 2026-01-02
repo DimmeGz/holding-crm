@@ -14,6 +14,12 @@ export function OrdersList(): ReactNode {
     data,
     columns: [
       {
+        header: 'Номер',
+        accessorFn: (originalRow: GetOrdersDto): string => {
+          return originalRow.orderNumber;
+        },
+      },
+      {
         header: 'Продавець',
         accessorFn: (originalRow: GetOrdersDto): string => {
           return originalRow.seller.name;

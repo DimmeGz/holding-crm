@@ -7,8 +7,8 @@ export type NavLinkGroupProps = {
   >;
   label: string;
   initiallyOpened?: boolean;
-  link?: string;
-  links?: { label: string; link: string }[];
+  url?: string;
+  links?: Link[];
 };
 
 export type SpinnerProps = {
@@ -16,3 +16,5 @@ export type SpinnerProps = {
   center?: boolean;
   size?: number;
 };
+
+export type Link = { label: string; url: string };

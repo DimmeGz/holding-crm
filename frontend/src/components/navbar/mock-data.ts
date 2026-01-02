@@ -27,7 +27,10 @@ export const generalMenu: NavLinkGroupProps[] = [
   {
     label: 'Склад',
     icon: IconForklift,
-    links: mockCompanies.map(company => ({ label: company, link: '/' })),
+    links: mockCompanies.map((companyName: string) => ({
+      label: companyName,
+      url: '/',
+    })),
   },
   { label: 'Календар', icon: IconCalendar },
   { label: 'Транзит', icon: IconTruckDelivery },
@@ -35,7 +38,7 @@ export const generalMenu: NavLinkGroupProps[] = [
 
 export const documentsMenu: NavLinkGroupProps[] = [
   { label: 'Контракти', icon: IconContract },
-  { label: 'Замовлення', icon: IconCurrencyEuro, link: '/orders' },
+  { label: 'Замовлення', icon: IconCurrencyEuro, url: '/orders' },
   { label: 'Рахунки', icon: IconFileEuro },
   { label: 'Платежі', icon: IconFileEuroFilled },
   { label: 'Комісійні рахунки', icon: IconFileEuro },

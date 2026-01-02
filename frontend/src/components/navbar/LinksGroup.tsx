@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import {
   Box,
   Collapse,
@@ -9,24 +9,26 @@ import {
 } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
 import classes from '@/components/navbar/LinksGroup.module.css';
-import type { NavLinkGroupProps } from '@/types/base-ui.types';
+import type { Link, NavLinkGroupProps } from '@/types/base-ui.types';
 
 export function LinksGroup({
   icon: Icon,
   label,
   initiallyOpened,
-  link,
+  url: link,
   links,
-}: NavLinkGroupProps) {
-  const hasLinks = Array.isArray(links);
+}: NavLinkGroupProps): ReactNode {
+  const hasLinks: boolean = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
-  const items = (hasLinks ? links : []).map(link => (
+  const items: ReactNode = (hasLinks ? links! : []).map((link: Link) => (
     <Text<'a'>
       component='a'
       className={classes.link}
-      href={link.link}
+      href={link.url}
       key={link.label}
-      onClick={event => event.preventDefault()}
+      onClick={(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) =>
+        event.preventDefault()
+      }
     >
       {link.label}
     </Text>
@@ -35,7 +37,7 @@ export function LinksGroup({
   return (
     <>
       <UnstyledButton
-        onClick={() => setOpened(o => !o)}
+        onClick={() => setOpened((opened: boolean) => !opened)}
         className={classes.control}
       >
         <Group justify='space-between' gap={0}>
@@ -62,7 +64,7 @@ export function LinksGroup({
   );
 }
 
-export function NavbarLinksGroup(linkdata: NavLinkGroupProps) {
+export function NavbarLinksGroup(linkdata: NavLinkGroupProps): ReactNode {
   return (
     <Box mih={220} p='md'>
       <LinksGroup {...linkdata} />
