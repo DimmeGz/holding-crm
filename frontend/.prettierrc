@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/prettierrc",
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "singleQuote": true,
+  "jsxSingleQuote": true,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "semi": true,
+  "printWidth": 80,
+  "endOfLine": "lf",
+  "useTabs": false,
+  "arrowParens": "avoid",
+  "bracketSpacing": true,
+  "jsxBracketSameLine": false,
+  "importOrder": [
+    "axios",
+    "^react",
+    "^react-router-dom",
+    "^@mantine",
+    "^mantine-react-table",
+    "^@tabler/icons-react",
+    "^@/*/(.*)$"
+  ],
+  "importOrderCaseInsensitive": true,
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": true,
+  "importOrderMergeDuplicateImports": true,
+  "importOrderCombineTypeAndValueImports": true,
+  "importOrderParserPlugins": [
+    "typescript",
+    "jsx",
+    "decorators-legacy",
+    "importAssertions"
+  ]
+}

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { IconChevronRight } from '@tabler/icons-react';
 import {
   Box,
   Collapse,
@@ -8,8 +7,9 @@ import {
   ThemeIcon,
   UnstyledButton,
 } from '@mantine/core';
-import classes from './LinksGroup.module.css';
-import type { NavLinkGroupProps } from '../../types/base-ui.types';
+import { IconChevronRight } from '@tabler/icons-react';
+import classes from '@/components/navbar/LinksGroup.module.css';
+import type { NavLinkGroupProps } from '@/types/base-ui.types';
 
 export function LinksGroup({
   icon: Icon,
@@ -20,13 +20,13 @@ export function LinksGroup({
 }: NavLinkGroupProps) {
   const hasLinks = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
-  const items = (hasLinks ? links : []).map((link) => (
+  const items = (hasLinks ? links : []).map(link => (
     <Text<'a'>
       component='a'
       className={classes.link}
       href={link.link}
       key={link.label}
-      onClick={(event) => event.preventDefault()}
+      onClick={event => event.preventDefault()}
     >
       {link.label}
     </Text>
@@ -35,7 +35,7 @@ export function LinksGroup({
   return (
     <>
       <UnstyledButton
-        onClick={() => setOpened((o) => !o)}
+        onClick={() => setOpened(o => !o)}
         className={classes.control}
       >
         <Group justify='space-between' gap={0}>

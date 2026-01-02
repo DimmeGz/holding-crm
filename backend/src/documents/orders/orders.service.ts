@@ -51,12 +51,16 @@ export class OrdersService {
       .leftJoin('order.buyer', 'buyer')
       .leftJoin('order.recipient', 'recipient')
       .leftJoin('order.contract', 'contract')
+      .leftJoin('order.currency', 'currency')
       .leftJoin('order.orderLines', 'orderLine')
       .leftJoin('orderLine.productMan', 'product')
       .leftJoin('order.orderConfirmations', 'orderConfirmation')
       .select([
-        'order.id',
         'order.documentSum',
+        'order.expectedDate',
+        'order.confirmExpectedDate',
+        'order.status',
+        'currency.name',
         'seller.name',
         'buyer.name',
         'recipient.name',

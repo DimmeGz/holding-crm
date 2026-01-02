@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react';
-import { OrdersService } from '../../documents/orders.service';
+import { OrdersService } from '@/services/documents/orders.service';
+import type { GetOrdersDto } from '@/types/documents/orders.types';
 
-export const useUsers = () => {
-  const [data, setData] = useState<unknown[]>([]);
-  const [loading, setLoading] = useState(false);
+export const useUsers: () => {
+  data: GetOrdersDto[];
+  loading: boolean;
+  error: string | null;
+} = () => {
+  const [data, setData] = useState<GetOrdersDto[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     OrdersService.getList()
       .then(setData)
-      .catch(e => setError(e.message))
+      .catch((e: unknown) => {
+        const message: string =
+          e instanceof Error ? e.message : 'Unknown error';
+        setError(message);
+      })
       .finally(() => setLoading(false));
   }, []);
 

@@ -1,9 +1,10 @@
-import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import MainLayout from './layout/MainLayout';
-import { OrdersList } from './components/documents/orders/OrdersList';
+import type { ReactNode } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import '@/App.css';
+import { OrdersList } from '@/components/documents/orders/OrdersList';
+import MainLayout from '@/layout/MainLayout';
 
-function App() {
+function App(): ReactNode {
   return (
     <BrowserRouter>
       <Routes>

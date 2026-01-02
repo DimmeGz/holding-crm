@@ -22,7 +22,19 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "noImplicitAny": true,        // попередження, якщо TS не може вивести тип
+    "strictNullChecks": true,     // null/undefined перевіряються
+    "strictFunctionTypes": true,  // контроль типів функцій
+    "strictBindCallApply": true,
+    "noImplicitThis": true,       // this має бути типізованим
+    "alwaysStrict": true,
+
+    /* Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "include": ["src", "tailwind.config.ts"]
 }

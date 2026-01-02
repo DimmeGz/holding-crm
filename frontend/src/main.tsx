@@ -1,14 +1,15 @@
-/* eslint-disable react-refresh/only-export-components */
-import { StrictMode } from 'react';
+import { type ReactNode, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MantineProvider, type MantineColorScheme } from '@mantine/core';
-import './index.css';
+import { type MantineColorScheme, MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import 'mantine-react-table/styles.css';
-import App from './App.tsx';
+import App from '@/App.tsx';
+import '@/index.css';
 
-function Root() {
-  const savedTheme = localStorage.getItem('theme') as MantineColorScheme | null;
+function Root(): ReactNode {
+  const savedTheme: MantineColorScheme | null = localStorage.getItem(
+    'theme',
+  ) as MantineColorScheme | null;
 
   return (
     <MantineProvider
@@ -23,5 +24,5 @@ function Root() {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Root />
-  </StrictMode>
+  </StrictMode>,
 );

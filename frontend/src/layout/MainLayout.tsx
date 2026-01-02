@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import Navbar from '../components/navbar/Navbar';
+import Navbar from '@/components/navbar/Navbar';
 
 export default function MainLayout() {
   return (
-    <div className='main w-screen h-screen bg-slate-100 dark:bg-slate-700'>
+    <div className='main w-screen h-screen flex bg-slate-100 dark:bg-slate-700'>
       <Navbar />
-      <div className='content bg-slate-100 dark:bg-slate-800 text-black dark:text-white'>
+      <div className='content w-full h-screen overflow-auto bg-slate-100 dark:bg-slate-800 text-black dark:text-white'>
         <Outlet />
       </div>
     </div>

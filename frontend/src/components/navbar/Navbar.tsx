@@ -1,19 +1,23 @@
 import type { ReactNode } from 'react';
-import { useTheme } from '../../hooks/useTheme';
-import { LinksGroup } from './LinksGroup';
-import classes from './Navbar.module.css';
 import { Button, ScrollArea } from '@mantine/core';
-import { adminMenu, documentsMenu, generalMenu } from './mock-data';
+import { LinksGroup } from '@/components/navbar/LinksGroup';
+import {
+  adminMenu,
+  documentsMenu,
+  generalMenu,
+} from '@/components/navbar/mock-data';
+import classes from '@/components/navbar/Navbar.module.css';
+import { useTheme } from '@/hooks/useTheme';
 
 export default function Navbar(): ReactNode {
   const { theme, toggleTheme } = useTheme(),
-    generalLinks = generalMenu.map((item) => (
+    generalLinks = generalMenu.map(item => (
       <LinksGroup {...item} key={item.label} />
     )),
-    documentsLinks = documentsMenu.map((item) => (
+    documentsLinks = documentsMenu.map(item => (
       <LinksGroup {...item} key={item.label} />
     )),
-    adminLinks = adminMenu.map((item) => (
+    adminLinks = adminMenu.map(item => (
       <LinksGroup {...item} key={item.label} />
     ));
 

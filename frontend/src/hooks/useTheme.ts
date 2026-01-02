@@ -4,7 +4,7 @@ import { useMantineColorScheme } from '@mantine/core';
 export function useTheme() {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   const [theme, setTheme] = useState<'light' | 'dark'>(
-    colorScheme === 'dark' ? 'dark' : 'light'
+    colorScheme === 'dark' ? 'dark' : 'light',
   );
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function useTheme() {
   }, [theme, setColorScheme]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return { theme, toggleTheme };
