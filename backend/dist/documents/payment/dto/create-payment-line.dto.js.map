@@ -1,1 +1,0 @@
-{"version":3,"file":"create-payment-line.dto.js","sourceRoot":"","sources":["../../../../src/documents/payment/dto/create-payment-line.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAA8D;AAE9D,MAAa,oBAAoB;CAQhC;AARD,oDAQC;AALC;IAFC,IAAA,4BAAU,GAAE;IACZ,IAAA,uBAAK,GAAE;;uDACU;AAIlB;IAFC,IAAA,4BAAU,GAAE;IACZ,IAAA,0BAAQ,EAAC,EAAE,gBAAgB,EAAE,CAAC,EAAE,CAAC;;oDACnB"}
