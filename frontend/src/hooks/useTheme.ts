@@ -1,27 +1,25 @@
 import { useEffect, useState } from 'react';
-import type { Theme } from '../types/common.types';
+import { useMantineColorScheme } from '@mantine/core';
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved as Theme;
-
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-  });
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    colorScheme === 'dark' ? 'dark' : 'light'
+  );
 
   useEffect(() => {
     const root = document.documentElement;
 
     if (theme === 'dark') {
       root.classList.add('dark');
+      setColorScheme('dark');
     } else {
       root.classList.remove('dark');
+      setColorScheme('light');
     }
 
     localStorage.setItem('theme', theme);
-  }, [theme]);
+  }, [theme, setColorScheme]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));

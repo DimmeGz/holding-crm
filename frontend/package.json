@@ -10,7 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/core": "^7.17.8",
+    "@mantine/dates": "^7.17.8",
+    "@mantine/hooks": "^7.17.8",
+    "@tabler/icons-react": "^3.36.1",
     "@tailwindcss/vite": "^4.1.18",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.19",
+    "mantine-react-table": "^2.0.0-beta.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.11.0"
