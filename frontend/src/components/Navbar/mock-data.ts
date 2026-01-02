@@ -4,6 +4,7 @@ import {
   IconCalendar,
   IconContract,
   IconCurrencyEuro,
+  IconEdit,
   IconFileEuro,
   IconFileEuroFilled,
   IconForklift,
@@ -43,4 +44,8 @@ export const documentsMenu: NavLinkGroupProps[] = [
   { label: 'Надходження', icon: IconTruckFilled },
   { label: 'Виробництво', icon: IconWreckingBall },
   { label: 'Переміщення', icon: IconArrowMoveRight },
+];
+
+export const adminMenu: NavLinkGroupProps[] = [
+  { label: 'Редагування партій', icon: IconEdit }
 ];

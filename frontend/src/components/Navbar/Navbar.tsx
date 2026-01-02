@@ -3,16 +3,19 @@ import { useTheme } from '../../hooks/useTheme';
 import { LinksGroup } from './LinksGroup';
 import classes from './Navbar.module.css';
 import { Button, ScrollArea } from '@mantine/core';
-import { documentsMenu, generalMenu } from './mock-data';
+import { adminMenu, documentsMenu, generalMenu } from './mock-data';
 
 export default function Navbar(): ReactNode {
-  const { theme, toggleTheme } = useTheme();
-  const generalLinks = generalMenu.map((item) => (
-    <LinksGroup {...item} key={item.label} />
-  ));
-  const documentsLinks = documentsMenu.map((item) => (
-    <LinksGroup {...item} key={item.label} />
-  ));
+  const { theme, toggleTheme } = useTheme(),
+    generalLinks = generalMenu.map((item) => (
+      <LinksGroup {...item} key={item.label} />
+    )),
+    documentsLinks = documentsMenu.map((item) => (
+      <LinksGroup {...item} key={item.label} />
+    )),
+    adminLinks = adminMenu.map((item) => (
+      <LinksGroup {...item} key={item.label} />
+    ));
 
   return (
     <nav className={classes.navbar}>
@@ -21,14 +24,11 @@ export default function Navbar(): ReactNode {
       <ScrollArea className={classes.links}>
         <div className={classes.linksInner}>{generalLinks}</div>
         <div className={classes.linksInner}>{documentsLinks}</div>
+        <div className={classes.linksInner}>{adminLinks}</div>
       </ScrollArea>
 
       <div className={classes.footer}>
-        <Button
-          variant='light'
-          my='xs'
-          onClick={toggleTheme}
-        >
+        <Button variant='light' my='xs' onClick={toggleTheme}>
           {theme === 'light' ? '🌙 Темна тема' : '☀️ Світла тема'}
         </Button>
       </div>
