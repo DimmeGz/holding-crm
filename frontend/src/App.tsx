@@ -11,8 +11,6 @@ function App(): ReactNode {
         <Route element={<MainLayout />}>
           <Route path='/' element={<div className='w-full h-full'></div>} />
           <Route path='/orders' element={<OrdersList />} />
-          {/* <Route path='/companies' element={<Companies />} />
-          <Route path='/reports' element={<Reports />} /> */}
         </Route>
       </Routes>
     </BrowserRouter>
