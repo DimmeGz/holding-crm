@@ -7,5 +7,6 @@ export type NavLinkGroupProps = {
   >;
   label: string;
   initiallyOpened?: boolean;
+  link?: string;
   links?: { label: string; link: string }[];
 };

@@ -15,6 +15,7 @@ export function LinksGroup({
   icon: Icon,
   label,
   initiallyOpened,
+  link,
   links,
 }: NavLinkGroupProps) {
   const hasLinks = Array.isArray(links);
@@ -42,7 +43,9 @@ export function LinksGroup({
             <ThemeIcon variant='light' size={30}>
               <Icon size={18} />
             </ThemeIcon>
-            <Box ml='md'>{label}</Box>
+            <Text<'a'> component='a' ml='md' href={link}>
+              {label}
+            </Text>
           </Box>
           {hasLinks && (
             <IconChevronRight
@@ -58,7 +61,6 @@ export function LinksGroup({
     </>
   );
 }
-
 
 export function NavbarLinksGroup(linkdata: NavLinkGroupProps) {
   return (

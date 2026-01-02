@@ -35,7 +35,7 @@ export const generalMenu: NavLinkGroupProps[] = [
 
 export const documentsMenu: NavLinkGroupProps[] = [
   { label: 'Контракти', icon: IconContract },
-  { label: 'Замовлення', icon: IconCurrencyEuro },
+  { label: 'Замовлення', icon: IconCurrencyEuro, link:'/orders' },
   { label: 'Рахунки', icon: IconFileEuro },
   { label: 'Платежі', icon: IconFileEuroFilled },
   { label: 'Комісійні рахунки', icon: IconFileEuro },
@@ -47,5 +47,5 @@ export const documentsMenu: NavLinkGroupProps[] = [
 ];
 
 export const adminMenu: NavLinkGroupProps[] = [
-  { label: 'Редагування партій', icon: IconEdit }
+  { label: 'Редагування партій', icon: IconEdit },
 ];
