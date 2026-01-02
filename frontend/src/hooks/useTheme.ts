@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useMantineColorScheme } from '@mantine/core';
+import type { Theme, UseThemeProps } from '@/types/common.types';
 
-export function useTheme() {
+export function useTheme(): UseThemeProps {
   const { colorScheme, setColorScheme } = useMantineColorScheme();
   const [theme, setTheme] = useState<'light' | 'dark'>(
-    colorScheme === 'dark' ? 'dark' : 'light'
+    colorScheme === 'dark' ? 'dark' : 'light',
   );
 
   useEffect(() => {
-    const root = document.documentElement;
+    const root: HTMLElement = document.documentElement;
 
     if (theme === 'dark') {
       root.classList.add('dark');
@@ -21,9 +22,9 @@ export function useTheme() {
     localStorage.setItem('theme', theme);
   }, [theme, setColorScheme]);
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
+  function toggleTheme(): void {
+    setTheme((prev: Theme) => (prev === 'light' ? 'dark' : 'light'));
+  }
 
   return { theme, toggleTheme };
 }

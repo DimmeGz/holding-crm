@@ -1,15 +1,16 @@
-import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import MainLayout from './layout/MainLayout';
+import type { ReactNode } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import '@/App.css';
+import { OrdersList } from '@/components/documents/orders/OrdersList';
+import MainLayout from '@/layout/MainLayout';
 
-function App() {
+function App(): ReactNode {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<MainLayout />}>
           <Route path='/' element={<div className='w-full h-full'></div>} />
-          {/* <Route path='/companies' element={<Companies />} />
-          <Route path='/reports' element={<Reports />} /> */}
+          <Route path='/orders' element={<OrdersList />} />
         </Route>
       </Routes>
     </BrowserRouter>

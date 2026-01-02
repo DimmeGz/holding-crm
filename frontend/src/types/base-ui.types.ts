@@ -1,5 +1,5 @@
-import type { IconProps } from '@tabler/icons-react';
 import type { ForwardRefExoticComponent } from 'react';
+import type { IconProps } from '@tabler/icons-react';
 
 export type NavLinkGroupProps = {
   icon: ForwardRefExoticComponent<
@@ -7,5 +7,14 @@ export type NavLinkGroupProps = {
   >;
   label: string;
   initiallyOpened?: boolean;
-  links?: { label: string; link: string }[];
+  url?: string;
+  links?: Link[];
 };
+
+export type SpinnerProps = {
+  fullscreen?: boolean;
+  center?: boolean;
+  size?: number;
+};
+
+export type Link = { label: string; url: string };

@@ -1,3 +1,0 @@
-export const MIN_VALIDATION_YEAR = 2010;
-export const MAX_VALIDATION_YEAR = 2100;
-export const OLD_RECORDS_LIMIT = 2022;
