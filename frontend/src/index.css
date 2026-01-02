@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background-light: #ffffff;
+  --color-foreground-light: #000000;
+  --color-primary-light: #3b82f6;
+
+  --color-background-dark: #0f172a;
+  --color-foreground-dark: #f1f5f9;
+  --color-primary-dark: #60a5fa;
+}
+
+:root {
+  --color-background: var(--color-background-light);
+  --color-foreground: var(--color-foreground-light);
+  --color-primary: var(--color-primary-light);
+}
+
+.dark {
+  --color-background: var(--color-background-dark);
+  --color-foreground: var(--color-foreground-dark);
+  --color-primary: var(--color-primary-dark);
+}
