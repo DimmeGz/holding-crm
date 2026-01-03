@@ -1,0 +1,20 @@
+import type { ReactNode } from 'react';
+import { useRoutes } from 'react-router-dom';
+import MainLayout from '@/layout/MainLayout';
+import { ordersRoutes } from '@/routes/documents/orders.routes';
+
+export function AppRoutes(): ReactNode {
+  return useRoutes([
+    {
+      path: '/',
+      element: <MainLayout />,
+      children: [
+        {
+          index: true,
+          element: <div className='w-full h-full'></div>,
+        },
+        ordersRoutes,
+      ],
+    },
+  ]);
+}
