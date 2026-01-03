@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Button, ScrollArea } from '@mantine/core';
+import LanguageSwitcher from '@/components/navbar/LanguageSwitcher';
 import { LinksGroup } from '@/components/navbar/LinksGroup';
 import {
   adminMenu,
@@ -13,13 +14,13 @@ import type { NavLinkGroupProps } from '@/types/base-ui.types';
 export default function Navbar(): ReactNode {
   const { theme, toggleTheme } = useTheme(),
     generalLinks: ReactNode[] = generalMenu.map((item: NavLinkGroupProps) => (
-      <LinksGroup {...item} key={item.label} />
+      <LinksGroup {...item} key={item.labelKey} />
     )),
     documentsLinks: ReactNode[] = documentsMenu.map(
-      (item: NavLinkGroupProps) => <LinksGroup {...item} key={item.label} />,
+      (item: NavLinkGroupProps) => <LinksGroup {...item} key={item.labelKey} />,
     ),
     adminLinks: ReactNode[] = adminMenu.map((item: NavLinkGroupProps) => (
-      <LinksGroup {...item} key={item.label} />
+      <LinksGroup {...item} key={item.labelKey} />
     ));
 
   return (
@@ -34,8 +35,9 @@ export default function Navbar(): ReactNode {
 
       <div className={classes.footer}>
         <Button variant='light' my='xs' onClick={toggleTheme}>
-          {theme === 'light' ? '🌙 Темна тема' : '☀️ Світла тема'}
+          {theme === 'light' ? '🌙' : '☀️'}
         </Button>
+        <LanguageSwitcher />
       </div>
     </nav>
   );

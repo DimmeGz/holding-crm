@@ -5,7 +5,7 @@ export type NavLinkGroupProps = {
   icon: ForwardRefExoticComponent<
     IconProps & React.RefAttributes<SVGSVGElement>
   >;
-  label: string;
+  labelKey: string;
   initiallyOpened?: boolean;
   url?: string;
   links?: Link[];

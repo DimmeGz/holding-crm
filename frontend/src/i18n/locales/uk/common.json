@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "companies": "Компанії",
+    "warehouse": "Склад",
+    "calendar": "Календар",
+    "transit": "Транзит",
+    "contracts": "Контракти",
+    "orders": "Замовлення",
+    "invoices": "Рахунки",
+    "payments": "Платежі",
+    "commissionInvoices": "Комісійні рахунки",
+    "commissioPayments": "Комісійні платежі",
+    "shipments": "Відвантаження",
+    "receives": "Надходження",
+    "production": "Виробництво",
+    "transportations": "Переміщення",
+    "batchEdit": "Редагування партій"
+  },
+  "actions": {
+    "create": "Створити",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "save": "Зберегти",
+    "cancel": "Скасувати"
+  },
+  "messages": {
+    "error": "Помилка завантаження даних",
+    "noData": "Немає даних"
+  }
+}

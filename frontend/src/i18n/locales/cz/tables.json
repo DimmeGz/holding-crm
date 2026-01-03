@@ -1,0 +1,14 @@
+{
+  "columns": {
+    "orderNumber": "Číslo objednávky",
+    "seller": "Prodávající",
+    "buyer": "Kupující",
+    "recipient": "Příjemce",
+    "expectedDate": "Datum",
+    "confirmDate": "Datum potvrzení",
+    "amount": "Částka",
+    "byContract": "Dle smlouvy",
+    "status": "Stav",
+    "goods": "Zboží"
+  }
+}

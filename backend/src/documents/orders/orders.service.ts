@@ -120,7 +120,7 @@ export class OrdersService {
       this.applyOrderListSelect(this.createBaseQueryBuilder()),
       query,
     )
-      .orderBy('order.id', 'DESC')
+      .orderBy('order.expectedDate', 'DESC', 'NULLS LAST')
       .getMany();
 
     for (const order of orders) {

@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Collapse,
@@ -13,11 +14,13 @@ import type { Link, NavLinkGroupProps } from '@/types/base-ui.types';
 
 export function LinksGroup({
   icon: Icon,
-  label,
+  labelKey,
   initiallyOpened,
   url: link,
   links,
 }: NavLinkGroupProps): ReactNode {
+  const { t } = useTranslation(['common']);
+
   const hasLinks: boolean = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
   const items: ReactNode = (hasLinks ? links! : []).map((link: Link) => (
@@ -46,7 +49,7 @@ export function LinksGroup({
               <Icon size={18} />
             </ThemeIcon>
             <Text<'a'> component='a' ml='md' href={link}>
-              {label}
+              {t(labelKey)}
             </Text>
           </Box>
           {hasLinks && (
