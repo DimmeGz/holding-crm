@@ -10,8 +10,8 @@ export default function LanguageSwitcher(): ReactNode {
     value: string;
     label: string;
   }[] = [
-    { value: 'uk', label: '🇺🇦 Українська' },
-    { value: 'cz', label: '🇨🇿 Čeština' },
+    { value: 'uk', label: '🇺🇦' },
+    { value: 'cz', label: '🇨🇿' },
   ];
 
   return (
@@ -19,6 +19,7 @@ export default function LanguageSwitcher(): ReactNode {
       value={i18n.language || 'uk'}
       onChange={(value: string | null) => value && i18n.changeLanguage(value)}
       data={languages}
+      w={80}
     />
   );
 }

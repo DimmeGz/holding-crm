@@ -1,0 +1,14 @@
+{
+  "columns": {
+    "orderNumber": "Номер замовлення",
+    "seller": "Продавець",
+    "buyer": "Покупець",
+    "recipient": "Отримувач",
+    "expectedDate": "Дата",
+    "confirmDate": "Дата підтвердження",
+    "amount": "Сума",
+    "byContract": "Згідно контракту",
+    "status": "Статус",
+    "goods": "Товари"
+  }
+}

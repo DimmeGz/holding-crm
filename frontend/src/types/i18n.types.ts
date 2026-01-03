@@ -16,7 +16,7 @@ export type LocaleDict = {
       payments: string;
       commissionInvoices: string;
       commissioPayments: string;
-      shippings: string;
+      shipments: string;
       receives: string;
       production: string;
       transportations: string;
@@ -32,6 +32,20 @@ export type LocaleDict = {
     messages: {
       error: string;
       noData: string;
+    };
+  };
+  tables: {
+    columns: {
+      orderNumber: string;
+      seller: string;
+      buyer: string;
+      recipient: string;
+      expectedDate: string;
+      confirmDate: string;
+      amount: string;
+      byContract: string;
+      status: string;
+      goods: string;
     };
   };
 };

@@ -35,7 +35,7 @@ export default function Navbar(): ReactNode {
 
       <div className={classes.footer}>
         <Button variant='light' my='xs' onClick={toggleTheme}>
-          {theme === 'light' ? '🌙 Темна тема' : '☀️ Світла тема'}
+          {theme === 'light' ? '🌙' : '☀️'}
         </Button>
         <LanguageSwitcher />
       </div>
