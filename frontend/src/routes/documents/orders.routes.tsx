@@ -1,4 +1,5 @@
 import type { RouteObject } from 'react-router-dom';
+import { OrderPage } from '@/components/documents/orders/OrderPage';
 import { OrdersTable } from '@/components/documents/orders/OrdersTable';
 
 export const ordersRoutes: RouteObject = {
@@ -7,6 +8,10 @@ export const ordersRoutes: RouteObject = {
     {
       index: true,
       element: <OrdersTable />,
+    },
+    {
+      path: ':id',
+      element: <OrderPage />,
     },
   ],
 };

@@ -1,4 +1,3 @@
-// src/config/tables/columns/common.columns.ts
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { MRT_ColumnDef } from 'mantine-react-table';

@@ -21,9 +21,6 @@ export function useOrdersColumns(): MRT_ColumnDef<GetOrdersDto>[] {
           <Text
             component='a'
             href={`${UrlConstants.ORDERS_URL}/${row.original.id}`}
-            onClick={(event: React.MouseEvent<HTMLAnchorElement>) =>
-              event.preventDefault()
-            }
             td='underline'
             style={{ cursor: 'pointer' }}
           >
