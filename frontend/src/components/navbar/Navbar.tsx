@@ -1,6 +1,6 @@
-import LanguageSwitcher from './LanguageSwitcher';
 import type { ReactNode } from 'react';
 import { Button, ScrollArea } from '@mantine/core';
+import LanguageSwitcher from '@/components/navbar/LanguageSwitcher';
 import { LinksGroup } from '@/components/navbar/LinksGroup';
 import {
   adminMenu,
