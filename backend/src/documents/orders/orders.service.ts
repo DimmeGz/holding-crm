@@ -56,6 +56,7 @@ export class OrdersService {
       .leftJoin('orderLine.productMan', 'product')
       .leftJoin('order.orderConfirmations', 'orderConfirmation')
       .select([
+        'order.id',
         'order.documentSum',
         'order.expectedDate',
         'order.confirmExpectedDate',

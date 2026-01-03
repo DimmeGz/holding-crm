@@ -1,6 +1,7 @@
 import type { GetCompanyDto } from '@/types/common.types';
 
 export type GetOrdersDto = {
+  id: number;
   orderNumber: string;
   documentSum: number;
   seller: GetCompanyDto;
