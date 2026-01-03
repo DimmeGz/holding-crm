@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "companies": "Společnosti",
+    "warehouse": "Sklad",
+    "calendar": "Kalendář",
+    "transit": "Tranzit",
+    "contracts": "Smlouvy",
+    "orders": "Objednávky",
+    "invoices": "Faktury",
+    "payments": "Platby",
+    "commissionInvoices": "Provizní faktury",
+    "commissioPayments": "Provizní platby",
+    "shippings": "Expedice",
+    "receives": "Příjem",
+    "production": "Výroba",
+    "transportations": "Přepravy",
+    "batchEdit": "Hromadná úprava"
+  },
+  "actions": {
+    "create": "Vytvořit",
+    "edit": "Upravit",
+    "delete": "Smazat",
+    "save": "Uložit",
+    "cancel": "Zrušit"
+  },
+  "messages": {
+    "error": "Chyba při načítání dat",
+    "noData": "Žádná data"
+  }
+}

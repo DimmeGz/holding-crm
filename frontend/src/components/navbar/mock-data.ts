@@ -23,32 +23,36 @@ const mockCompanies: string[] = [
 ];
 
 export const generalMenu: NavLinkGroupProps[] = [
-  { label: 'Компанії', icon: IconBuildingSkyscraper },
   {
-    label: 'Склад',
+    labelKey: 'common:nav.companies',
+    icon: IconBuildingSkyscraper,
+    url: '/companies',
+  },
+  {
+    labelKey: 'common:nav.warehouse',
     icon: IconForklift,
     links: mockCompanies.map((companyName: string) => ({
       label: companyName,
       url: '/',
     })),
   },
-  { label: 'Календар', icon: IconCalendar },
-  { label: 'Транзит', icon: IconTruckDelivery },
+  { labelKey: 'common:nav.calendar', icon: IconCalendar },
+  { labelKey: 'common:nav.transit', icon: IconTruckDelivery },
 ];
 
 export const documentsMenu: NavLinkGroupProps[] = [
-  { label: 'Контракти', icon: IconContract },
-  { label: 'Замовлення', icon: IconCurrencyEuro, url: '/orders' },
-  { label: 'Рахунки', icon: IconFileEuro },
-  { label: 'Платежі', icon: IconFileEuroFilled },
-  { label: 'Комісійні рахунки', icon: IconFileEuro },
-  { label: 'Комісійні платежі', icon: IconFileEuroFilled },
-  { label: 'Відвантаження', icon: IconTruck },
-  { label: 'Надходження', icon: IconTruckFilled },
-  { label: 'Виробництво', icon: IconWreckingBall },
-  { label: 'Переміщення', icon: IconArrowMoveRight },
+  { labelKey: 'common:nav.contracts', icon: IconContract },
+  { labelKey: 'common:nav.orders', icon: IconCurrencyEuro, url: '/orders' },
+  { labelKey: 'common:nav.invoices', icon: IconFileEuro },
+  { labelKey: 'common:nav.payments', icon: IconFileEuroFilled },
+  { labelKey: 'common:nav.commissionInvoices', icon: IconFileEuro },
+  { labelKey: 'common:nav.commissioPayments', icon: IconFileEuroFilled },
+  { labelKey: 'common:nav.shipments', icon: IconTruck },
+  { labelKey: 'common:nav.receives', icon: IconTruckFilled },
+  { labelKey: 'common:nav.production', icon: IconWreckingBall },
+  { labelKey: 'common:nav.transportations', icon: IconArrowMoveRight },
 ];
 
 export const adminMenu: NavLinkGroupProps[] = [
-  { label: 'Редагування партій', icon: IconEdit },
+  { labelKey: 'common:nav.batchEdit', icon: IconEdit },
 ];
