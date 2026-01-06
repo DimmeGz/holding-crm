@@ -22,52 +22,7 @@ export type GetOrdersDto = {
 };
 
 export type GetOrderDto = {
-  order: {
-    createdById: number;
-    id: number;
-    sellerId: number;
-    buyerId: number;
-    currencyId: number;
-    comment: string;
-    status: boolean;
-    createdAt: Date;
-    sellerWarehouseId: number;
-    buyerWarehouseId: number;
-    recipientWarehouseId: number;
-    paymentDelay: number;
-    signatureDate: Date;
-    vat: number;
-    documentSum: number;
-    carPlate?: string;
-    orderNumber: string;
-    expectedDate: Date;
-    confirmExpectedDate: Date;
-    sortingDate: Date;
-    isDateAsap: boolean;
-    contractId: number;
-    incotermsId: number;
-    transportPlace: string;
-    isHidden: boolean;
-    confirmation?: {
-      createdById: number;
-      id: number;
-      sellerId: number;
-      buyerId: number;
-      currencyId: number;
-      comment: string;
-      createdAt: Date;
-      sellerWarehouseId: number;
-      buyerWarehouseId: number;
-      recipientId: number;
-      recipientWarehouseId: number;
-      paymentDelay: number;
-      orderId: number;
-      confirmationNumber: string;
-      expectedDate: Date;
-      incotermsId: number;
-      transportPlace: string;
-    };
-  };
+  order: Order;
   invoices: {
     createdById: number;
     id: number;
@@ -109,4 +64,43 @@ export type GetOrderDto = {
     id: number;
     confirmationNumber: string;
   }[];
+};
+
+export type Order = {
+  id: number;
+  status: boolean;
+  orderNumber: string;
+  seller: { name: string };
+  sellerWarehouse: { name: string };
+  buyer: { name: string };
+  buyerWarehouse: { name: string };
+  recipient?: { name: string };
+  recipientWarehouse?: { name: string };
+  createdAt: Date;
+  expectedDate: Date;
+  vat: number;
+  currency: { name: string };
+  paymentDelay: number;
+  incoterms: string;
+  contract: {
+    id: number;
+    name: string;
+  };
+  confirmation?: { id: number };
+  orderLines: OrderLine[];
+};
+
+export type OrderLine = {
+  qty: number;
+  price: number;
+  batchRename?: string;
+  productMan: {
+    name: string;
+  };
+  productBuy: {
+    name: string;
+  };
+  package: {
+    name: string;
+  };
 };

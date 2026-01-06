@@ -46,6 +46,30 @@ export type LocaleDict = {
       byContract: string;
       status: string;
       goods: string;
+      productMan: string;
+      productBuy: string;
+      batchRename: string;
+      package: string;
+      qty: string;
+      price: string;
+    };
+  };
+  documents: {
+    documents: {
+      order: string;
+      byContract: string;
+      createdAt: string;
+      mainInfo: string;
+      seller: string;
+      buyer: string;
+      recipient: string;
+      warehouse: string;
+      payDelivery: string;
+      expectedDate: string;
+      vat: string;
+      paymentDelay: string;
+      incoterms: string;
+      days: string;
     };
   };
 };

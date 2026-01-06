@@ -8,14 +8,14 @@ import type { UseTableColumns } from '@/types/common.types';
 import type { GetOrdersDto } from '@/types/documents/orders.types';
 
 export function useOrdersColumns(): MRT_ColumnDef<GetOrdersDto>[] {
-  const { t } = useTranslation(['tables']);
-  const commonColumns: UseTableColumns = useTableColumns();
+  const { t } = useTranslation(['tables']),
+    commonColumns: UseTableColumns = useTableColumns();
 
   return useMemo(
     () => [
       {
         header: t('tables:columns.orderNumber'),
-        accessorKey: 'orderNumber', // ← тут просто ключ для даних
+        accessorKey: 'orderNumber',
         id: 'orderNumber',
         Cell: ({ row }: { row: MRT_Row<GetOrdersDto> }) => (
           <Text

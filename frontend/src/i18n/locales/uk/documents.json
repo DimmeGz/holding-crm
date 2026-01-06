@@ -1,0 +1,18 @@
+{
+  "documents": {
+    "order": "Замовлення",
+    "byContract": "Згідно договору",
+    "createdAt": "Дата оформлення",
+    "mainInfo": "Основна інформація",
+    "seller": "Продавець",
+    "buyer": "Покупець",
+    "recipient": "Отримувач",
+    "warehouse": "Склад",
+    "payDelivery": "Оплата і доставка",
+    "expectedDate": "Очікувана дата виконання",
+    "vat": "ПДВ",
+    "paymentDelay": "Відстрочка оплати",
+    "incoterms": "Інкотермс",
+    "days": "днів"
+  }
+}

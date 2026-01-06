@@ -9,6 +9,13 @@
     "amount": "Částka",
     "byContract": "Dle smlouvy",
     "status": "Stav",
-    "goods": "Zboží"
+    "goods": "Zboží",
+    "productMan": "Produkt (název prodávajícího)",
+    "productBuy": "Produkt (název kupujícího)",
+    "batchRename": "Přejmenování šarže",
+    "package": "Balení",
+    "qty": "Množství",
+    "price": "Cena",
+    "kg": "kg"
   }
 }
