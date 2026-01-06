@@ -86,7 +86,7 @@ export type Order = {
     id: number;
     name: string;
   };
-  confirmation?: { id: number };
+  confirmation?: Confirmation;
   orderLines: OrderLine[];
 };
 
@@ -103,4 +103,15 @@ export type OrderLine = {
   package: {
     name: string;
   };
+};
+
+type Confirmation = {
+  confirmationNumber: string;
+  createdAt: Date;
+  buyerWarehouse: { name: string };
+  recipient?: { name: string };
+  recipientWarehouse?: { name: string };
+  paymentDelay: number;
+  incoterms: string;
+  expectedDate: Date;
 };

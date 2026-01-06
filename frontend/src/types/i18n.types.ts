@@ -57,6 +57,7 @@ export type LocaleDict = {
   documents: {
     documents: {
       order: string;
+      confirm: string;
       byContract: string;
       createdAt: string;
       mainInfo: string;

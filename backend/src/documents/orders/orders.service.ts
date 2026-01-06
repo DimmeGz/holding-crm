@@ -177,6 +177,9 @@ export class OrdersService {
       .leftJoin('orderLine.productMan', 'productMan')
       .leftJoin('orderLine.productBuy', 'productBuy')
       .leftJoin('orderLine.package', 'package')
+      .leftJoin('confirmation.buyerWarehouse', 'confirmBuyerWarehouse')
+      .leftJoin('confirmation.recipient', 'confirmRecipient')
+      .leftJoin('confirmation.recipientWarehouse', 'confirmRecipientWarehouse')
       .select([
         'order.id',
         'order.status',
@@ -185,6 +188,7 @@ export class OrdersService {
         'order.expectedDate',
         'order.vat',
         'order.paymentDelay',
+        'order.incoterms',
         'currency.name',
         'seller.name',
         'sellerWarehouse.name',
@@ -194,7 +198,16 @@ export class OrdersService {
         'recipientWarehouse.name',
         'contract.id',
         'contract.name',
+        // confirmation
         'confirmation.confirmationNumber',
+        'confirmation.createdAt',
+        'confirmation.expectedDate',
+        'confirmation.paymentDelay',
+        'confirmation.incoterms',
+        'confirmBuyerWarehouse.name',
+        'confirmRecipient.name',
+        'confirmRecipientWarehouse.name',
+        // lines
         'orderLine.qty',
         'orderLine.price',
         'orderLine.batchRename',

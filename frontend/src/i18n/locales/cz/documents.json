@@ -1,13 +1,14 @@
 {
   "documents": {
     "order": "Objednávka",
+    "confirm": "Potvrzení",
     "byContract": "Podle smlouvy",
     "createdAt": "Datum vystavení",
     "mainInfo": "Základní informace",
     "seller": "Prodávající",
     "buyer": "Kupující",
     "recipient": "Příjemce",
-    "warehouse": "Sklad",
+    "warehouse": "Složení",
     "payDelivery": "Platba a dodání",
     "expectedDate": "Očekávané datum plnění",
     "vat": "DPH",
