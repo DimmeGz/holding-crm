@@ -7,6 +7,7 @@ import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
+import { StylesConstants } from '@/constants/styles.constants';
 import { useOrderLinesColumns } from '@/hooks/documents/table-columns/useOrderLinesColumns';
 import { useOrder } from '@/hooks/documents/useOrders';
 import type { Order, OrderLine } from '@/types/documents/orders.types';
@@ -55,7 +56,11 @@ export function OrderPage(): ReactNode {
                   ) : (
                     <IconCircle color='grey' stroke={5} />
                   )}
-                  <Text size='lg' fw={700} ml='xs'>
+                  <Text
+                    size='lg'
+                    fw={StylesConstants.HEAVY_FONT_WEIGHT}
+                    ml='xs'
+                  >
                     {t('documents:documents.order')} №{order.orderNumber}
                   </Text>
                 </Group>
@@ -63,26 +68,27 @@ export function OrderPage(): ReactNode {
 
               {order.confirmation && (
                 <Grid.Col span={6}>
-                  <Text size='lg' fw={700}>
-                    {t('documents:documents.confirm')} №{order.confirmation.confirmationNumber}
+                  <Text size='lg' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
+                    {t('documents:documents.confirm')} №
+                    {order.confirmation.confirmationNumber}
                   </Text>
                 </Grid.Col>
               )}
 
               <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='sm' fw={500}>
+                <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.byContract')}: {order.contract.name}
                 </Text>
               </Grid.Col>
               <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='sm' fw={500}>
+                <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.createdAt')}:{' '}
                   {new Date(order.createdAt).toLocaleDateString('uk-UA')}
                 </Text>
               </Grid.Col>
               {order.confirmation && (
                 <Grid.Col span={6}>
-                  <Text size='sm' fw={500}>
+                  <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                     {t('documents:documents.createdAt')}:{' '}
                     {new Date(order.confirmation.createdAt).toLocaleDateString(
                       'uk-UA',
@@ -94,19 +100,24 @@ export function OrderPage(): ReactNode {
           </Card>
 
           <Card shadow='sm' p='md' radius='md' withBorder mb='sm'>
-            <Text fw={700} size='md' mb='5'>
+            <Text fw={StylesConstants.HEAVY_FONT_WEIGHT} size='md' mb='5'>
               {t('documents:documents.mainInfo')}
             </Text>
             <Grid gutter='md' align='center'>
               <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={500}>
+                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.seller')}:
                 </Text>
                 <div className='flex gap-xs'>
-                  <Text size='sm' fw={700}>
+                  <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                     {order.seller.name}
                   </Text>
-                  <Text size='sm' fw={500} ml={5} c='dimmed'>
+                  <Text
+                    size='sm'
+                    fw={StylesConstants.DEFAULT_FONT_WEIGHT}
+                    ml={5}
+                    c='dimmed'
+                  >
                     ({t('documents:documents.warehouse')}:{' '}
                     {order.sellerWarehouse.name})
                   </Text>
@@ -114,14 +125,19 @@ export function OrderPage(): ReactNode {
               </Grid.Col>
               <Grid.Col span={hasConfirmation ? 3 : 6}>
                 <div>
-                  <Text size='md' fw={500}>
+                  <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                     {t('documents:documents.buyer')}:
                   </Text>
                   <div className='flex gap-xs'>
-                    <Text size='sm' fw={700}>
+                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                       {order.buyer.name}
                     </Text>
-                    <Text size='sm' fw={500} ml={5} c='dimmed'>
+                    <Text
+                      size='sm'
+                      fw={StylesConstants.DEFAULT_FONT_WEIGHT}
+                      ml={5}
+                      c='dimmed'
+                    >
                       ({t('documents:documents.warehouse')}:{' '}
                       {order.buyerWarehouse.name})
                     </Text>
@@ -132,14 +148,19 @@ export function OrderPage(): ReactNode {
               {order.confirmation && (
                 <>
                   <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={500}>
+                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                       {t('documents:documents.seller')}:
                     </Text>
                     <div className='flex gap-xs'>
-                      <Text size='sm' fw={700}>
+                      <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                         {order.seller.name}
                       </Text>
-                      <Text size='sm' fw={500} ml={5} c='dimmed'>
+                      <Text
+                        size='sm'
+                        fw={StylesConstants.DEFAULT_FONT_WEIGHT}
+                        ml={5}
+                        c='dimmed'
+                      >
                         ({t('documents:documents.warehouse')}:{' '}
                         {order.sellerWarehouse.name})
                       </Text>
@@ -147,14 +168,19 @@ export function OrderPage(): ReactNode {
                   </Grid.Col>
                   <Grid.Col span={hasConfirmation ? 3 : 6}>
                     <div>
-                      <Text size='md' fw={500}>
+                      <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                         {t('documents:documents.buyer')}:
                       </Text>
                       <div className='flex gap-xs'>
-                        <Text size='sm' fw={700}>
+                        <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                           {order.buyer.name}
                         </Text>
-                        <Text size='sm' fw={500} ml={5} c='dimmed'>
+                        <Text
+                          size='sm'
+                          fw={StylesConstants.DEFAULT_FONT_WEIGHT}
+                          ml={5}
+                          c='dimmed'
+                        >
                           ({t('documents:documents.warehouse')}:{' '}
                           {order.confirmation.buyerWarehouse.name})
                         </Text>
@@ -167,14 +193,19 @@ export function OrderPage(): ReactNode {
               {order.recipient && (
                 <Grid.Col span={hasConfirmation ? 6 : 12}>
                   <div>
-                    <Text size='md' fw={500}>
+                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                       {t('documents:documents.recipient')}:
                     </Text>
                     <div className='flex gap-xs'>
-                      <Text size='sm' fw={700}>
+                      <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                         {order.recipient.name}
                       </Text>
-                      <Text size='sm' fw={500} ml={5} c='dimmed'>
+                      <Text
+                        size='sm'
+                        fw={StylesConstants.DEFAULT_FONT_WEIGHT}
+                        ml={5}
+                        c='dimmed'
+                      >
                         ({t('documents:documents.warehouse')}:{' '}
                         {order.recipientWarehouse?.name})
                       </Text>
@@ -185,14 +216,19 @@ export function OrderPage(): ReactNode {
               {order.confirmation && order.confirmation.recipient && (
                 <Grid.Col span={6}>
                   <div>
-                    <Text size='md' fw={500}>
+                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                       {t('documents:documents.recipient')}:
                     </Text>
                     <div className='flex gap-xs'>
-                      <Text size='sm' fw={700}>
+                      <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                         {order.confirmation.recipient.name}
                       </Text>
-                      <Text size='sm' fw={500} ml={5} c='dimmed'>
+                      <Text
+                        size='sm'
+                        fw={StylesConstants.DEFAULT_FONT_WEIGHT}
+                        ml={5}
+                        c='dimmed'
+                      >
                         ({t('documents:documents.warehouse')}:{' '}
                         {order.confirmation.recipientWarehouse?.name})
                       </Text>
@@ -204,41 +240,43 @@ export function OrderPage(): ReactNode {
           </Card>
 
           <Card shadow='sm' p='md' radius='md' withBorder mb='sm'>
-            <Text fw={700} size='md' mb='5'>
+            <Text fw={StylesConstants.HEAVY_FONT_WEIGHT} size='md' mb='5'>
               {t('documents:documents.payDelivery')}
             </Text>
             <Grid gutter='md' align='center'>
               <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={500}>
+                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.expectedDate')}:
                 </Text>
-                <Text size='sm' fw={700}>
+                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                   {new Date(order.expectedDate).toLocaleDateString('uk-UA')}
                 </Text>
               </Grid.Col>
               <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={500}>
+                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.vat')}:
                 </Text>
-                <Text size='sm' fw={700}>
+                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                   {order.vat} %
                 </Text>
               </Grid.Col>
               {order.confirmation && (
                 <>
                   <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={500}>
+                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                       {t('documents:documents.expectedDate')}:
                     </Text>
-                    <Text size='sm' fw={700}>
-                      {new Date(order.confirmation.expectedDate).toLocaleDateString('uk-UA')}
+                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
+                      {new Date(
+                        order.confirmation.expectedDate,
+                      ).toLocaleDateString('uk-UA')}
                     </Text>
                   </Grid.Col>
                   <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={500}>
+                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                       {t('documents:documents.vat')}:
                     </Text>
-                    <Text size='sm' fw={700}>
+                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                       {order.vat} %
                     </Text>
                   </Grid.Col>
@@ -246,36 +284,37 @@ export function OrderPage(): ReactNode {
               )}
 
               <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={500}>
+                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.paymentDelay')}:
                 </Text>
-                <Text size='sm' fw={700}>
+                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                   {order.paymentDelay} {t('documents:documents.days')}
                 </Text>
               </Grid.Col>
               <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={500}>
+                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.incoterms')}:
                 </Text>
-                <Text size='sm' fw={700}>
+                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                   {order.incoterms}
                 </Text>
               </Grid.Col>
               {order.confirmation && (
                 <>
                   <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={500}>
+                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                       {t('documents:documents.paymentDelay')}:
                     </Text>
-                    <Text size='sm' fw={700}>
-                      {order.confirmation.paymentDelay} {t('documents:documents.days')}
+                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
+                      {order.confirmation.paymentDelay}{' '}
+                      {t('documents:documents.days')}
                     </Text>
                   </Grid.Col>
                   <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={500}>
+                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                       {t('documents:documents.incoterms')}:
                     </Text>
-                    <Text size='sm' fw={700}>
+                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                       {order.confirmation.incoterms}
                     </Text>
                   </Grid.Col>
