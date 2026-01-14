@@ -36,7 +36,7 @@ export function OrderPageItem({
             td={!isEqual && hasConfirmation ? 'line-through' : 'none'}
             c={!isEqual && hasConfirmation ? 'line-through' : 'none'}
             style={{
-              textDecorationThickness: '2px',
+              textDecorationThickness: '3px',
             }}
           >
             {baseValue.primary}
@@ -49,7 +49,7 @@ export function OrderPageItem({
               c='dimmed'
               td={!isEqual && hasConfirmation ? 'line-through' : 'none'}
               style={{
-                textDecorationThickness: '2px',
+                textDecorationThickness: '3px',
               }}
             >
               ({t(translationKey.secondary)}: {baseValue.secondary})

@@ -114,4 +114,5 @@ type Confirmation = {
   paymentDelay: number;
   incoterms: string;
   expectedDate: Date;
+  orderLines: OrderLine[];
 };

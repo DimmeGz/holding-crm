@@ -180,6 +180,10 @@ export class OrdersService {
       .leftJoin('confirmation.buyerWarehouse', 'confirmBuyerWarehouse')
       .leftJoin('confirmation.recipient', 'confirmRecipient')
       .leftJoin('confirmation.recipientWarehouse', 'confirmRecipientWarehouse')
+      .leftJoin('confirmation.orderLines', 'confirmOrderLine')
+      .leftJoin('confirmOrderLine.productMan', 'confirmProductMan')
+      .leftJoin('confirmOrderLine.productBuy', 'confirmProductBuy')
+      .leftJoin('confirmOrderLine.package', 'confirmPackage')
       .select([
         'order.id',
         'order.status',
@@ -214,6 +218,12 @@ export class OrdersService {
         'productMan.name',
         'productBuy.name',
         'package.name',
+        // confirmation lines
+        'confirmOrderLine.qty',
+        'confirmOrderLine.price',
+        'confirmProductMan.name',
+        'confirmProductBuy.name',
+        'confirmPackage.name',
       ])
       .getOne();
 

@@ -1,7 +1,7 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ChangeEvent, type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { Card, Grid, Group, Text } from '@mantine/core';
+import { Card, Grid, Group, Switch, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
 import { OrderPageItem } from '@/components/documents/orders/OrderPageItem';
@@ -38,7 +38,16 @@ export function OrderPage(): ReactNode {
         },
       }),
       [order, columns],
-    );
+    ),
+    confirmOrderLinesTableConfig: MRT_TableOptions<OrderLine> | undefined =
+      hasConfirmation
+        ? {
+            ...orderLinesTableConfig,
+            data: order?.confirmation?.orderLines || [],
+          }
+        : undefined,
+    [showConfirmLinesTable, setShowConfirmLinesTable] =
+      useState<boolean>(false);
 
   return (
     <>
@@ -47,7 +56,7 @@ export function OrderPage(): ReactNode {
       {!loading && error && <h3>Помилка завантаження даних: {error}</h3>}
 
       {!loading && !error && order && (
-        <div>
+        <>
           <Card shadow='sm' p='md' radius='md' withBorder mb='xs' mt='6'>
             <Grid gutter='xs' align='flex-start'>
               <Grid.Col span={hasConfirmation ? 8 : 12}>
@@ -231,11 +240,47 @@ export function OrderPage(): ReactNode {
               />
             </Grid>
           </Card>
+          <Card>
+            <Grid gutter='xs' align='flex-start' mb='xs'>
+              <Grid.Col span={hasConfirmation ? 9 : 12}>
+                <Text size='lg' fw={StylesConstants.HEAVY_FONT_WEIGHT} ml='xs'>
+                  {t('documents:documents.goods')}
+                </Text>
+              </Grid.Col>
+              {hasConfirmation && (
+                <Grid.Col span={3}>
+                  <Group justify='flex-end'>
+                    <Text
+                      size='md'
+                      fw={StylesConstants.DEFAULT_FONT_WEIGHT}
+                      ml='xs'
+                    >
+                      {showConfirmLinesTable
+                        ? t('documents:documents.confirm').toLowerCase()
+                        : t('documents:documents.order').toLowerCase()}
+                    </Text>
+                    <Switch
+                      checked={showConfirmLinesTable}
+                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                        setShowConfirmLinesTable(event.currentTarget.checked)
+                      }
+                      // label={dict?.losses.showOurLossesBySubunit}
+                    />
+                  </Group>
+                </Grid.Col>
+              )}
+            </Grid>
 
-          {order.orderLines && (
-            <HoldingTable tableOptions={orderLinesTableConfig} />
-          )}
-        </div>
+            {order.orderLines && !showConfirmLinesTable && (
+              <HoldingTable tableOptions={orderLinesTableConfig} />
+            )}
+            {order.confirmation?.orderLines &&
+              showConfirmLinesTable &&
+              confirmOrderLinesTableConfig && (
+                <HoldingTable tableOptions={confirmOrderLinesTableConfig} />
+              )}
+          </Card>
+        </>
       )}
     </>
   );

@@ -6,6 +6,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { Currency, Incoterms, TechnicalProcess } from '../../../libs/entities';
@@ -13,6 +14,7 @@ import { Order } from '../../orders/entities';
 import { Warehouse } from '../../../warehouse/entities';
 import { Company } from '../../../companies/entities';
 import { AbstractEntity } from '../../../common/entities';
+import { OrderConfirmationLine } from './order-confirmation-line.entity';
 
 @Entity({ name: 'documents_orderconfirmation' })
 export class OrderConfirmation extends AbstractEntity {
@@ -157,6 +159,13 @@ export class OrderConfirmation extends AbstractEntity {
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(
+    () => OrderConfirmationLine,
+    (orderLine) => orderLine.orderConfirmation,
+    { cascade: true },
+  )
+  orderLines: Partial<OrderConfirmationLine>[];
 
   // TODO: created by
   @Column({ name: 'created_by_id' })

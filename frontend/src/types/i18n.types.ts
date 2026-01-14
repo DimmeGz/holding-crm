@@ -71,6 +71,7 @@ export type LocaleDict = {
       paymentDelay: string;
       incoterms: string;
       days: string;
+      goods: string;
     };
   };
 };
