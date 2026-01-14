@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Card, Grid, Group, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
+import { OrderPageItem } from '@/components/documents/orders/OrderPageItem';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
@@ -48,8 +49,8 @@ export function OrderPage(): ReactNode {
       {!loading && !error && order && (
         <div>
           <Card shadow='sm' p='md' radius='md' withBorder mb='xs' mt='6'>
-            <Grid gutter='xs' align='center'>
-              <Grid.Col span={hasConfirmation ? 6 : 12}>
+            <Grid gutter='xs' align='flex-start'>
+              <Grid.Col span={hasConfirmation ? 8 : 12}>
                 <Group justify='flex-start' wrap='nowrap' gap='2'>
                   {order.status ? (
                     <IconCircleFilled color='green' />
@@ -67,7 +68,7 @@ export function OrderPage(): ReactNode {
               </Grid.Col>
 
               {order.confirmation && (
-                <Grid.Col span={6}>
+                <Grid.Col span={4}>
                   <Text size='lg' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
                     {t('documents:documents.confirm')} №
                     {order.confirmation.confirmationNumber}
@@ -75,19 +76,19 @@ export function OrderPage(): ReactNode {
                 </Grid.Col>
               )}
 
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
+              <Grid.Col span={hasConfirmation ? 4 : 6}>
                 <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.byContract')}: {order.contract.name}
                 </Text>
               </Grid.Col>
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
+              <Grid.Col span={hasConfirmation ? 4 : 6}>
                 <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                   {t('documents:documents.createdAt')}:{' '}
                   {new Date(order.createdAt).toLocaleDateString('uk-UA')}
                 </Text>
               </Grid.Col>
               {order.confirmation && (
-                <Grid.Col span={6}>
+                <Grid.Col span={4}>
                   <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
                     {t('documents:documents.createdAt')}:{' '}
                     {new Date(order.confirmation.createdAt).toLocaleDateString(
@@ -103,138 +104,67 @@ export function OrderPage(): ReactNode {
             <Text fw={StylesConstants.HEAVY_FONT_WEIGHT} size='md' mb='5'>
               {t('documents:documents.mainInfo')}
             </Text>
-            <Grid gutter='md' align='center'>
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                  {t('documents:documents.seller')}:
-                </Text>
-                <div className='flex gap-xs'>
-                  <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                    {order.seller.name}
-                  </Text>
-                  <Text
-                    size='sm'
-                    fw={StylesConstants.DEFAULT_FONT_WEIGHT}
-                    ml={5}
-                    c='dimmed'
-                  >
-                    ({t('documents:documents.warehouse')}:{' '}
-                    {order.sellerWarehouse.name})
-                  </Text>
-                </div>
-              </Grid.Col>
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <div>
-                  <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                    {t('documents:documents.buyer')}:
-                  </Text>
-                  <div className='flex gap-xs'>
-                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                      {order.buyer.name}
-                    </Text>
-                    <Text
-                      size='sm'
-                      fw={StylesConstants.DEFAULT_FONT_WEIGHT}
-                      ml={5}
-                      c='dimmed'
-                    >
-                      ({t('documents:documents.warehouse')}:{' '}
-                      {order.buyerWarehouse.name})
-                    </Text>
-                  </div>
-                </div>
-              </Grid.Col>
-
-              {order.confirmation && (
-                <>
-                  <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                      {t('documents:documents.seller')}:
-                    </Text>
-                    <div className='flex gap-xs'>
-                      <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                        {order.seller.name}
-                      </Text>
-                      <Text
-                        size='sm'
-                        fw={StylesConstants.DEFAULT_FONT_WEIGHT}
-                        ml={5}
-                        c='dimmed'
-                      >
-                        ({t('documents:documents.warehouse')}:{' '}
-                        {order.sellerWarehouse.name})
-                      </Text>
-                    </div>
-                  </Grid.Col>
-                  <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <div>
-                      <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                        {t('documents:documents.buyer')}:
-                      </Text>
-                      <div className='flex gap-xs'>
-                        <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                          {order.buyer.name}
-                        </Text>
-                        <Text
-                          size='sm'
-                          fw={StylesConstants.DEFAULT_FONT_WEIGHT}
-                          ml={5}
-                          c='dimmed'
-                        >
-                          ({t('documents:documents.warehouse')}:{' '}
-                          {order.confirmation.buyerWarehouse.name})
-                        </Text>
-                      </div>
-                    </div>
-                  </Grid.Col>
-                </>
-              )}
+            <Grid gutter='md' align='flex-start'>
+              <OrderPageItem
+                gridSpan={order.recipient ? 4 : 6}
+                translationKey={{
+                  primary: 'documents:documents.seller',
+                  secondary: 'documents:documents.warehouse',
+                }}
+                baseValue={{
+                  primary: order.seller.name,
+                  secondary: order.sellerWarehouse.name,
+                }}
+                confirmValue={
+                  order.confirmation
+                    ? {
+                        primary: order.seller.name,
+                        secondary: order.sellerWarehouse.name,
+                      }
+                    : undefined
+                }
+              />
+              <OrderPageItem
+                gridSpan={hasConfirmation ? 4 : 6}
+                translationKey={{
+                  primary: 'documents:documents.buyer',
+                  secondary: 'documents:documents.warehouse',
+                }}
+                baseValue={{
+                  primary: order.buyer.name,
+                  secondary: order.buyerWarehouse.name,
+                }}
+                confirmValue={
+                  order.confirmation
+                    ? {
+                        primary: order.buyer.name,
+                        secondary: order.confirmation.buyerWarehouse.name,
+                      }
+                    : undefined
+                }
+              />
 
               {order.recipient && (
-                <Grid.Col span={hasConfirmation ? 6 : 12}>
-                  <div>
-                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                      {t('documents:documents.recipient')}:
-                    </Text>
-                    <div className='flex gap-xs'>
-                      <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                        {order.recipient.name}
-                      </Text>
-                      <Text
-                        size='sm'
-                        fw={StylesConstants.DEFAULT_FONT_WEIGHT}
-                        ml={5}
-                        c='dimmed'
-                      >
-                        ({t('documents:documents.warehouse')}:{' '}
-                        {order.recipientWarehouse?.name})
-                      </Text>
-                    </div>
-                  </div>
-                </Grid.Col>
-              )}
-              {order.confirmation && order.confirmation.recipient && (
-                <Grid.Col span={6}>
-                  <div>
-                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                      {t('documents:documents.recipient')}:
-                    </Text>
-                    <div className='flex gap-xs'>
-                      <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                        {order.confirmation.recipient.name}
-                      </Text>
-                      <Text
-                        size='sm'
-                        fw={StylesConstants.DEFAULT_FONT_WEIGHT}
-                        ml={5}
-                        c='dimmed'
-                      >
-                        ({t('documents:documents.warehouse')}:{' '}
-                        {order.confirmation.recipientWarehouse?.name})
-                      </Text>
-                    </div>
-                  </div>
-                </Grid.Col>
+                <OrderPageItem
+                  gridSpan={4}
+                  translationKey={{
+                    primary: 'documents:documents.recipient',
+                    secondary: 'documents:documents.warehouse',
+                  }}
+                  baseValue={{
+                    primary: order.recipient.name,
+                    secondary: order.recipientWarehouse?.name,
+                  }}
+                  confirmValue={
+                    order.confirmation
+                      ? {
+                          primary: order.confirmation.recipient?.name,
+                          secondary:
+                            order.confirmation.recipientWarehouse?.name,
+                        }
+                      : undefined
+                  }
+                />
               )}
             </Grid>
           </Card>
@@ -243,83 +173,62 @@ export function OrderPage(): ReactNode {
             <Text fw={StylesConstants.HEAVY_FONT_WEIGHT} size='md' mb='5'>
               {t('documents:documents.payDelivery')}
             </Text>
-            <Grid gutter='md' align='center'>
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                  {t('documents:documents.expectedDate')}:
-                </Text>
-                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                  {new Date(order.expectedDate).toLocaleDateString('uk-UA')}
-                </Text>
-              </Grid.Col>
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                  {t('documents:documents.vat')}:
-                </Text>
-                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                  {order.vat} %
-                </Text>
-              </Grid.Col>
-              {order.confirmation && (
-                <>
-                  <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                      {t('documents:documents.expectedDate')}:
-                    </Text>
-                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                      {new Date(
-                        order.confirmation.expectedDate,
-                      ).toLocaleDateString('uk-UA')}
-                    </Text>
-                  </Grid.Col>
-                  <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                      {t('documents:documents.vat')}:
-                    </Text>
-                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                      {order.vat} %
-                    </Text>
-                  </Grid.Col>
-                </>
-              )}
-
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                  {t('documents:documents.paymentDelay')}:
-                </Text>
-                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                  {order.paymentDelay} {t('documents:documents.days')}
-                </Text>
-              </Grid.Col>
-              <Grid.Col span={hasConfirmation ? 3 : 6}>
-                <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                  {t('documents:documents.incoterms')}:
-                </Text>
-                <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                  {order.incoterms}
-                </Text>
-              </Grid.Col>
-              {order.confirmation && (
-                <>
-                  <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                      {t('documents:documents.paymentDelay')}:
-                    </Text>
-                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                      {order.confirmation.paymentDelay}{' '}
-                      {t('documents:documents.days')}
-                    </Text>
-                  </Grid.Col>
-                  <Grid.Col span={hasConfirmation ? 3 : 6}>
-                    <Text size='md' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                      {t('documents:documents.incoterms')}:
-                    </Text>
-                    <Text size='sm' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                      {order.confirmation.incoterms}
-                    </Text>
-                  </Grid.Col>
-                </>
-              )}
+            <Grid gutter='md' align='flex-start'>
+              <OrderPageItem
+                gridSpan={3}
+                translationKey={{
+                  primary: 'documents:documents.expectedDate',
+                }}
+                baseValue={{
+                  primary: new Date(order.expectedDate).toLocaleDateString(
+                    'uk-UA',
+                  ),
+                }}
+                confirmValue={
+                  order.confirmation
+                    ? {
+                        primary: new Date(
+                          order.confirmation.expectedDate,
+                        ).toLocaleDateString('uk-UA'),
+                      }
+                    : undefined
+                }
+              />
+              <OrderPageItem
+                gridSpan={3}
+                translationKey={{
+                  primary: 'documents:documents.vat',
+                }}
+                baseValue={{
+                  primary: `${order.vat} %`,
+                }}
+              />
+              <OrderPageItem
+                gridSpan={3}
+                translationKey={{
+                  primary: 'documents:documents.paymentDelay',
+                }}
+                baseValue={{
+                  primary: `${order.paymentDelay} ${t('documents:documents.days')}`,
+                }}
+                confirmValue={{
+                  primary: order.confirmation
+                    ? `${order.confirmation?.paymentDelay} ${t('documents:documents.days')}`
+                    : undefined,
+                }}
+              />
+              <OrderPageItem
+                gridSpan={3}
+                translationKey={{
+                  primary: 'documents:documents.incoterms',
+                }}
+                baseValue={{
+                  primary: order.incoterms,
+                }}
+                confirmValue={{
+                  primary: order.confirmation?.incoterms,
+                }}
+              />
             </Grid>
           </Card>
 
