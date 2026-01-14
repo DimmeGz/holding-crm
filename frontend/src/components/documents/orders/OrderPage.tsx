@@ -43,6 +43,9 @@ export function OrderPage(): ReactNode {
       hasConfirmation
         ? {
             ...orderLinesTableConfig,
+            columns: [...columns].filter(
+              (column: MRT_ColumnDef<OrderLine>) => column.id !== 'batchRename',
+            ),
             data: order?.confirmation?.orderLines || [],
           }
         : undefined,
