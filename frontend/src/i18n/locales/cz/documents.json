@@ -1,0 +1,20 @@
+{
+  "documents": {
+    "order": "Objednávka",
+    "confirm": "Potvrzení",
+    "byContract": "Podle smlouvy",
+    "createdAt": "Datum vystavení",
+    "mainInfo": "Základní informace",
+    "seller": "Prodávající",
+    "buyer": "Kupující",
+    "recipient": "Příjemce",
+    "warehouse": "Složení",
+    "payDelivery": "Platba a dodání",
+    "expectedDate": "Očekávané datum plnění",
+    "vat": "DPH",
+    "paymentDelay": "Odklad platby",
+    "incoterms": "Incoterms",
+    "days": "dny",
+    "goods": "Zboží"
+  }
+}

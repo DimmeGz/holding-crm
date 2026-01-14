@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractLineEntity } from '../../entities';
 import { OrderConfirmation } from './order-confirmation.entity';
@@ -18,9 +18,15 @@ export class OrderConfirmationLine extends AbstractLineEntity {
   @JoinColumn({ name: 'product_man_id' })
   productMan: Product;
 
+  @Column({ name: 'product_man_id' })
+  productManId: number;
+
   @ManyToOne(() => Product, {
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'product_buy_id' })
   productBuy: Product;
+
+  @Column({ name: 'product_buy_id' })
+  productBuyId: number;
 }

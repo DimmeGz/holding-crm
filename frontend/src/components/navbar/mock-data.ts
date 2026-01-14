@@ -13,6 +13,7 @@ import {
   IconTruckFilled,
   IconWreckingBall,
 } from '@tabler/icons-react';
+import { UrlConstants } from '@/constants/url-constants';
 import type { NavLinkGroupProps } from '@/types/base-ui.types';
 
 const mockCompanies: string[] = [
@@ -42,7 +43,11 @@ export const generalMenu: NavLinkGroupProps[] = [
 
 export const documentsMenu: NavLinkGroupProps[] = [
   { labelKey: 'common:nav.contracts', icon: IconContract },
-  { labelKey: 'common:nav.orders', icon: IconCurrencyEuro, url: '/orders' },
+  {
+    labelKey: 'common:nav.orders',
+    icon: IconCurrencyEuro,
+    url: UrlConstants.ORDERS_URL,
+  },
   { labelKey: 'common:nav.invoices', icon: IconFileEuro },
   { labelKey: 'common:nav.payments', icon: IconFileEuroFilled },
   { labelKey: 'common:nav.commissionInvoices', icon: IconFileEuro },

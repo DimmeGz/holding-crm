@@ -1,5 +1,5 @@
 import { ordersApi } from '@/api/documents/orders.api';
-import type { GetOrdersDto } from '@/types/documents/orders.types';
+import type { GetOrderDto, GetOrdersDto } from '@/types/documents/orders.types';
 
 export type User = {
   id: number;
@@ -13,5 +13,11 @@ export class OrdersService {
     const orders: GetOrdersDto[] = await ordersApi.getList();
 
     return orders;
+  }
+
+  static async getById(orderId: number): Promise<GetOrderDto> {
+    const order: GetOrderDto = await ordersApi.getById(orderId);
+
+    return order;
   }
 }

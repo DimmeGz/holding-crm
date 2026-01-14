@@ -56,6 +56,7 @@ export class OrdersService {
       .leftJoin('orderLine.productMan', 'product')
       .leftJoin('order.orderConfirmations', 'orderConfirmation')
       .select([
+        'order.id',
         'order.documentSum',
         'order.expectedDate',
         'order.confirmExpectedDate',
@@ -164,6 +165,66 @@ export class OrdersService {
         oc.order_id = order.id AND oc.id > confirmation.id)`,
       )
       .where('order.id = :orderId', { orderId })
+      .leftJoin('order.seller', 'seller')
+      .leftJoin('order.sellerWarehouse', 'sellerWarehouse')
+      .leftJoin('order.buyer', 'buyer')
+      .leftJoin('order.buyerWarehouse', 'buyerWarehouse')
+      .leftJoin('order.recipient', 'recipient')
+      .leftJoin('order.recipientWarehouse', 'recipientWarehouse')
+      .leftJoin('order.contract', 'contract')
+      .leftJoin('order.currency', 'currency')
+      .leftJoin('order.orderLines', 'orderLine')
+      .leftJoin('orderLine.productMan', 'productMan')
+      .leftJoin('orderLine.productBuy', 'productBuy')
+      .leftJoin('orderLine.package', 'package')
+      .leftJoin('confirmation.buyerWarehouse', 'confirmBuyerWarehouse')
+      .leftJoin('confirmation.recipient', 'confirmRecipient')
+      .leftJoin('confirmation.recipientWarehouse', 'confirmRecipientWarehouse')
+      .leftJoin('confirmation.orderLines', 'confirmOrderLine')
+      .leftJoin('confirmOrderLine.productMan', 'confirmProductMan')
+      .leftJoin('confirmOrderLine.productBuy', 'confirmProductBuy')
+      .leftJoin('confirmOrderLine.package', 'confirmPackage')
+      .select([
+        'order.id',
+        'order.status',
+        'order.orderNumber',
+        'order.createdAt',
+        'order.expectedDate',
+        'order.vat',
+        'order.paymentDelay',
+        'order.incoterms',
+        'currency.name',
+        'seller.name',
+        'sellerWarehouse.name',
+        'buyer.name',
+        'buyerWarehouse.name',
+        'recipient.name',
+        'recipientWarehouse.name',
+        'contract.id',
+        'contract.name',
+        // confirmation
+        'confirmation.confirmationNumber',
+        'confirmation.createdAt',
+        'confirmation.expectedDate',
+        'confirmation.paymentDelay',
+        'confirmation.incoterms',
+        'confirmBuyerWarehouse.name',
+        'confirmRecipient.name',
+        'confirmRecipientWarehouse.name',
+        // lines
+        'orderLine.qty',
+        'orderLine.price',
+        'orderLine.batchRename',
+        'productMan.name',
+        'productBuy.name',
+        'package.name',
+        // confirmation lines
+        'confirmOrderLine.qty',
+        'confirmOrderLine.price',
+        'confirmProductMan.name',
+        'confirmProductBuy.name',
+        'confirmPackage.name',
+      ])
       .getOne();
 
     if (!order) {
