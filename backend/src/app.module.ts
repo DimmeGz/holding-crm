@@ -10,6 +10,7 @@ import { DocumentsModule } from './documents';
 
 import { databaseConfig, typeOrmConfig, VALIDATION_SCHEMA } from './config';
 import { ReportsModule } from './reports/reports.module';
+import { StoreDataModule } from './store-data/store-data.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ReportsModule } from './reports/reports.module';
     CompaniesModule,
     DocumentsModule,
     ReportsModule,
+    StoreDataModule,
   ],
   controllers: [AppController],
   providers: [AppService],

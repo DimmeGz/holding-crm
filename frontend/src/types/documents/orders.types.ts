@@ -1,23 +1,18 @@
-import type { GetCompanyDto } from '@/types/common.types';
-
 export type GetOrdersDto = {
   id: number;
   orderNumber: string;
   documentSum: number;
-  seller: GetCompanyDto;
-  buyer: GetCompanyDto;
-  recipient: GetCompanyDto;
+  sellerId: number;
+  buyerId: number;
+  recipientId: number;
+  currencyId: number;
   contract: {
     createdById: number;
     name: string;
   };
-  orderProducts: string[];
+  orderProductIds: number[];
   expectedDate?: Date;
   confirmExpectedDate?: Date;
-  currency: {
-    id: number;
-    name: string;
-  };
   status: boolean;
 };
 
@@ -70,16 +65,16 @@ export type Order = {
   id: number;
   status: boolean;
   orderNumber: string;
-  seller: { name: string };
-  sellerWarehouse: { name: string };
-  buyer: { name: string };
-  buyerWarehouse: { name: string };
-  recipient?: { name: string };
-  recipientWarehouse?: { name: string };
+  sellerId: number;
+  sellerWarehouseId: number;
+  buyerId: number;
+  buyerWarehouseId: number;
+  recipientId?: number;
+  recipientWarehouseId?: number;
   createdAt: Date;
   expectedDate: Date;
   vat: number;
-  currency: { name: string };
+  currencyId: number;
   paymentDelay: number;
   incoterms: string;
   contract: {
@@ -94,23 +89,17 @@ export type OrderLine = {
   qty: number;
   price: number;
   batchRename?: string;
-  productMan: {
-    name: string;
-  };
-  productBuy: {
-    name: string;
-  };
-  package: {
-    name: string;
-  };
+  productManId: number;
+  productBuyId: number;
+  packageId: number;
 };
 
 type Confirmation = {
   confirmationNumber: string;
   createdAt: Date;
-  buyerWarehouse: { name: string };
-  recipient?: { name: string };
-  recipientWarehouse?: { name: string };
+  buyerWarehouseId: number;
+  recipientId?: number;
+  recipientWarehouseId?: number;
   paymentDelay: number;
   incoterms: string;
   expectedDate: Date;

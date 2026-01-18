@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
-import { Batch, Product, Service } from './entities';
+import { Batch, Package, Product, Service } from './entities';
 import { TechnicalProcess } from '../libs/entities';
 import {
   ProductionInLine,
@@ -17,6 +17,8 @@ export class GoodsService {
   constructor(
     @InjectRepository(Batch)
     private readonly batchesRepository: Repository<Batch>,
+    @InjectRepository(Package)
+    private readonly packagesRepository: Repository<Package>,
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
     @InjectRepository(Service)
@@ -214,5 +216,19 @@ export class GoodsService {
     }
 
     return processes;
+  }
+
+  async getProductsStoreData() {
+    return await this.productsRepository
+      .createQueryBuilder('product')
+      .select(['product.id', 'product.name'])
+      .getMany();
+  }
+
+  async getPackagesStoreData() {
+    return await this.packagesRepository
+      .createQueryBuilder('package')
+      .select(['package.id', 'package.name'])
+      .getMany();
   }
 }

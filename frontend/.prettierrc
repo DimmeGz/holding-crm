@@ -19,6 +19,7 @@
     "^@mantine",
     "^mantine-react-table",
     "^@tabler/icons-react",
+    "^@zustand",
     "^@/*/(.*)$"
   ],
   "importOrderCaseInsensitive": true,

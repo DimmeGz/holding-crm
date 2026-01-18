@@ -47,28 +47,23 @@ export class OrdersService {
     qb: SelectQueryBuilder<Order>,
   ): SelectQueryBuilder<Order> {
     return qb
-      .leftJoin('order.seller', 'seller')
-      .leftJoin('order.buyer', 'buyer')
-      .leftJoin('order.recipient', 'recipient')
       .leftJoin('order.contract', 'contract')
-      .leftJoin('order.currency', 'currency')
       .leftJoin('order.orderLines', 'orderLine')
-      .leftJoin('orderLine.productMan', 'product')
       .leftJoin('order.orderConfirmations', 'orderConfirmation')
       .select([
         'order.id',
+        'order.sellerId',
+        'order.buyerId',
+        'order.recipientId',
         'order.documentSum',
+        'order.currencyId',
         'order.expectedDate',
         'order.confirmExpectedDate',
         'order.status',
         'order.orderNumber',
-        'currency.name',
-        'seller.name',
-        'buyer.name',
-        'recipient.name',
         'contract.name',
         'orderLine.id',
-        'product.name',
+        'orderLine.productManId',
         'orderConfirmation.id',
         'orderConfirmation.expectedDate',
       ]);
@@ -125,7 +120,9 @@ export class OrdersService {
       .getMany();
 
     for (const order of orders) {
-      order['orderProducts'] = this.getOrderProductNames(order);
+      order['orderProductIds'] = [
+        ...new Set(order.orderLines.map((orderLine) => orderLine.productManId)),
+      ];
       delete order.orderLines;
 
       order['confirmDate'] = this.getOrderConfirmationDate(order);
@@ -133,15 +130,6 @@ export class OrdersService {
     }
 
     return orders;
-  }
-
-  private getOrderProductNames(order: Order): string[] {
-    const products: Set<string> = new Set();
-    for (const line of order.orderLines) {
-      products.add(line.productMan.name);
-    }
-
-    return [...products].sort();
   }
 
   private getOrderConfirmationDate(order: Order): Date | undefined {
@@ -165,41 +153,25 @@ export class OrdersService {
         oc.order_id = order.id AND oc.id > confirmation.id)`,
       )
       .where('order.id = :orderId', { orderId })
-      .leftJoin('order.seller', 'seller')
-      .leftJoin('order.sellerWarehouse', 'sellerWarehouse')
-      .leftJoin('order.buyer', 'buyer')
-      .leftJoin('order.buyerWarehouse', 'buyerWarehouse')
-      .leftJoin('order.recipient', 'recipient')
-      .leftJoin('order.recipientWarehouse', 'recipientWarehouse')
       .leftJoin('order.contract', 'contract')
-      .leftJoin('order.currency', 'currency')
       .leftJoin('order.orderLines', 'orderLine')
-      .leftJoin('orderLine.productMan', 'productMan')
-      .leftJoin('orderLine.productBuy', 'productBuy')
-      .leftJoin('orderLine.package', 'package')
-      .leftJoin('confirmation.buyerWarehouse', 'confirmBuyerWarehouse')
-      .leftJoin('confirmation.recipient', 'confirmRecipient')
-      .leftJoin('confirmation.recipientWarehouse', 'confirmRecipientWarehouse')
       .leftJoin('confirmation.orderLines', 'confirmOrderLine')
-      .leftJoin('confirmOrderLine.productMan', 'confirmProductMan')
-      .leftJoin('confirmOrderLine.productBuy', 'confirmProductBuy')
-      .leftJoin('confirmOrderLine.package', 'confirmPackage')
       .select([
         'order.id',
         'order.status',
         'order.orderNumber',
         'order.createdAt',
         'order.expectedDate',
+        'order.currencyId',
         'order.vat',
         'order.paymentDelay',
         'order.incoterms',
-        'currency.name',
-        'seller.name',
-        'sellerWarehouse.name',
-        'buyer.name',
-        'buyerWarehouse.name',
-        'recipient.name',
-        'recipientWarehouse.name',
+        'order.sellerId',
+        'order.buyerId',
+        'order.recipientId',
+        'order.sellerWarehouseId',
+        'order.buyerWarehouseId',
+        'order.recipientWarehouseId',
         'contract.id',
         'contract.name',
         // confirmation
@@ -208,22 +180,22 @@ export class OrdersService {
         'confirmation.expectedDate',
         'confirmation.paymentDelay',
         'confirmation.incoterms',
-        'confirmBuyerWarehouse.name',
-        'confirmRecipient.name',
-        'confirmRecipientWarehouse.name',
+        'confirmation.buyerWarehouseId',
+        'confirmation.recipientId',
+        'confirmation.recipientWarehouseId',
         // lines
         'orderLine.qty',
         'orderLine.price',
         'orderLine.batchRename',
-        'productMan.name',
-        'productBuy.name',
-        'package.name',
+        'orderLine.productManId',
+        'orderLine.productBuyId',
+        'orderLine.packageId',
         // confirmation lines
         'confirmOrderLine.qty',
         'confirmOrderLine.price',
-        'confirmProductMan.name',
-        'confirmProductBuy.name',
-        'confirmPackage.name',
+        'confirmOrderLine.productManId',
+        'confirmOrderLine.productBuyId',
+        'confirmOrderLine.packageId',
       ])
       .getOne();
 

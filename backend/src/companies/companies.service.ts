@@ -221,4 +221,11 @@ export class CompaniesService {
 
     return company;
   }
+
+  async getStoreData() {
+    return await this.companiesRepository
+      .createQueryBuilder('company')
+      .select(['company.id', 'company.name'])
+      .getMany();
+  }
 }

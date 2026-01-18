@@ -4,12 +4,16 @@ import { Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_Row } from 'mantine-react-table';
 import { UrlConstants } from '@/constants/url-constants';
 import { useTableColumns } from '@/hooks/documents/table-columns/useTableColumns';
-import type { UseTableColumns } from '@/types/common.types';
+import { useLibsStore } from '@/stores/useLibsStore';
+import type { UseTableColumns } from '@/types/documents/common-documents.types';
 import type { GetOrdersDto } from '@/types/documents/orders.types';
 
 export function useOrdersColumns(): MRT_ColumnDef<GetOrdersDto>[] {
   const { t } = useTranslation(['tables']),
-    commonColumns: UseTableColumns = useTableColumns();
+    commonColumns: UseTableColumns = useTableColumns(),
+    getProductName: (id: number) => string = useLibsStore(
+      s => s.getProductName,
+    );
 
   return useMemo(
     () => [
@@ -38,10 +42,13 @@ export function useOrdersColumns(): MRT_ColumnDef<GetOrdersDto>[] {
       commonColumns.status<GetOrdersDto>(),
       {
         header: t('tables:columns.goods'),
-        accessorFn: (row: GetOrdersDto) => row.orderProducts.join(', '),
+        accessorFn: (row: GetOrdersDto) =>
+          row.orderProductIds
+            .map(productId => getProductName(productId))
+            .join(', '),
         id: 'orderProducts',
       },
     ],
-    [t, commonColumns],
+    [t, commonColumns, getProductName],
   );
 }

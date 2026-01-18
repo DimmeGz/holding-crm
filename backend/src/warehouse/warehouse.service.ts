@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { WarehouseAccounting } from './entities';
+import { Warehouse, WarehouseAccounting } from './entities';
 import {
   ChangeReceiveGoodsCountDTO,
   ChangeShipGoodsCountDTO,
@@ -17,6 +17,8 @@ export class WarehouseService {
   constructor(
     @InjectRepository(WarehouseAccounting)
     private readonly warehouseAccountingRepository: Repository<WarehouseAccounting>,
+    @InjectRepository(Warehouse)
+    private readonly warehouseRepository: Repository<Warehouse>,
   ) {}
 
   private createBaseQueryBuilder(): SelectQueryBuilder<WarehouseAccounting> {
@@ -389,5 +391,12 @@ export class WarehouseService {
     linesToSave.push(...outLines, ...inLines);
 
     await this.warehouseAccountingRepository.save(linesToSave);
+  }
+
+  async getStoreData() {
+    return await this.warehouseRepository
+      .createQueryBuilder('warehouse')
+      .select(['warehouse.id', 'warehouse.name'])
+      .getMany();
   }
 }

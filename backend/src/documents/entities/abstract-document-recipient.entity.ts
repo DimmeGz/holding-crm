@@ -14,6 +14,9 @@ export class AbstractDocumentRecipientEntity<
   @JoinColumn({ name: 'recipient_id' })
   recipient: Company;
 
+  @Column({ name: 'recipient_id' })
+  recipientId: number;
+
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
   })

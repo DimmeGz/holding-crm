@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TechnicalProcess } from './entities';
+import { Currency, TechnicalProcess } from './entities';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
@@ -8,6 +8,8 @@ export class LibsService {
   constructor(
     @InjectRepository(TechnicalProcess)
     private readonly technicalProcessesRepository: Repository<TechnicalProcess>,
+    @InjectRepository(Currency)
+    private readonly currenciesRepository: Repository<Currency>,
   ) {}
 
   private createBaseQueryBuilder(): SelectQueryBuilder<TechnicalProcess> {
@@ -56,6 +58,13 @@ export class LibsService {
       .where('batch.id = :batchId', {
         batchId,
       })
+      .getMany();
+  }
+
+  async getCurrenciesStoreData() {
+    return await this.currenciesRepository
+      .createQueryBuilder('currency')
+      .select(['currency.id', 'currency.name'])
       .getMany();
   }
 }

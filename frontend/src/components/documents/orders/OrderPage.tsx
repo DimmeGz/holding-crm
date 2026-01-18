@@ -11,16 +11,26 @@ import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
 import { useOrderLinesColumns } from '@/hooks/documents/table-columns/useOrderLinesColumns';
 import { useOrder } from '@/hooks/documents/useOrders';
+import { useLibsStore } from '@/stores/useLibsStore';
 import type { Order, OrderLine } from '@/types/documents/orders.types';
 
 export function OrderPage(): ReactNode {
   const { t } = useTranslation(['documents']),
     { id } = useParams<{ id: string }>(),
     { data, loading, error } = useOrder(Number(id)),
+    getCompanyName: (id: number) => string = useLibsStore(
+      s => s.getCompanyName,
+    ),
+    getWarehouseName: (id: number) => string = useLibsStore(
+      s => s.getWarehouseName,
+    ),
+    getCurrencyName: (id: number) => string = useLibsStore(
+      s => s.getCurrencyName,
+    ),
     order: Order | undefined = data?.order,
     hasConfirmation: boolean = Boolean(order?.confirmation),
     columns: MRT_ColumnDef<OrderLine>[] = useOrderLinesColumns(
-      order?.currency.name || CommonConstants.EMPTY_STRING,
+      order ? getCurrencyName(order.currencyId) : CommonConstants.EMPTY_STRING,
     ),
     orderLinesTableConfig: MRT_TableOptions<OrderLine> = useMemo(
       () => ({
@@ -118,20 +128,20 @@ export function OrderPage(): ReactNode {
             </Text>
             <Grid gutter='md' align='flex-start'>
               <OrderPageItem
-                gridSpan={order.recipient ? 4 : 6}
+                gridSpan={order.recipientId ? 4 : 6}
                 translationKey={{
                   primary: 'documents:documents.seller',
                   secondary: 'documents:documents.warehouse',
                 }}
                 baseValue={{
-                  primary: order.seller.name,
-                  secondary: order.sellerWarehouse.name,
+                  primary: getCompanyName(order.sellerId),
+                  secondary: getWarehouseName(order.sellerWarehouseId),
                 }}
                 confirmValue={
                   order.confirmation
                     ? {
-                        primary: order.seller.name,
-                        secondary: order.sellerWarehouse.name,
+                        primary: getCompanyName(order.sellerId),
+                        secondary: getWarehouseName(order.sellerWarehouseId),
                       }
                     : undefined
                 }
@@ -143,20 +153,22 @@ export function OrderPage(): ReactNode {
                   secondary: 'documents:documents.warehouse',
                 }}
                 baseValue={{
-                  primary: order.buyer.name,
-                  secondary: order.buyerWarehouse.name,
+                  primary: getCompanyName(order.buyerId),
+                  secondary: getWarehouseName(order.buyerWarehouseId),
                 }}
                 confirmValue={
                   order.confirmation
                     ? {
-                        primary: order.buyer.name,
-                        secondary: order.confirmation.buyerWarehouse.name,
+                        primary: getCompanyName(order.buyerId),
+                        secondary: getWarehouseName(
+                          order.confirmation.buyerWarehouseId,
+                        ),
                       }
                     : undefined
                 }
               />
 
-              {order.recipient && (
+              {order.recipientId && order.recipientWarehouseId && (
                 <OrderPageItem
                   gridSpan={4}
                   translationKey={{
@@ -164,15 +176,19 @@ export function OrderPage(): ReactNode {
                     secondary: 'documents:documents.warehouse',
                   }}
                   baseValue={{
-                    primary: order.recipient.name,
-                    secondary: order.recipientWarehouse?.name,
+                    primary: getCompanyName(order.recipientId),
+                    secondary: getWarehouseName(order.recipientWarehouseId),
                   }}
                   confirmValue={
-                    order.confirmation
+                    order.confirmation?.recipientId &&
+                    order.confirmation.recipientWarehouseId
                       ? {
-                          primary: order.confirmation.recipient?.name,
-                          secondary:
-                            order.confirmation.recipientWarehouse?.name,
+                          primary: getCompanyName(
+                            order.confirmation.recipientId,
+                          ),
+                          secondary: getWarehouseName(
+                            order.confirmation.recipientWarehouseId,
+                          ),
                         }
                       : undefined
                   }

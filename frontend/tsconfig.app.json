@@ -23,11 +23,11 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "noImplicitAny": true,        // попередження, якщо TS не може вивести тип
-    "strictNullChecks": true,     // null/undefined перевіряються
-    "strictFunctionTypes": true,  // контроль типів функцій
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
     "strictBindCallApply": true,
-    "noImplicitThis": true,       // this має бути типізованим
+    "noImplicitThis": true,
     "alwaysStrict": true,
 
     /* Aliases */
