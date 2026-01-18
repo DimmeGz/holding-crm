@@ -19,12 +19,14 @@ export class StoreDataService {
       warehouses: {},
       currencies: {},
       products: {},
+      packages: {},
     };
 
     const rawCompanies = await this.companiesService.getStoreData();
     const rawWarehouses = await this.warehouseService.getStoreData();
     const rawCurrencies = await this.libsService.getCurrenciesStoreData();
     const rawProducts = await this.goodsService.getProductsStoreData();
+    const rawPackages = await this.goodsService.getPackagesStoreData();
 
     rawCompanies.forEach(
       (company) => (allStoreData.companies[company.id] = company.name),
@@ -38,6 +40,7 @@ export class StoreDataService {
     rawProducts.forEach(
       (product) => (allStoreData.products[product.id] = product.name),
     );
+    rawPackages.forEach((pack) => (allStoreData.packages[pack.id] = pack.name));
 
     return allStoreData;
   }

@@ -10,6 +10,7 @@ export type LibsData = {
   warehouses: Record<number, string>;
   currencies: Record<number, string>;
   products: Record<number, string>;
+  packages: Record<number, string>;
 };
 
 export type LibsStore = LibsData & {
@@ -20,4 +21,5 @@ export type LibsStore = LibsData & {
   getWarehouseName: (id: number) => string;
   getCurrencyName: (id: number) => string;
   getProductName: (id: number) => string;
+  getPackageName: (id: number) => string;
 };
