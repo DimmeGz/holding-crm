@@ -49,7 +49,6 @@ export class OrdersService {
     return qb
       .leftJoin('order.contract', 'contract')
       .leftJoin('order.orderLines', 'orderLine')
-      .leftJoin('orderLine.productMan', 'product')
       .leftJoin('order.orderConfirmations', 'orderConfirmation')
       .select([
         'order.id',
@@ -64,7 +63,7 @@ export class OrdersService {
         'order.orderNumber',
         'contract.name',
         'orderLine.id',
-        'product.name',
+        'orderLine.productManId',
         'orderConfirmation.id',
         'orderConfirmation.expectedDate',
       ]);
@@ -121,7 +120,9 @@ export class OrdersService {
       .getMany();
 
     for (const order of orders) {
-      order['orderProducts'] = this.getOrderProductNames(order);
+      order['orderProductIds'] = [
+        ...new Set(order.orderLines.map((orderLine) => orderLine.productManId)),
+      ];
       delete order.orderLines;
 
       order['confirmDate'] = this.getOrderConfirmationDate(order);
@@ -129,15 +130,6 @@ export class OrdersService {
     }
 
     return orders;
-  }
-
-  private getOrderProductNames(order: Order): string[] {
-    const products: Set<string> = new Set();
-    for (const line of order.orderLines) {
-      products.add(line.productMan.name);
-    }
-
-    return [...products].sort();
   }
 
   private getOrderConfirmationDate(order: Order): Date | undefined {

@@ -7,6 +7,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
     companies: {},
     warehouses: {},
     currencies: {},
+    products: {},
     isLoaded: false,
 
     loadAll: async (): Promise<void> => {
@@ -17,6 +18,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
           companies: data.companies,
           warehouses: data.warehouses,
           currencies: data.currencies,
+          products: data.products,
           isLoaded: true,
         });
       } catch (error) {
@@ -34,5 +36,9 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
     getCurrencyName: (id: number): string => {
       return get().currencies[id] || `Unknown currency (ID: ${id})`;
+    },
+
+    getProductName: (id: number): string => {
+      return get().products[id] || `Unknown currency (ID: ${id})`;
     },
   }));

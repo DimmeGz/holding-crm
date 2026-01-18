@@ -10,7 +10,7 @@ export type GetOrdersDto = {
     createdById: number;
     name: string;
   };
-  orderProducts: string[];
+  orderProductIds: number[];
   expectedDate?: Date;
   confirmExpectedDate?: Date;
   status: boolean;

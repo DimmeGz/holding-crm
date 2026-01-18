@@ -9,6 +9,7 @@ export type LibsData = {
   companies: Record<number, string>;
   warehouses: Record<number, string>;
   currencies: Record<number, string>;
+  products: Record<number, string>;
 };
 
 export type LibsStore = LibsData & {
@@ -18,4 +19,5 @@ export type LibsStore = LibsData & {
   getCompanyName: (id: number) => string;
   getWarehouseName: (id: number) => string;
   getCurrencyName: (id: number) => string;
+  getProductName: (id: number) => string;
 };

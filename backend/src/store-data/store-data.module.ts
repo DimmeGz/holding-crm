@@ -4,9 +4,10 @@ import { StoreDataController } from './store-data.controller';
 import { CompaniesModule } from 'src/companies';
 import { LibsModule } from 'src/libs';
 import { WarehouseModule } from 'src/warehouse';
+import { GoodsModule } from 'src/goods';
 
 @Module({
-  imports: [CompaniesModule, LibsModule, WarehouseModule],
+  imports: [CompaniesModule, GoodsModule, LibsModule, WarehouseModule],
   providers: [StoreDataService],
   controllers: [StoreDataController],
 })

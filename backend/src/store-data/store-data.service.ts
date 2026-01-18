@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CompaniesService } from 'src/companies';
+import { GoodsService } from 'src/goods';
 import { LibsService } from 'src/libs';
 import { WarehouseService } from 'src/warehouse';
 
@@ -7,8 +8,9 @@ import { WarehouseService } from 'src/warehouse';
 export class StoreDataService {
   constructor(
     private readonly companiesService: CompaniesService,
-    private readonly warehouseService: WarehouseService,
+    private readonly goodsService: GoodsService,
     private readonly libsService: LibsService,
+    private readonly warehouseService: WarehouseService,
   ) {}
 
   async getAllStoreData() {
@@ -16,11 +18,13 @@ export class StoreDataService {
       companies: {},
       warehouses: {},
       currencies: {},
+      products: {},
     };
 
     const rawCompanies = await this.companiesService.getStoreData();
     const rawWarehouses = await this.warehouseService.getStoreData();
     const rawCurrencies = await this.libsService.getCurrenciesStoreData();
+    const rawProducts = await this.goodsService.getProductsStoreData();
 
     rawCompanies.forEach(
       (company) => (allStoreData.companies[company.id] = company.name),
@@ -30,6 +34,9 @@ export class StoreDataService {
     );
     rawCurrencies.forEach(
       (currency) => (allStoreData.currencies[currency.id] = currency.name),
+    );
+    rawProducts.forEach(
+      (product) => (allStoreData.products[product.id] = product.name),
     );
 
     return allStoreData;

@@ -215,4 +215,11 @@ export class GoodsService {
 
     return processes;
   }
+
+  async getProductsStoreData() {
+    return await this.productsRepository
+      .createQueryBuilder('product')
+      .select(['product.id', 'product.name'])
+      .getMany();
+  }
 }
