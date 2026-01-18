@@ -39,9 +39,11 @@ export function OrderPage(): ReactNode {
         enablePagination: false,
         enableSorting: false,
         enableColumnFilters: false,
-        enableTopToolbar: false,
         enableBottomToolbar: false,
         enableColumnActions: false,
+        enableGlobalFilter: false,
+        enableFullScreenToggle: false,
+        enableHiding: false,
         mantinePaperProps: {
           shadow: 'sm',
           radius: 'md',
@@ -259,45 +261,52 @@ export function OrderPage(): ReactNode {
               />
             </Grid>
           </Card>
-          <Card>
-            <Grid gutter='xs' align='flex-start' mb='xs'>
-              <Grid.Col span={hasConfirmation ? 9 : 12}>
-                <Text size='lg' fw={StylesConstants.HEAVY_FONT_WEIGHT} ml='xs'>
-                  {t('documents:documents.goods')}
-                </Text>
-              </Grid.Col>
-              {hasConfirmation && (
-                <Grid.Col span={3}>
-                  <Group justify='flex-end'>
-                    <Text
-                      size='md'
-                      fw={StylesConstants.DEFAULT_FONT_WEIGHT}
-                      ml='xs'
-                    >
-                      {showConfirmLinesTable
+          {order.orderLines && !showConfirmLinesTable && (
+            <HoldingTable
+              tableOptions={orderLinesTableConfig}
+              title={t('documents:documents.goods')}
+              toolBarControls={
+                <Switch
+                  checked={showConfirmLinesTable}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    setShowConfirmLinesTable(event.currentTarget.checked)
+                  }
+                  label={
+                    showConfirmLinesTable
+                      ? t('documents:documents.confirm').toLowerCase()
+                      : t('documents:documents.order').toLowerCase()
+                  }
+                  labelPosition='left'
+                  mr='md'
+                  hidden={!hasConfirmation}
+                />
+              }
+            />
+          )}
+          {order.confirmation?.orderLines &&
+            showConfirmLinesTable &&
+            confirmOrderLinesTableConfig && (
+              <HoldingTable
+                tableOptions={confirmOrderLinesTableConfig}
+                title={t('documents:documents.goods')}
+                toolBarControls={
+                  <Switch
+                    checked={showConfirmLinesTable}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      setShowConfirmLinesTable(event.currentTarget.checked)
+                    }
+                    label={
+                      showConfirmLinesTable
                         ? t('documents:documents.confirm').toLowerCase()
-                        : t('documents:documents.order').toLowerCase()}
-                    </Text>
-                    <Switch
-                      checked={showConfirmLinesTable}
-                      onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                        setShowConfirmLinesTable(event.currentTarget.checked)
-                      }
-                    />
-                  </Group>
-                </Grid.Col>
-              )}
-            </Grid>
-
-            {order.orderLines && !showConfirmLinesTable && (
-              <HoldingTable tableOptions={orderLinesTableConfig} />
+                        : t('documents:documents.order').toLowerCase()
+                    }
+                    labelPosition='left'
+                    mr='md'
+                    hidden={!hasConfirmation}
+                  />
+                }
+              />
             )}
-            {order.confirmation?.orderLines &&
-              showConfirmLinesTable &&
-              confirmOrderLinesTableConfig && (
-                <HoldingTable tableOptions={confirmOrderLinesTableConfig} />
-              )}
-          </Card>
         </>
       )}
     </>

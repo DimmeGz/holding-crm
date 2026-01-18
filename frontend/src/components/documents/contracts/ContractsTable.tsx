@@ -37,6 +37,7 @@ export function ContractsTable(): ReactNode {
     data: withArchived ? data || [] : actualContracts,
     enableExpanding: true,
     getSubRows: row => row.children,
+    enablePagination: false,
     initialState: {
       expanded: true,
     },

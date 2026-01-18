@@ -33,6 +33,7 @@ export function HoldingTable<TData extends MRT_RowData>({
     mantineTableProps: {
       striped: true,
     },
+    enableStickyHeader: true,
     renderTopToolbarCustomActions: () => (
       <Group w='100%' justify='space-between'>
         <Title order={3} ml='xs' mt='xs'>
@@ -43,8 +44,8 @@ export function HoldingTable<TData extends MRT_RowData>({
     ),
     ...tableOptions,
     initialState: {
-      ...tableOptions.initialState,
       pagination: { pageSize: 50, pageIndex: 0 },
+      ...tableOptions.initialState,
     },
   });
 
