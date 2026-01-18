@@ -22,5 +22,6 @@
     "name": "Jméno",
     "valid": "Platný",
     "closed": "Uzavřená"
-  }
+  },
+  "showArchived": "zobrazit archivované"
 }

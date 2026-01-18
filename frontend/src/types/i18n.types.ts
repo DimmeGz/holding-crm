@@ -56,6 +56,7 @@ export type LocaleDict = {
       price: string;
       name: string;
     };
+    showArchived: string;
   };
   documents: {
     documents: {

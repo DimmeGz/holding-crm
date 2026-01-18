@@ -283,7 +283,6 @@ export function OrderPage(): ReactNode {
                       onChange={(event: ChangeEvent<HTMLInputElement>) =>
                         setShowConfirmLinesTable(event.currentTarget.checked)
                       }
-                      // label={dict?.losses.showOurLossesBySubunit}
                     />
                   </Group>
                 </Grid.Col>

@@ -1,5 +1,6 @@
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ChangeEvent, type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Switch } from '@mantine/core';
 import {
   type MRT_ColumnDef,
   MRT_ExpandButton,
@@ -12,7 +13,7 @@ import { useContracts } from '@/hooks/documents/useContracts';
 import type { GetContractsDto } from '@/types/documents/contracts.types';
 
 export function ContractsTable(): ReactNode {
-  const { t } = useTranslation(['common']),
+  const { t } = useTranslation(['common', 'tables']),
     columns: MRT_ColumnDef<GetContractsDto>[] = useContractColumns(),
     { data, loading, error } = useContracts(),
     [withArchived, setWithArchived] = useState(false),
@@ -41,12 +42,20 @@ export function ContractsTable(): ReactNode {
     },
     displayColumnDefOptions: {
       'mrt-row-expand': {
+        size: 32,
+        minSize: 32,
+        maxSize: 32,
         Cell: ({ row, table }) =>
           row.original.children && row.original.children.length > 0 ? (
             <MRT_ExpandButton row={row} table={table} />
           ) : null,
       },
     },
+    mantineTableBodyRowProps: ({ row }) => ({
+      style: {
+        opacity: row.original.isArchived ? 0.5 : 1,
+      },
+    }),
   };
 
   return (
@@ -59,6 +68,15 @@ export function ContractsTable(): ReactNode {
         <HoldingTable
           tableOptions={tableOptions}
           title={t('common:nav.contracts')}
+          toolBarControls={
+            <Switch
+              checked={withArchived}
+              onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                setWithArchived(event.currentTarget.checked)
+              }
+              label={t('tables:showArchived')}
+            />
+          }
         />
       )}
     </>

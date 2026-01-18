@@ -19,10 +19,7 @@ import {
 
 import { Contract } from './entities';
 import { CreateContractDTO, UpdateContractDTO } from './dto';
-import {
-  GetContractResponseDTO,
-  GetContractsResponseDTO,
-} from './dto/response-dto';
+import { GetContractResponseDTO } from './dto/response-dto';
 import { GetContractsQueryDTO } from './dto/query-dto';
 import { DocumentTypeEnum } from '../common/enums';
 
@@ -66,7 +63,7 @@ export class ContractsService {
         'children.parentId',
         'children.isArchived',
       ])
-      .orderBy('contract.signatureDate', 'DESC');
+      .orderBy('contract.id', 'DESC');
   }
 
   private applyContractDetailSelect(
@@ -147,7 +144,9 @@ export class ContractsService {
     return qb;
   }
 
-  async getContracts(query: GetContractsQueryDTO): Promise<any> {
+  async getContracts(
+    query: GetContractsQueryDTO,
+  ): Promise<Partial<Contract>[]> {
     const contracts = await this.applyContractListSelect(
       this.ApplyQueryFilter(this.createBaseQueryBuilder(), query),
     ).getMany();

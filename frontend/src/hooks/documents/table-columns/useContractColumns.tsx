@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_Row } from 'mantine-react-table';
+import { CommonConstants } from '@/constants/common.constants';
 import { UrlConstants } from '@/constants/url-constants';
 import { useTableColumns } from '@/hooks/documents/table-columns/useTableColumns';
 import type { UseTableColumns } from '@/types/documents/common-documents.types';
@@ -23,9 +24,10 @@ export function useContractColumns(): MRT_ColumnDef<GetContractsDto>[] {
             href={`${UrlConstants.CONTRACTS_URL}/${row.original.id}`}
             td='underline'
             style={{ cursor: 'pointer' }}
-            ml={`${row.original.parentId ? 'xl' : undefined}`}
+            ml={`${row.original.parentId ? 'lg' : undefined}`}
           >
-            {row.original.name}
+            {`${row.original.parentId ? CommonConstants.HYPHEN : CommonConstants.EMPTY_STRING} ${row.original.name}`
+              }
           </Text>
         ),
       },
@@ -48,7 +50,9 @@ export function useContractColumns(): MRT_ColumnDef<GetContractsDto>[] {
       {
         header: t('tables:columns.status'),
         accessorFn: (row: GetContractsDto): string =>
-          row.status ? t('documents:documents:closed') : t('documents:documents:valid'),
+          row.status
+            ? t('documents:documents:closed')
+            : t('documents:documents:valid'),
         id: 'status',
       },
     ],
