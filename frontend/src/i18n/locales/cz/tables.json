@@ -5,7 +5,9 @@
     "buyer": "Kupující",
     "recipient": "Příjemce",
     "expectedDate": "Datum",
+    "signatureDate": "Datum podpisu",
     "confirmDate": "Datum potvrzení",
+    "expirationDate": "Datum spotřeby",
     "amount": "Částka",
     "byContract": "Dle smlouvy",
     "status": "Stav",
@@ -16,6 +18,9 @@
     "package": "Balení",
     "qty": "Množství",
     "price": "Cena",
-    "kg": "kg"
+    "kg": "kg",
+    "name": "Jméno",
+    "valid": "Platný",
+    "closed": "Uzavřená"
   }
 }

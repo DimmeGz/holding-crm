@@ -41,7 +41,9 @@ export type LocaleDict = {
       buyer: string;
       recipient: string;
       expectedDate: string;
+      signatureDate: string;
       confirmDate: string;
+      expirationDate: string;
       amount: string;
       byContract: string;
       status: string;
@@ -52,6 +54,7 @@ export type LocaleDict = {
       package: string;
       qty: string;
       price: string;
+      name: string;
     };
   };
   documents: {
@@ -72,6 +75,9 @@ export type LocaleDict = {
       incoterms: string;
       days: string;
       goods: string;
+      perpetual: string;
+      valid: string;
+      closed: string;
     };
   };
 };

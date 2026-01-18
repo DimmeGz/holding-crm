@@ -15,6 +15,7 @@
     "paymentDelay": "Odklad platby",
     "incoterms": "Incoterms",
     "days": "dny",
-    "goods": "Zboží"
+    "goods": "Zboží",
+    "perpetual": "Věčný"
   }
 }

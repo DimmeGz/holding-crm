@@ -5,7 +5,9 @@
     "buyer": "Покупець",
     "recipient": "Отримувач",
     "expectedDate": "Дата",
+    "signatureDate": "Дата підписання",
     "confirmDate": "Дата підтвердження",
+    "expirationDate": "Термін дії",
     "amount": "Сума",
     "byContract": "Згідно контракту",
     "status": "Статус",
@@ -16,6 +18,7 @@
     "package": "Упаковка",
     "qty": "Кількість",
     "price": "Ціна",
-    "kg": "кг"
+    "kg": "кг",
+    "name": "Найменування"
   }
 }

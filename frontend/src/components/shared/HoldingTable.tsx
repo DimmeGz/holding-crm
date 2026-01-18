@@ -36,8 +36,11 @@ export function HoldingTable<TData extends MRT_RowData>({
         {title}
       </Title>
     ),
-    initialState: { pagination: { pageSize: 50, pageIndex: 1 } },
     ...tableOptions,
+    initialState: {
+      ...tableOptions.initialState,
+      pagination: { pageSize: 50, pageIndex: 0 },
+    },
   });
 
   return <MantineReactTable table={table} />;

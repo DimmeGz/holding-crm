@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useRoutes } from 'react-router-dom';
 import MainLayout from '@/layout/MainLayout';
+import { contractsRoutes } from '@/routes/documents/contracts.routes';
 import { ordersRoutes } from '@/routes/documents/orders.routes';
 
 export function AppRoutes(): ReactNode {
@@ -14,6 +15,7 @@ export function AppRoutes(): ReactNode {
           element: <div className='w-full h-full'></div>,
         },
         ordersRoutes,
+        contractsRoutes,
       ],
     },
   ]);

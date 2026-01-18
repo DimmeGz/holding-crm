@@ -8,14 +8,13 @@ import { useOrders } from '@/hooks/documents/useOrders';
 import type { GetOrdersDto } from '@/types/documents/orders.types';
 
 export function OrdersTable(): ReactNode {
-  const { data, loading, error } = useOrders();
-  const columns: MRT_ColumnDef<GetOrdersDto>[] = useOrdersColumns();
-
-  const { t } = useTranslation(['common']);
-  const tableConfig: MRT_TableOptions<GetOrdersDto> = {
-    data: data ?? [],
-    columns,
-  };
+  const { t } = useTranslation(['common']),
+    { data, loading, error } = useOrders(),
+    columns: MRT_ColumnDef<GetOrdersDto>[] = useOrdersColumns(),
+    tableConfig: MRT_TableOptions<GetOrdersDto> = {
+      data: data ?? [],
+      columns,
+    };
 
   return (
     <>
