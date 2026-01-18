@@ -56,7 +56,7 @@ export default [
           memberVariableDeclaration: true,
           arrayDestructuring: false,
           objectDestructuring: false,
-          arrowParameter: true, // замість variableDeclarationIgnoreArrow
+          arrowParameter: false,
         },
       ],
       '@typescript-eslint/explicit-function-return-type': [
@@ -72,6 +72,7 @@ export default [
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
       'no-undef': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
     },
 
     settings: {

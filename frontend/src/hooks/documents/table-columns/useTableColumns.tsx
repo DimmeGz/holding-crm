@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { MRT_ColumnDef } from 'mantine-react-table';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { CommonConstants } from '@/constants/common.constants';
-import type { UseTableColumns } from '@/types/common.types';
+import type { UseTableColumns } from '@/types/documents/common-documents.types';
 
 export function useTableColumns(): UseTableColumns {
   const { t } = useTranslation(['tables']);
