@@ -3,27 +3,35 @@ import { useTranslation } from 'react-i18next';
 import type { MRT_ColumnDef } from 'mantine-react-table';
 import { IconCheck, IconX } from '@tabler/icons-react';
 import { CommonConstants } from '@/constants/common.constants';
+import { useLibsStore } from '@/stores/useLibsStore';
 import type { UseTableColumns } from '@/types/documents/common-documents.types';
 
 export function useTableColumns(): UseTableColumns {
-  const { t } = useTranslation(['tables']);
+  const { t } = useTranslation(['tables']),
+    getCompanyName: (id: number) => string = useLibsStore(
+      s => s.getCompanyName,
+    ),
+    getCurrencyName: (id: number) => string = useLibsStore(
+      s => s.getCurrencyName,
+    );
 
   return {
-    seller: <T extends { seller: { name: string } }>(): MRT_ColumnDef<T> => ({
+    seller: <T extends { sellerId: number }>(): MRT_ColumnDef<T> => ({
       header: t('tables:columns.seller'),
-      accessorFn: (row: T) => row.seller.name,
+      accessorFn: (row: T) => getCompanyName(row.sellerId),
       id: 'sellerName',
     }),
-    buyer: <T extends { buyer: { name: string } }>(): MRT_ColumnDef<T> => ({
+    buyer: <T extends { buyerId: number }>(): MRT_ColumnDef<T> => ({
       header: t('tables:columns.buyer'),
-      accessorFn: (row: T) => row.buyer.name,
+      accessorFn: (row: T) => getCompanyName(row.buyerId),
       id: 'buyerName',
     }),
-    recipient: <
-      T extends { recipient: { name: string } },
-    >(): MRT_ColumnDef<T> => ({
+    recipient: <T extends { recipientId?: number }>(): MRT_ColumnDef<T> => ({
       header: t('tables:columns.recipient'),
-      accessorFn: (row: T) => row.recipient?.name,
+      accessorFn: (row: T) =>
+        row.recipientId
+          ? getCompanyName(row.recipientId)
+          : CommonConstants.EMPTY_STRING,
       id: 'recipientName',
     }),
     date: <T extends { expectedDate?: Date }>(): MRT_ColumnDef<T> => ({
@@ -45,10 +53,11 @@ export function useTableColumns(): UseTableColumns {
       id: 'confirmExpectedDate',
     }),
     amount: <
-      T extends { documentSum: number; currency: { name: string } },
+      T extends { documentSum: number; currencyId: number },
     >(): MRT_ColumnDef<T> => ({
       header: t('tables:columns.confirmDate'),
-      accessorFn: (row: T): string => `${row.documentSum} ${row.currency.name}`,
+      accessorFn: (row: T): string =>
+        `${row.documentSum} ${getCurrencyName(row.currencyId)}`,
       id: 'amount',
     }),
     byContract: <

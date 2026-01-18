@@ -1,12 +1,11 @@
-import type { GetCompanyDto } from '@/types/common.types';
-
 export type GetOrdersDto = {
   id: number;
   orderNumber: string;
   documentSum: number;
-  seller: GetCompanyDto;
-  buyer: GetCompanyDto;
-  recipient: GetCompanyDto;
+  sellerId: number;
+  buyerId: number;
+  recipientId: number;
+  currencyId: number;
   contract: {
     createdById: number;
     name: string;
@@ -14,10 +13,6 @@ export type GetOrdersDto = {
   orderProducts: string[];
   expectedDate?: Date;
   confirmExpectedDate?: Date;
-  currency: {
-    id: number;
-    name: string;
-  };
   status: boolean;
 };
 

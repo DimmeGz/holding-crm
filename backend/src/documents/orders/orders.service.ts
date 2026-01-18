@@ -47,25 +47,21 @@ export class OrdersService {
     qb: SelectQueryBuilder<Order>,
   ): SelectQueryBuilder<Order> {
     return qb
-      .leftJoin('order.seller', 'seller')
-      .leftJoin('order.buyer', 'buyer')
-      .leftJoin('order.recipient', 'recipient')
       .leftJoin('order.contract', 'contract')
-      .leftJoin('order.currency', 'currency')
       .leftJoin('order.orderLines', 'orderLine')
       .leftJoin('orderLine.productMan', 'product')
       .leftJoin('order.orderConfirmations', 'orderConfirmation')
       .select([
         'order.id',
+        'order.sellerId',
+        'order.buyerId',
+        'order.recipientId',
         'order.documentSum',
+        'order.currencyId',
         'order.expectedDate',
         'order.confirmExpectedDate',
         'order.status',
         'order.orderNumber',
-        'currency.name',
-        'seller.name',
-        'buyer.name',
-        'recipient.name',
         'contract.name',
         'orderLine.id',
         'product.name',

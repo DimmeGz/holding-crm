@@ -5,10 +5,6 @@ export type UseThemeProps = {
   toggleTheme: () => void;
 };
 
-export type GetCompanyDto = {
-  name: string;
-};
-
 export type LibsData = {
   companies: Record<number, string>;
   warehouses: Record<number, string>;
@@ -21,5 +17,5 @@ export type LibsStore = LibsData & {
 
   getCompanyName: (id: number) => string;
   getWarehouseName: (id: number) => string;
-  getCurrency: (id: number) => string;
+  getCurrencyName: (id: number) => string;
 };

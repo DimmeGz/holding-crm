@@ -32,7 +32,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
       return get().warehouses[id] || `Unknown warehouse (ID: ${id})`;
     },
 
-    getCurrency: (id: number): string => {
+    getCurrencyName: (id: number): string => {
       return get().currencies[id] || `Unknown currency (ID: ${id})`;
     },
   }));

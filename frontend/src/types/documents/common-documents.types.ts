@@ -3,23 +3,17 @@ import type { MRT_ColumnDef } from 'mantine-react-table';
 export type UseTableColumns = {
   seller: <
     T extends {
-      seller: {
-        name: string;
-      };
+      sellerId: number;
     },
   >() => MRT_ColumnDef<T>;
   buyer: <
     T extends {
-      buyer: {
-        name: string;
-      };
+      buyerId: number;
     },
   >() => MRT_ColumnDef<T>;
   recipient: <
     T extends {
-      recipient: {
-        name: string;
-      };
+      recipientId: number;
     },
   >() => MRT_ColumnDef<T>;
   date: <
@@ -35,9 +29,7 @@ export type UseTableColumns = {
   amount: <
     T extends {
       documentSum: number;
-      currency: {
-        name: string;
-      };
+      currencyId: number;
     },
   >() => MRT_ColumnDef<T>;
   byContract: <
