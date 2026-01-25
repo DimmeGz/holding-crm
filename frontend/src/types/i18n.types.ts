@@ -41,18 +41,25 @@ export type LocaleDict = {
       buyer: string;
       recipient: string;
       expectedDate: string;
+      signatureDate: string;
       confirmDate: string;
+      expirationDate: string;
       amount: string;
       byContract: string;
       status: string;
       goods: string;
+      product: string;
       productMan: string;
       productBuy: string;
       batchRename: string;
       package: string;
       qty: string;
+      shipLeft: string;
+      shipQty: string;
       price: string;
+      name: string;
     };
+    showArchived: string;
   };
   documents: {
     documents: {
@@ -72,6 +79,11 @@ export type LocaleDict = {
       incoterms: string;
       days: string;
       goods: string;
+      perpetual: string;
+      valid: string;
+      closed: string;
+      contract: string;
+      orderPrefix: string;
     };
   };
 };

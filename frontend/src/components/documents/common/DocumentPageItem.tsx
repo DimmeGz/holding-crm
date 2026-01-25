@@ -5,7 +5,7 @@ import { IconCheck } from '@tabler/icons-react';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
 
-export function OrderPageItem({
+export function DocumentPageItem({
   gridSpan,
   translationKey,
   baseValue,
@@ -13,7 +13,7 @@ export function OrderPageItem({
 }: {
   gridSpan: number;
   translationKey: { primary: string; secondary?: string };
-  baseValue: { primary: string; secondary?: string };
+  baseValue: { primary?: string; secondary?: string };
   confirmValue?: { primary?: string; secondary?: string };
 }): ReactNode {
   const { t } = useTranslation(['documents']),

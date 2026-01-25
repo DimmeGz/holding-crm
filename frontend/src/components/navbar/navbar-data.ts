@@ -42,7 +42,11 @@ export const generalMenu: NavLinkGroupProps[] = [
 ];
 
 export const documentsMenu: NavLinkGroupProps[] = [
-  { labelKey: 'common:nav.contracts', icon: IconContract },
+  {
+    labelKey: 'common:nav.contracts',
+    icon: IconContract,
+    url: UrlConstants.CONTRACTS_URL,
+  },
   {
     labelKey: 'common:nav.orders',
     icon: IconCurrencyEuro,

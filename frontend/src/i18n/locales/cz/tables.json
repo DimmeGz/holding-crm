@@ -5,17 +5,24 @@
     "buyer": "Kupující",
     "recipient": "Příjemce",
     "expectedDate": "Datum",
+    "signatureDate": "Datum podpisu",
     "confirmDate": "Datum potvrzení",
+    "expirationDate": "Datum spotřeby",
     "amount": "Částka",
     "byContract": "Dle smlouvy",
     "status": "Stav",
     "goods": "Zboží",
+    "product": "Produkt",
     "productMan": "Produkt (název prodávajícího)",
     "productBuy": "Produkt (název kupujícího)",
     "batchRename": "Přejmenování šarže",
     "package": "Balení",
     "qty": "Množství",
+    "shipLeft": "Zbývá už jen to odeslat",
+    "shipQty": "Frekvence zásilek",
     "price": "Cena",
-    "kg": "kg"
-  }
+    "kg": "kg",
+    "name": "Jméno"
+  },
+  "showArchived": "zobrazit archivované"
 }

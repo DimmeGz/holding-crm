@@ -15,6 +15,11 @@
     "paymentDelay": "Odklad platby",
     "incoterms": "Incoterms",
     "days": "dny",
-    "goods": "Zboží"
+    "goods": "Zboží",
+    "perpetual": "Věčný",
+    "valid": "Platný",
+    "closed": "Uzavřená",
+    "contract": "Smlouva",
+    "orderPrefix": "Předpona názvu objednávky"
   }
 }

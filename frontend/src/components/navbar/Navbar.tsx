@@ -6,7 +6,7 @@ import {
   adminMenu,
   documentsMenu,
   generalMenu,
-} from '@/components/navbar/mock-data';
+} from '@/components/navbar/navbar-data';
 import classes from '@/components/navbar/Navbar.module.css';
 import { useTheme } from '@/hooks/useTheme';
 import type { NavLinkGroupProps } from '@/types/base-ui.types';

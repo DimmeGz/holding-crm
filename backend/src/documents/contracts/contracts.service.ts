@@ -19,10 +19,7 @@ import {
 
 import { Contract } from './entities';
 import { CreateContractDTO, UpdateContractDTO } from './dto';
-import {
-  GetContractResponseDTO,
-  GetContractsResponseDTO,
-} from './dto/response-dto';
+import { GetContractResponseDTO } from './dto/response-dto';
 import { GetContractsQueryDTO } from './dto/query-dto';
 import { DocumentTypeEnum } from '../common/enums';
 
@@ -46,29 +43,35 @@ export class ContractsService {
     qb: SelectQueryBuilder<Contract>,
   ): SelectQueryBuilder<Contract> {
     return qb
-      .leftJoin('contract.seller', 'seller')
-      .leftJoin('contract.buyer', 'buyer')
+      .leftJoin('contract.children', 'children')
+      .where('contract.parentId IS NULL')
       .select([
         'contract.id',
+        'contract.sellerId',
+        'contract.buyerId',
         'contract.name',
-        'seller.name',
-        'buyer.name',
         'contract.signatureDate',
         'contract.term',
-      ]);
+        'contract.parentId',
+        'contract.isArchived',
+        'children.id',
+        'children.sellerId',
+        'children.buyerId',
+        'children.name',
+        'children.signatureDate',
+        'children.term',
+        'children.parentId',
+        'children.isArchived',
+      ])
+      .orderBy('contract.id', 'DESC');
   }
 
   private applyContractDetailSelect(
     qb: SelectQueryBuilder<Contract>,
   ): SelectQueryBuilder<Contract> {
     return qb
-      .leftJoin('contract.seller', 'seller')
-      .leftJoin('contract.buyer', 'buyer')
-      .leftJoin('contract.currency', 'currency')
       .leftJoin('contract.incoterms', 'incoterms')
       .leftJoin('contract.contractLines', 'contractLine')
-      .leftJoin('contractLine.product', 'product')
-      .leftJoin('contractLine.package', 'package')
       .leftJoin('contract.contractServiceLines', 'contractServiceLine')
       .leftJoin('contractServiceLine.service', 'service')
       .select([
@@ -82,17 +85,16 @@ export class ContractsService {
         'contract.term',
         'contract.transportPlace',
         'contract.orderPrefix',
-        'seller.name',
-        'buyer.name',
-        'currency.name',
+        'contract.sellerId',
+        'contract.buyerId',
+        'contract.currencyId',
         'incoterms.name',
         'contractLine.id',
         'contractLine.qty',
         'contractLine.shipQty',
         'contractLine.price',
-        'product.id',
-        'product.name',
-        'package.name',
+        'contractLine.productId',
+        'contractLine.packageId',
         'contractServiceLine.id',
         'contractServiceLine.price',
         'contractServiceLine.qty',
@@ -138,45 +140,12 @@ export class ContractsService {
 
   async getContracts(
     query: GetContractsQueryDTO,
-  ): Promise<GetContractsResponseDTO> {
-    const actualContractsQuery = this.applyContractListSelect(
+  ): Promise<Partial<Contract>[]> {
+    const contracts = await this.applyContractListSelect(
       this.ApplyQueryFilter(this.createBaseQueryBuilder(), query),
-    )
-      .andWhere('contract.isArchived = false')
-      .andWhere('contract.parent IS NULL');
-
-    const archivedContractsQuery = this.applyContractListSelect(
-      this.ApplyQueryFilter(this.createBaseQueryBuilder(), query),
-    )
-      .andWhere('contract.isArchived = true')
-      .andWhere('contract.parent IS NULL');
-
-    const actualContractsWithArchivedChildrenQuery = this.ApplyQueryFilter(
-      this.createBaseQueryBuilder(),
-      query,
-    )
-      .andWhere('contract.isArchived = false')
-      .andWhere('contract.parent IS NULL')
-      .leftJoin('contract.children', 'children')
-      .andWhere('children.isArchived = true');
-
-    const actualContracts = await actualContractsQuery.getMany();
-
-    const archivedContracts = await archivedContractsQuery.getMany();
-
-    const archivedChildContracts = await this.applyContractListSelect(
-      actualContractsWithArchivedChildrenQuery,
     ).getMany();
 
-    const allArchivedContracts = [
-      ...archivedContracts,
-      ...archivedChildContracts,
-    ];
-
-    return {
-      actualContracts,
-      archivedContracts: allArchivedContracts,
-    };
+    return contracts;
   }
 
   async getContractById(contractId: number): Promise<GetContractResponseDTO> {
@@ -194,8 +163,8 @@ export class ContractsService {
       await this.shipmentsService.getShippedProductsByContract(contractId);
 
     for (const contractLine of contract.contractLines) {
-      contractLine['shipLeft'] = shippedProducts[contractLine.product.id]
-        ? contractLine.qty - shippedProducts[contractLine.product.id]
+      contractLine['shipLeft'] = shippedProducts[contractLine.productId]
+        ? contractLine.qty - shippedProducts[contractLine.productId]
         : contractLine.qty;
     }
 

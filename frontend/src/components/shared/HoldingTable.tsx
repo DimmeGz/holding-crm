@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import {
   MantineReactTable,
   type MRT_Localization,
@@ -15,9 +15,11 @@ import { MRT_Localization_UK } from 'mantine-react-table/locales/uk/index.cjs';
 export function HoldingTable<TData extends MRT_RowData>({
   tableOptions,
   title,
+  toolBarControls,
 }: {
   tableOptions: MRT_TableOptions<TData>;
   title?: string;
+  toolBarControls?: ReactNode;
 }): ReactNode {
   const { i18n } = useTranslation();
   const localization: MRT_Localization =
@@ -31,13 +33,20 @@ export function HoldingTable<TData extends MRT_RowData>({
     mantineTableProps: {
       striped: true,
     },
+    enableStickyHeader: true,
     renderTopToolbarCustomActions: () => (
-      <Title order={3} ml='xs' mt='xs'>
-        {title}
-      </Title>
+      <Group w='100%' justify='space-between'>
+        <Title order={3} ml='xs' mt='xs'>
+          {title}
+        </Title>
+        {toolBarControls}
+      </Group>
     ),
-    initialState: { pagination: { pageSize: 50, pageIndex: 1 } },
     ...tableOptions,
+    initialState: {
+      pagination: { pageSize: 50, pageIndex: 0 },
+      ...tableOptions.initialState,
+    },
   });
 
   return <MantineReactTable table={table} />;
