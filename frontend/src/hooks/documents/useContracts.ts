@@ -13,13 +13,13 @@ export function useContracts(): {
   });
 }
 
-// export function useContract(contractId: number): {
-//   data: any | null;
-//   loading: boolean;
-//   error: string | null;
-//   refetch: () => void;
-// } {
-//   return useApiData<any>(() => ContractsService.getById(contractId), {
-//     dependencies: [contractId],
-//   });
-// }
+export function useContract(contractId: number): {
+  data: any | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+} {
+  return useApiData<any>(() => ContractsService.getById(contractId), {
+    dependencies: [contractId],
+  });
+}

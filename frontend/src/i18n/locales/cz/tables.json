@@ -19,9 +19,7 @@
     "qty": "Množství",
     "price": "Cena",
     "kg": "kg",
-    "name": "Jméno",
-    "valid": "Platný",
-    "closed": "Uzavřená"
+    "name": "Jméno"
   },
   "showArchived": "zobrazit archivované"
 }

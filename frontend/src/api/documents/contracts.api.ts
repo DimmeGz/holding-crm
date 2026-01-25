@@ -6,7 +6,7 @@ import type { GetContractsDto } from '@/types/documents/contracts.types';
 
 export const contractsApi: {
   getList(): Promise<GetContractsDto[]>;
-  // getById(orderId: number): Promise<any>;
+  getById(contractId: number): Promise<any>;
 } = {
   async getList(): Promise<GetContractsDto[]> {
     try {
@@ -24,19 +24,19 @@ export const contractsApi: {
     }
   },
 
-  // async getById(orderId: number): Promise<any> {
-  //   try {
-  //     const response: AxiosResponse<any> = await http.get<any>(
-  //       `${UrlConstants.ORDERS_URL}/${orderId}`,
-  //     );
+  async getById(contractId: number): Promise<any> {
+    try {
+      const response: AxiosResponse<any> = await http.get<any>(
+        `${UrlConstants.CONTRACTS_URL}/${contractId}`,
+      );
 
-  //     return response.data;
-  //   } catch (e: unknown) {
-  //     if (axios.isAxiosError(e)) {
-  //       throw new Error(e.message);
-  //     }
+      return response.data;
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        throw new Error(e.message);
+      }
 
-  //     throw new Error('An unexpected error occurred');
-  //   }
-  // },
+      throw new Error('An unexpected error occurred');
+    }
+  },
 };

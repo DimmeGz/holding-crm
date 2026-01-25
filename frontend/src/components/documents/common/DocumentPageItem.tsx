@@ -5,7 +5,7 @@ import { IconCheck } from '@tabler/icons-react';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
 
-export function OrderPageItem({
+export function DocumentPageItem({
   gridSpan,
   translationKey,
   baseValue,

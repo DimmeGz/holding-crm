@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Card, Grid, Group, Switch, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
-import { OrderPageItem } from '@/components/documents/orders/OrderPageItem';
+import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
@@ -129,7 +129,7 @@ export function OrderPage(): ReactNode {
               {t('documents:documents.mainInfo')}
             </Text>
             <Grid gutter='md' align='flex-start'>
-              <OrderPageItem
+              <DocumentPageItem
                 gridSpan={order.recipientId ? 4 : 6}
                 translationKey={{
                   primary: 'documents:documents.seller',
@@ -148,8 +148,8 @@ export function OrderPage(): ReactNode {
                     : undefined
                 }
               />
-              <OrderPageItem
-                gridSpan={hasConfirmation ? 4 : 6}
+              <DocumentPageItem
+                gridSpan={order.recipientId ? 4 : 6}
                 translationKey={{
                   primary: 'documents:documents.buyer',
                   secondary: 'documents:documents.warehouse',
@@ -171,7 +171,7 @@ export function OrderPage(): ReactNode {
               />
 
               {order.recipientId && order.recipientWarehouseId && (
-                <OrderPageItem
+                <DocumentPageItem
                   gridSpan={4}
                   translationKey={{
                     primary: 'documents:documents.recipient',
@@ -204,7 +204,7 @@ export function OrderPage(): ReactNode {
               {t('documents:documents.payDelivery')}
             </Text>
             <Grid gutter='md' align='flex-start'>
-              <OrderPageItem
+              <DocumentPageItem
                 gridSpan={3}
                 translationKey={{
                   primary: 'documents:documents.expectedDate',
@@ -224,7 +224,7 @@ export function OrderPage(): ReactNode {
                     : undefined
                 }
               />
-              <OrderPageItem
+              <DocumentPageItem
                 gridSpan={3}
                 translationKey={{
                   primary: 'documents:documents.vat',
@@ -233,7 +233,7 @@ export function OrderPage(): ReactNode {
                   primary: `${order.vat} %`,
                 }}
               />
-              <OrderPageItem
+              <DocumentPageItem
                 gridSpan={3}
                 translationKey={{
                   primary: 'documents:documents.paymentDelay',
@@ -247,16 +247,16 @@ export function OrderPage(): ReactNode {
                     : undefined,
                 }}
               />
-              <OrderPageItem
+              <DocumentPageItem
                 gridSpan={3}
                 translationKey={{
                   primary: 'documents:documents.incoterms',
                 }}
                 baseValue={{
-                  primary: order.incoterms,
+                  primary: order.incoterms.name,
                 }}
                 confirmValue={{
-                  primary: order.confirmation?.incoterms,
+                  primary: order.confirmation?.incoterms.name,
                 }}
               />
             </Grid>

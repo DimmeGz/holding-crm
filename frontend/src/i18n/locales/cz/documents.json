@@ -16,6 +16,10 @@
     "incoterms": "Incoterms",
     "days": "dny",
     "goods": "Zboží",
-    "perpetual": "Věčný"
+    "perpetual": "Věčný",
+    "valid": "Platný",
+    "closed": "Uzavřená",
+    "contract": "Smlouva",
+    "orderPrefix": "Předpona názvu objednávky"
   }
 }

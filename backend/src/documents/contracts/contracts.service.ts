@@ -70,9 +70,6 @@ export class ContractsService {
     qb: SelectQueryBuilder<Contract>,
   ): SelectQueryBuilder<Contract> {
     return qb
-      .leftJoin('contract.seller', 'seller')
-      .leftJoin('contract.buyer', 'buyer')
-      .leftJoin('contract.currency', 'currency')
       .leftJoin('contract.incoterms', 'incoterms')
       .leftJoin('contract.contractLines', 'contractLine')
       .leftJoin('contractLine.product', 'product')
@@ -90,9 +87,9 @@ export class ContractsService {
         'contract.term',
         'contract.transportPlace',
         'contract.orderPrefix',
-        'seller.name',
-        'buyer.name',
-        'currency.name',
+        'contract.sellerId',
+        'contract.buyerId',
+        'contract.currencyId',
         'incoterms.name',
         'contractLine.id',
         'contractLine.qty',

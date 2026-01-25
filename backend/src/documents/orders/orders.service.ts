@@ -154,6 +154,7 @@ export class OrdersService {
       )
       .where('order.id = :orderId', { orderId })
       .leftJoin('order.contract', 'contract')
+      .leftJoin('order.incoterms', 'incoterms')
       .leftJoin('order.orderLines', 'orderLine')
       .leftJoin('confirmation.orderLines', 'confirmOrderLine')
       .select([
@@ -165,7 +166,6 @@ export class OrdersService {
         'order.currencyId',
         'order.vat',
         'order.paymentDelay',
-        'order.incoterms',
         'order.sellerId',
         'order.buyerId',
         'order.recipientId',
@@ -174,6 +174,7 @@ export class OrdersService {
         'order.recipientWarehouseId',
         'contract.id',
         'contract.name',
+        'incoterms.name',
         // confirmation
         'confirmation.confirmationNumber',
         'confirmation.createdAt',

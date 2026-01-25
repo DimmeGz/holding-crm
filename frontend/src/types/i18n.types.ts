@@ -79,6 +79,8 @@ export type LocaleDict = {
       perpetual: string;
       valid: string;
       closed: string;
+      contract: string;
+      orderPrefix: string;
     };
   };
 };

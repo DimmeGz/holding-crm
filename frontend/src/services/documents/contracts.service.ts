@@ -3,14 +3,14 @@ import type { GetContractsDto } from '@/types/documents/contracts.types';
 
 export class ContractsService {
   static async getList(): Promise<GetContractsDto[]> {
-    const orders: GetContractsDto[] = await contractsApi.getList();
+    const contracts: GetContractsDto[] = await contractsApi.getList();
 
-    return orders;
+    return contracts;
   }
 
-  // static async getById(orderId: number): Promise<any> {
-  //   const order: any = await contractsApi.getById(orderId);
+  static async getById(orderId: number): Promise<any> {
+    const contract: any = await contractsApi.getById(orderId);
 
-  //   return order;
-  // }
+    return contract;
+  }
 }
