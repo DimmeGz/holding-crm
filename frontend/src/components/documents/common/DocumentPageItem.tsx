@@ -13,7 +13,7 @@ export function DocumentPageItem({
 }: {
   gridSpan: number;
   translationKey: { primary: string; secondary?: string };
-  baseValue: { primary: string; secondary?: string };
+  baseValue: { primary?: string; secondary?: string };
   confirmValue?: { primary?: string; secondary?: string };
 }): ReactNode {
   const { t } = useTranslation(['documents']),

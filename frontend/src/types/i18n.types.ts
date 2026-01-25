@@ -48,11 +48,14 @@ export type LocaleDict = {
       byContract: string;
       status: string;
       goods: string;
+      product: string;
       productMan: string;
       productBuy: string;
       batchRename: string;
       package: string;
       qty: string;
+      shipLeft: string;
+      shipQty: string;
       price: string;
       name: string;
     };

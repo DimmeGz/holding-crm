@@ -1,5 +1,8 @@
 import { contractsApi } from '@/api/documents/contracts.api';
-import type { GetContractsDto } from '@/types/documents/contracts.types';
+import type {
+  GetContractDto,
+  GetContractsDto,
+} from '@/types/documents/contracts.types';
 
 export class ContractsService {
   static async getList(): Promise<GetContractsDto[]> {
@@ -8,8 +11,8 @@ export class ContractsService {
     return contracts;
   }
 
-  static async getById(orderId: number): Promise<any> {
-    const contract: any = await contractsApi.getById(orderId);
+  static async getById(orderId: number): Promise<GetContractDto> {
+    const contract: GetContractDto = await contractsApi.getById(orderId);
 
     return contract;
   }

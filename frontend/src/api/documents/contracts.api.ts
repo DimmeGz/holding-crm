@@ -2,11 +2,14 @@ import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import { http } from '@/api/http';
 import { UrlConstants } from '@/constants/url-constants';
-import type { GetContractsDto } from '@/types/documents/contracts.types';
+import type {
+  GetContractDto,
+  GetContractsDto,
+} from '@/types/documents/contracts.types';
 
 export const contractsApi: {
   getList(): Promise<GetContractsDto[]>;
-  getById(contractId: number): Promise<any>;
+  getById(contractId: number): Promise<GetContractDto>;
 } = {
   async getList(): Promise<GetContractsDto[]> {
     try {
@@ -24,11 +27,12 @@ export const contractsApi: {
     }
   },
 
-  async getById(contractId: number): Promise<any> {
+  async getById(contractId: number): Promise<GetContractDto> {
     try {
-      const response: AxiosResponse<any> = await http.get<any>(
-        `${UrlConstants.CONTRACTS_URL}/${contractId}`,
-      );
+      const response: AxiosResponse<GetContractDto> =
+        await http.get<GetContractDto>(
+          `${UrlConstants.CONTRACTS_URL}/${contractId}`,
+        );
 
       return response.data;
     } catch (e: unknown) {

@@ -16,7 +16,7 @@ export function useProductTableColumns(
 
   return {
     product: <T extends { productId: number }>(): MRT_ColumnDef<T> => ({
-      header: t('tables:columns.productMan'),
+      header: t('tables:columns.product'),
       accessorFn: (row: T) => getProductName(row.productId),
       id: 'productMan',
     }),

@@ -15,3 +15,32 @@ type BaseContractDTO = {
   parentId: number;
   isArchived: boolean;
 };
+
+export type GetContractDto = {
+  contract: Contract;
+};
+
+export type Contract = {
+  id: number;
+  name: string;
+  status: boolean;
+  signatureDate: Date;
+  term?: Date;
+  sellerId: number;
+  buyerId: number;
+  currencyId: number;
+  vat: number;
+  paymentDelay: number;
+  incoterms?: { name: string };
+  orderPrefix: string;
+  contractLines: ContractLine[];
+};
+
+export type ContractLine = {
+  productId: number;
+  packageId: number;
+  qty: number;
+  shipQty: number; // кратність відвантаження
+  shipLeft: number;
+  price: number;
+};

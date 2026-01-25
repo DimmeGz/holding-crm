@@ -1,13 +1,18 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Card, Grid, Group, Text } from '@mantine/core';
+import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle } from '@tabler/icons-react';
 import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
+import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
+import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
+import { useContractLinesColumns } from '@/hooks/documents/table-columns/useContractLinesColumns';
 import { useContract } from '@/hooks/documents/useContracts';
 import { useLibsStore } from '@/stores/useLibsStore';
+import type { Contract, ContractLine } from '@/types/documents/contracts.types';
 
 export function ContractPage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']),
@@ -16,27 +21,34 @@ export function ContractPage(): ReactNode {
     getCompanyName: (id: number) => string = useLibsStore(
       s => s.getCompanyName,
     ),
-    contract = data?.contract;
-  // columns: MRT_ColumnDef<OrderLine>[] = useOrderLinesColumns();
-  // orderLinesTableConfig: MRT_TableOptions<OrderLine> = useMemo(
-  //   () => ({
-  //     data: order?.orderLines || [],
-  //     columns,
-  //     enablePagination: false,
-  //     enableSorting: false,
-  //     enableColumnFilters: false,
-  //     enableBottomToolbar: false,
-  //     enableColumnActions: false,
-  //     enableGlobalFilter: false,
-  //     enableFullScreenToggle: false,
-  //     enableHiding: false,
-  //     mantinePaperProps: {
-  //       shadow: 'sm',
-  //       radius: 'md',
-  //     },
-  //   }),
-  //   [order, columns],
-  // );
+    getCurrencyName: (id: number) => string = useLibsStore(
+      s => s.getCurrencyName,
+    ),
+    contract: Contract | undefined = data?.contract,
+    columns: MRT_ColumnDef<ContractLine>[] = useContractLinesColumns(
+      contract
+        ? getCurrencyName(contract.currencyId)
+        : CommonConstants.EMPTY_STRING,
+    ),
+    contractLinesTableConfig: MRT_TableOptions<ContractLine> = useMemo(
+      () => ({
+        data: contract?.contractLines || [],
+        columns,
+        enablePagination: false,
+        enableSorting: false,
+        enableColumnFilters: false,
+        enableBottomToolbar: false,
+        enableColumnActions: false,
+        enableGlobalFilter: false,
+        enableFullScreenToggle: false,
+        enableHiding: false,
+        mantinePaperProps: {
+          shadow: 'sm',
+          radius: 'md',
+        },
+      }),
+      [contract, columns],
+    );
 
   console.log('contract', contract);
 
@@ -148,7 +160,7 @@ export function ContractPage(): ReactNode {
                   primary: 'documents:documents.incoterms',
                 }}
                 baseValue={{
-                  primary: contract.incoterms.name,
+                  primary: contract.incoterms?.name,
                 }}
               />
               <DocumentPageItem
@@ -163,28 +175,12 @@ export function ContractPage(): ReactNode {
             </Grid>
           </Card>
 
-          {/* {order.orderLines && !showConfirmLinesTable && (
+          {contract.contractLines && (
             <HoldingTable
-              tableOptions={orderLinesTableConfig}
+              tableOptions={contractLinesTableConfig}
               title={t('documents:documents.goods')}
-              toolBarControls={
-                <Switch
-                  checked={showConfirmLinesTable}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                    setShowConfirmLinesTable(event.currentTarget.checked)
-                  }
-                  label={
-                    showConfirmLinesTable
-                      ? t('documents:documents.confirm').toLowerCase()
-                      : t('documents:documents.order').toLowerCase()
-                  }
-                  labelPosition='left'
-                  mr='md'
-                  hidden={!hasConfirmation}
-                />
-              }
             />
-          )} */}
+          )}
         </>
       )}
     </>

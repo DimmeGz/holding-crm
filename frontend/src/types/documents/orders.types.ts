@@ -76,7 +76,7 @@ export type Order = {
   vat: number;
   currencyId: number;
   paymentDelay: number;
-  incoterms: { name: string };
+  incoterms?: { name: string };
   contract: {
     id: number;
     name: string;

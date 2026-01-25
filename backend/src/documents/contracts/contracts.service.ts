@@ -72,8 +72,6 @@ export class ContractsService {
     return qb
       .leftJoin('contract.incoterms', 'incoterms')
       .leftJoin('contract.contractLines', 'contractLine')
-      .leftJoin('contractLine.product', 'product')
-      .leftJoin('contractLine.package', 'package')
       .leftJoin('contract.contractServiceLines', 'contractServiceLine')
       .leftJoin('contractServiceLine.service', 'service')
       .select([
@@ -95,9 +93,8 @@ export class ContractsService {
         'contractLine.qty',
         'contractLine.shipQty',
         'contractLine.price',
-        'product.id',
-        'product.name',
-        'package.name',
+        'contractLine.productId',
+        'contractLine.packageId',
         'contractServiceLine.id',
         'contractServiceLine.price',
         'contractServiceLine.qty',
@@ -166,8 +163,8 @@ export class ContractsService {
       await this.shipmentsService.getShippedProductsByContract(contractId);
 
     for (const contractLine of contract.contractLines) {
-      contractLine['shipLeft'] = shippedProducts[contractLine.product.id]
-        ? contractLine.qty - shippedProducts[contractLine.product.id]
+      contractLine['shipLeft'] = shippedProducts[contractLine.productId]
+        ? contractLine.qty - shippedProducts[contractLine.productId]
         : contractLine.qty;
     }
 
