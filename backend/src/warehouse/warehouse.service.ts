@@ -58,7 +58,6 @@ export class WarehouseService {
     qb: SelectQueryBuilder<WarehouseAccounting>,
     query?: GetWarehouseQueryDTO,
   ) {
-    console.log(query);
     if (query.company) {
       qb.andWhere('warehouseAccounting.companyId = :companyId', {
         companyId: query.company,

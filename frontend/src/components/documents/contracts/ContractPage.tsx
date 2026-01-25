@@ -50,8 +50,6 @@ export function ContractPage(): ReactNode {
       [contract, columns],
     );
 
-  console.log('contract', contract);
-
   return (
     <>
       {loading && <Spinner />}
