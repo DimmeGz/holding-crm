@@ -1,3 +1,5 @@
+import type { TreeNodeData } from "@mantine/core";
+
 export type GetContractsDto = BaseContractDTO & {
   children?: (BaseContractDTO & {
     children?: [];
@@ -18,6 +20,7 @@ type BaseContractDTO = {
 
 export type GetContractDto = {
   contract: Contract;
+  orders: TreeNodeData[];
 };
 
 export type Contract = {

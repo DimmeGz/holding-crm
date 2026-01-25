@@ -1,3 +1,4 @@
+import { ContractRelatedDocuments } from './ContractRelatedDocuments';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -45,10 +46,13 @@ export function ContractPage(): ReactNode {
         mantinePaperProps: {
           shadow: 'sm',
           radius: 'md',
+          mb: 'xs',
         },
       }),
       [contract, columns],
     );
+
+  console.log('contract', data);
 
   return (
     <>
@@ -179,6 +183,8 @@ export function ContractPage(): ReactNode {
               title={t('documents:documents.goods')}
             />
           )}
+
+          {data?.orders && <ContractRelatedDocuments orders={data.orders} />}
         </>
       )}
     </>

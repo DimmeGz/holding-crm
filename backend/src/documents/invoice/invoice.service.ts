@@ -253,7 +253,7 @@ export class InvoiceService {
     const invoices = await this.createBaseQueryBuilder()
       .where('invoiceLine.orderId = :orderId', { orderId })
       .select(['invoice.id', 'invoice.status', 'invoice.invoiceNumber'])
-      .leftJoinAndSelect('invoice.invoiceLines', 'invoiceLine')
+      .leftJoin('invoice.invoiceLines', 'invoiceLine')
       .orderBy('invoice.id', 'ASC')
       .getMany();
 

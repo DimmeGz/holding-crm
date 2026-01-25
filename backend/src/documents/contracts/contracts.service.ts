@@ -170,7 +170,7 @@ export class ContractsService {
 
     const orders = await this.ordersService.getOrdersByContractId(contractId);
 
-    return { contract, orders };
+    return { contract, orders: this.transformToTreeData(orders) };
   }
 
   async createContract(
@@ -319,5 +319,34 @@ export class ContractsService {
     }
 
     return contract.orderPrefix || '';
+  }
+
+  private transformToTreeData(orders) {
+    return orders.map((order) => ({
+      value: `orders/${order.id}`,
+      label: `Замовлення №${order.id}`,
+      children: [
+        ...(order.invoices?.map((invoice) => ({
+          value: `invoices/${invoice.id}`,
+          label: `Рахунок ${invoice.invoiceNumber}`,
+          children: [
+            ...(invoice.shipments?.map((shipment) => ({
+              value: `shipments/${shipment.id}`,
+              label: `Відвантаження №${shipment.id}`,
+              children: [
+                ...(shipment.receives?.map((receive) => ({
+                  value: `receives/${receive.id}`,
+                  label: `Надходження №${receive.id}`,
+                })) || []),
+              ],
+            })) || []),
+            ...(invoice.payments?.map((payment) => ({
+              value: `payments/${payment.id}`,
+              label: `Платіж №${payment.id}`,
+            })) || []),
+          ],
+        })) || []),
+      ],
+    }));
   }
 }
