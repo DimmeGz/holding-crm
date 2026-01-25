@@ -45,3 +45,32 @@ export type UseTableColumns = {
     },
   >() => MRT_ColumnDef<T>;
 };
+
+export type UseProductTableColumns = {
+  product: <
+    T extends {
+      productId: number;
+    },
+  >() => MRT_ColumnDef<T>;
+  package: <
+    T extends {
+      packageId: number;
+    },
+  >() => MRT_ColumnDef<T>;
+  qty: <
+    T extends {
+      qty: number;
+    },
+  >() => MRT_ColumnDef<T>;
+  price: <
+    T extends {
+      price: number;
+    },
+  >() => MRT_ColumnDef<T>;
+  amount: <
+    T extends {
+      qty: number;
+      price: number;
+    },
+  >() => MRT_ColumnDef<T>;
+};
