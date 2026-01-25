@@ -14,6 +14,11 @@ export function OrdersTable(): ReactNode {
     tableConfig: MRT_TableOptions<GetOrdersDto> = {
       data: data ?? [],
       columns,
+      mantineTableContainerProps: {
+        style: {
+          height: '93vh',
+        },
+      },
     };
 
   return (

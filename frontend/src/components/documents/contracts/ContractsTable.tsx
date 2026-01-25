@@ -38,6 +38,7 @@ export function ContractsTable(): ReactNode {
     enableExpanding: true,
     getSubRows: row => row.children,
     enablePagination: false,
+    enableBottomToolbar: false,
     initialState: {
       expanded: true,
     },
@@ -50,6 +51,11 @@ export function ContractsTable(): ReactNode {
           row.original.children && row.original.children.length > 0 ? (
             <MRT_ExpandButton row={row} table={table} />
           ) : null,
+      },
+    },
+    mantineTableContainerProps: {
+      style: {
+        height: '93vh',
       },
     },
     mantineTableBodyRowProps: ({ row }) => ({
