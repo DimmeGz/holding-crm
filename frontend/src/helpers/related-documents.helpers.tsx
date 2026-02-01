@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Group,
   type RenderTreeNodePayload,
@@ -18,11 +19,8 @@ export function renderTreeNode(payload: RenderTreeNodePayload): ReactNode {
 
   return (
     <Group gap='xs' {...elementProps}>
-      <Group gap={5} onClick={() => tree.toggleExpanded(node.value)}>
-        <span>
-          {}
-          {node.label}
-        </span>
+      <Group gap={5}>
+        <Link to={`/${node.value}`}>{node.label}</Link>
 
         {hasChildren && (
           <IconChevronDown
@@ -30,6 +28,7 @@ export function renderTreeNode(payload: RenderTreeNodePayload): ReactNode {
             style={{
               transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
             }}
+            onClick={() => tree.toggleExpanded(node.value)}
           />
         )}
       </Group>

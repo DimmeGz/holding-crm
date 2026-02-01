@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -13,10 +13,7 @@ import {
 } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
 import { StylesConstants } from '@/constants/styles.constants';
-import {
-  getAllValues,
-  renderTreeNode,
-} from '@/helpers/related-documents.helpers';
+import { renderTreeNode } from '@/helpers/related-documents.helpers';
 
 export function ContractRelatedDocuments({
   orders,
@@ -28,13 +25,6 @@ export function ContractRelatedDocuments({
     tree: UseTreeReturnType | undefined = useTree({
       initialExpandedState: getTreeExpandedState(orders, '*'),
     });
-
-  useEffect(() => {
-    if (orders) {
-      const allValues: string[] = getAllValues(orders);
-      allValues.forEach(value => tree.expand(value));
-    }
-  }, [orders, tree]);
 
   return (
     <Card shadow='sm' p='md' radius='md' withBorder mb='sm'>
