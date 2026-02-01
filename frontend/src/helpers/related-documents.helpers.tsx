@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -39,28 +40,29 @@ export function renderTreeNode(payload: RenderTreeNodePayload): ReactNode {
 
 export function transformContractRelatedDocumentsToTreeData(
   orders: ContractRelatedDocument[],
+  t: TFunction<readonly ['common', 'documents'], undefined>,
 ): TreeNodeData[] {
   return orders.map(order => ({
     value: `orders/${order.id}`,
-    label: `Замовлення №${order.id}`,
+    label: `${t('documents:documents.order')} №${order.id}`,
     children: [
       ...(order.invoices?.map(invoice => ({
         value: `invoices/${invoice.id}`,
-        label: `Рахунок ${invoice.invoiceNumber}`,
+        label: `${t('documents:documents.invoice')} ${invoice.invoiceNumber}`,
         children: [
           ...(invoice.shipments?.map(shipment => ({
             value: `shipments/${shipment.id}`,
-            label: `Відвантаження №${shipment.id}`,
+            label: `${t('documents:documents.shipment')} №${shipment.id}`,
             children: [
               ...(shipment.receives?.map(receive => ({
                 value: `receives/${receive.id}`,
-                label: `Надходження №${receive.id}`,
+                label: `${t('documents:documents.receive')} №${receive.id}`,
               })) || []),
             ],
           })) || []),
           ...(invoice.payments?.map(payment => ({
             value: `payments/${payment.id}`,
-            label: `Платіж №${payment.id}`,
+            label: `${t('documents:documents.payment')} №${payment.id}`,
           })) || []),
         ],
       })) || []),

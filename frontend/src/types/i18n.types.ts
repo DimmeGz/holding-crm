@@ -85,6 +85,10 @@ export type LocaleDict = {
       contract: string;
       orderPrefix: string;
       relatedDocuments: string;
+      invoice: string;
+      shipment: string;
+      receive: string;
+      payment: string;
     };
   };
 };
