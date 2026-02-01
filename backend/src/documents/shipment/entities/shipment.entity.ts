@@ -13,7 +13,7 @@ import { DecimalColumnTransformer } from '../../../common/transformers';
 import { AbstractDocumentEntity } from '../../entities';
 import { Incoterms, TechnicalProcess } from '../../../libs/entities';
 import { Warehouse } from '../../../warehouse/entities';
-import { Invoice } from '../../invoice/entities';
+import { Invoice } from '../../invoices/entities';
 import { ShipmentLine } from './shipment-line.entity';
 import { ShipmentServiceLine } from './shipment-service-line.entity';
 import { Receive } from '../../receive/entities';

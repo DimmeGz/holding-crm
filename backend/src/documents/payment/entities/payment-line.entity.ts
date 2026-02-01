@@ -4,7 +4,7 @@ import { DecimalColumnTransformer } from '../../../common/transformers';
 
 import { AbstractEntity } from '../../../common/entities';
 import { Payment } from './payment.entity';
-import { Invoice } from '../../invoice/entities';
+import { Invoice } from '../../invoices/entities';
 
 @Entity({ name: 'documents_paymentline' })
 export class PaymentLine extends AbstractEntity {

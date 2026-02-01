@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../../common/entities';
 import { CountryOfOrigin } from '../../libs/entities';
 import { Product } from './product.entity';
-import { InvoiceLine } from '../../documents/invoice/entities';
+import { InvoiceLine } from '../../documents/invoices/entities';
 import {
   ProductionInLine,
   ProductionOutLine,

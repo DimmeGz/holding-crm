@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CompaniesModule } from '../../companies';
-import { InvoiceModule } from '../invoice';
+import { InvoiceModule } from '../invoices';
 import { LibsModule } from '../../libs';
 
 import { Payment } from './entities';

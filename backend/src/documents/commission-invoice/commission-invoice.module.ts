@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CompaniesModule } from '../../companies';
-import { InvoiceModule } from '../invoice';
+import { InvoiceModule } from '../invoices';
 
 import { CommissionInvoice } from './entities';
 import { CommissionInvoiceService } from './commission-invoice.service';

@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Invoice } from '../documents/invoice/entities';
+import { Invoice } from '../documents/invoices/entities';
 import { Company } from '../companies/entities';
 
 import { ReportQueryDTO } from './dto/query-dto';

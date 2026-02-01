@@ -11,7 +11,7 @@ import {
 import { DecimalColumnTransformer } from '../../../common/transformers';
 
 import { AbstractDocumentEntity } from '../../entities';
-import { Invoice } from '../../invoice/entities';
+import { Invoice } from '../../invoices/entities';
 import { TechnicalProcess } from '../../../libs/entities';
 import { CommissionPayment } from '../../commission-payment/entities';
 

@@ -37,7 +37,7 @@ import {
   Invoice,
   InvoiceLine,
   InvoiceServiceLine,
-} from '../documents/invoice/entities';
+} from '../documents/invoices/entities';
 import { CommissionInvoice } from '../documents/commission-invoice/entities';
 import { CommissionPayment } from '../documents/commission-payment/entities';
 import { Payment, PaymentLine } from '../documents/payment/entities';

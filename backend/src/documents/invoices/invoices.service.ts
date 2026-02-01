@@ -60,23 +60,19 @@ export class InvoiceService {
     qb: SelectQueryBuilder<Invoice>,
   ): SelectQueryBuilder<Invoice> {
     return qb
-      .leftJoin('invoice.seller', 'seller')
-      .leftJoin('invoice.buyer', 'buyer')
-      .leftJoin('invoice.recipient', 'recipient')
       .leftJoin('invoice.parent', 'parent')
       .select([
         'invoice.id',
-        'invoice.number',
-        'seller.id',
-        'seller.name',
-        'buyer.id',
-        'buyer.name',
-        'recipient.id',
-        'recipient.name',
+        'invoice.invoiceNumber',
+        'invoice.expectedDate',
+        'invoice.sellerId',
+        'invoice.buyerId',
+        'invoice.recipientId',
         'invoice.status',
         'invoice.documentSum',
+        'invoice.currencyId',
         'parent.id',
-        'parent.number',
+        'parent.invoiceNumber',
       ]);
   }
 

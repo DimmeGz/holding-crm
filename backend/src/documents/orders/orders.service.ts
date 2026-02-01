@@ -10,7 +10,7 @@ import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { ContractsService } from '../contracts';
 import { GoodsService } from '../../goods';
-import { InvoiceService } from '../invoice';
+import { InvoiceService } from '../invoices';
 import { OrdersConfirmationService } from '../orders-confirmation';
 
 import {

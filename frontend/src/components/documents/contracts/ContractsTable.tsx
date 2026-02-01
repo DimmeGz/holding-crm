@@ -55,7 +55,7 @@ export function ContractsTable(): ReactNode {
     },
     mantineTableContainerProps: {
       style: {
-        height: '93vh',
+        height: '87vh',
       },
     },
     mantineTableBodyRowProps: ({ row }) => ({

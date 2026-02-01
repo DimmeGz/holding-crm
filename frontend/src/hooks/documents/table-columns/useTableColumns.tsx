@@ -55,17 +55,10 @@ export function useTableColumns(): UseTableColumns {
     amount: <
       T extends { documentSum: number; currencyId: number },
     >(): MRT_ColumnDef<T> => ({
-      header: t('tables:columns.confirmDate'),
+      header: t('tables:columns.amount'),
       accessorFn: (row: T): string =>
         `${row.documentSum} ${getCurrencyName(row.currencyId)}`,
       id: 'amount',
-    }),
-    byContract: <
-      T extends { contract: { name: string } },
-    >(): MRT_ColumnDef<T> => ({
-      header: t('tables:columns.byContract'),
-      accessorFn: (row: T) => row.contract.name,
-      id: 'contractName',
     }),
     status: <T extends { status: boolean }>(): MRT_ColumnDef<T> => ({
       header: t('tables:columns.status'),

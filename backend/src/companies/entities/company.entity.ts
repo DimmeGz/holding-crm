@@ -13,7 +13,7 @@ import { AbstractEntity } from '../../common/entities';
 import { Account } from './account.entity';
 import { Warehouse } from '../../warehouse/entities';
 import { Production } from '../../documents/production/entities';
-import { Invoice } from '../../documents/invoice/entities';
+import { Invoice } from '../../documents/invoices/entities';
 
 @Entity({ name: 'companies_company' })
 export class Company extends AbstractEntity {

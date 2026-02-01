@@ -8,7 +8,7 @@ import { OrdersController } from './orders.controller';
 
 import { ContractsModule } from '../contracts';
 import { GoodsModule } from '../../goods';
-import { InvoiceModule } from '../invoice';
+import { InvoiceModule } from '../invoices';
 import { OrdersConfirmationModule } from '../orders-confirmation';
 
 @Module({
