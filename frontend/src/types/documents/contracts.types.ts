@@ -18,6 +18,24 @@ type BaseContractDTO = {
 
 export type GetContractDto = {
   contract: Contract;
+  orders: ContractRelatedDocument[];
+};
+
+export type ContractRelatedDocument = {
+  id: number;
+  invoices: {
+    id: number;
+    invoiceNumber: string;
+    shipments: {
+      id: number;
+      receives: {
+        id: number;
+      }[];
+    }[];
+    payments: {
+      id: number;
+    }[];
+  }[];
 };
 
 export type Contract = {

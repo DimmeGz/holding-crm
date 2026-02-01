@@ -20,6 +20,7 @@
     "valid": "Platný",
     "closed": "Uzavřená",
     "contract": "Smlouva",
-    "orderPrefix": "Předpona názvu objednávky"
+    "orderPrefix": "Předpona názvu objednávky",
+    "relatedDocuments": "Související dokumenty"
   }
 }

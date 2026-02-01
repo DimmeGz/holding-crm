@@ -84,6 +84,7 @@ export type LocaleDict = {
       closed: string;
       contract: string;
       orderPrefix: string;
+      relatedDocuments: string;
     };
   };
 };

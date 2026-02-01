@@ -1,3 +1,4 @@
+import { ContractRelatedDocuments } from './ContractRelatedDocuments';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -9,6 +10,7 @@ import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
+import { transformContractRelatedDocumentsToTreeData } from '@/helpers/related-documents.helpers';
 import { useContractLinesColumns } from '@/hooks/documents/table-columns/useContractLinesColumns';
 import { useContract } from '@/hooks/documents/useContracts';
 import { useLibsStore } from '@/stores/useLibsStore';
@@ -45,6 +47,7 @@ export function ContractPage(): ReactNode {
         mantinePaperProps: {
           shadow: 'sm',
           radius: 'md',
+          mb: 'xs',
         },
       }),
       [contract, columns],
@@ -177,6 +180,12 @@ export function ContractPage(): ReactNode {
             <HoldingTable
               tableOptions={contractLinesTableConfig}
               title={t('documents:documents.goods')}
+            />
+          )}
+
+          {data?.orders && (
+            <ContractRelatedDocuments
+              orders={transformContractRelatedDocumentsToTreeData(data.orders)}
             />
           )}
         </>
