@@ -6,6 +6,7 @@ import {
   type TreeNodeData,
 } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
+import type { ContractRelatedDocument } from '@/types/documents/contracts.types';
 
 export function getAllValues(nodes: TreeNodeData[]): string[] {
   return nodes.flatMap(node => [
@@ -34,4 +35,35 @@ export function renderTreeNode(payload: RenderTreeNodePayload): ReactNode {
       </Group>
     </Group>
   );
+}
+
+export function transformContractRelatedDocumentsToTreeData(
+  orders: ContractRelatedDocument[],
+): TreeNodeData[] {
+  return orders.map(order => ({
+    value: `orders/${order.id}`,
+    label: `Замовлення №${order.id}`,
+    children: [
+      ...(order.invoices?.map(invoice => ({
+        value: `invoices/${invoice.id}`,
+        label: `Рахунок ${invoice.invoiceNumber}`,
+        children: [
+          ...(invoice.shipments?.map(shipment => ({
+            value: `shipments/${shipment.id}`,
+            label: `Відвантаження №${shipment.id}`,
+            children: [
+              ...(shipment.receives?.map(receive => ({
+                value: `receives/${receive.id}`,
+                label: `Надходження №${receive.id}`,
+              })) || []),
+            ],
+          })) || []),
+          ...(invoice.payments?.map(payment => ({
+            value: `payments/${payment.id}`,
+            label: `Платіж №${payment.id}`,
+          })) || []),
+        ],
+      })) || []),
+    ],
+  }));
 }

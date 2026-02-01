@@ -10,6 +10,7 @@ import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
+import { transformContractRelatedDocumentsToTreeData } from '@/helpers/related-documents.helpers';
 import { useContractLinesColumns } from '@/hooks/documents/table-columns/useContractLinesColumns';
 import { useContract } from '@/hooks/documents/useContracts';
 import { useLibsStore } from '@/stores/useLibsStore';
@@ -51,8 +52,6 @@ export function ContractPage(): ReactNode {
       }),
       [contract, columns],
     );
-
-  console.log('contract', data);
 
   return (
     <>
@@ -184,7 +183,11 @@ export function ContractPage(): ReactNode {
             />
           )}
 
-          {data?.orders && <ContractRelatedDocuments orders={data.orders} />}
+          {data?.orders && (
+            <ContractRelatedDocuments
+              orders={transformContractRelatedDocumentsToTreeData(data.orders)}
+            />
+          )}
         </>
       )}
     </>
