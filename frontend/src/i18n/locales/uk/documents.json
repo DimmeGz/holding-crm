@@ -21,6 +21,10 @@
     "closed": "Закритий",
     "contract": "Контракт",
     "orderPrefix": "Префікс назви замовлення",
-    "relatedDocuments": "Пов'язані документи"
+    "relatedDocuments": "Пов'язані документи",
+    "invoice": "Рахунок",
+    "shipment": "Відвантаження",
+    "receive": "Надходження",
+    "payment": "Платіж"
   }
 }

@@ -21,6 +21,10 @@
     "closed": "Uzavřená",
     "contract": "Smlouva",
     "orderPrefix": "Předpona názvu objednávky",
-    "relatedDocuments": "Související dokumenty"
+    "relatedDocuments": "Související dokumenty",
+    "invoice": "Skóre",
+    "shipment": "Zásilka",
+    "receive": "Přicházející",
+    "payment": "Platba"
   }
 }

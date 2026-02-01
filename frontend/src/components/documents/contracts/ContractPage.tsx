@@ -185,7 +185,7 @@ export function ContractPage(): ReactNode {
 
           {data?.orders && (
             <ContractRelatedDocuments
-              orders={transformContractRelatedDocumentsToTreeData(data.orders)}
+              orders={transformContractRelatedDocumentsToTreeData(data.orders, t)}
             />
           )}
         </>
