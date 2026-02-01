@@ -89,6 +89,9 @@ export type LocaleDict = {
       shipment: string;
       receive: string;
       payment: string;
+      byInvoice: string;
+      payed: string;
+      invoiced: string;
     };
   };
 };

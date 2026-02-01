@@ -34,12 +34,14 @@ export function useInvoicesColumns(): MRT_ColumnDef<GetInvoicesDto>[] {
       {
         header: t('tables:columns.status'),
         accessorFn: (row: GetInvoicesDto): string =>
-          row.status ? 'Сплачено' : 'Виставлено',
+          row.status
+            ? t('documents:documents.payed')
+            : t('documents:documents.invoiced'),
         id: 'status',
       },
       commonColumns.amount<GetInvoicesDto>(),
       {
-        header: 'На підставі рахунку',
+        header: t('documents:documents.byInvoice'),
         id: 'invoiceParent',
         Cell: ({ row }: { row: MRT_Row<GetInvoicesDto> }) =>
           row.original.parent && (
