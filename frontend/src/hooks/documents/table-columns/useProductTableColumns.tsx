@@ -6,7 +6,7 @@ import type { UseProductTableColumns } from '@/types/documents/common-documents.
 export function useProductTableColumns(
   currency: string,
 ): UseProductTableColumns {
-  const { t } = useTranslation(['tables']),
+  const { t } = useTranslation(['common', 'tables']),
     getProductName: (id: number) => string = useLibsStore(
       s => s.getProductName,
     ),
@@ -30,7 +30,7 @@ export function useProductTableColumns(
       accessorKey: 'qty',
       id: 'qty',
       Cell: ({ cell }: { cell: MRT_Cell<T> }) =>
-        `${cell.getValue<number>()} ${t('tables:columns.kg')}`,
+        `${cell.getValue<number>()} ${t('common:common.kg')}`,
     }),
     price: <T extends { price: number }>(): MRT_ColumnDef<T> => ({
       header: t('tables:columns.price'),

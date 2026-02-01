@@ -1,5 +1,8 @@
 import { invoicesApi } from '@/api/documents/invoices.api';
-import type { GetInvoicesDto } from '@/types/documents/invoices.types';
+import type {
+  GetInvoiceDto,
+  GetInvoicesDto,
+} from '@/types/documents/invoices.types';
 
 export class InvoicesService {
   static async getList(): Promise<GetInvoicesDto[]> {
@@ -8,9 +11,9 @@ export class InvoicesService {
     return invoices;
   }
 
-  //   static async getById(invoiceId: number): Promise<unknown> {
-  //     const contract: unknown = await contractsApi.getById(invoiceId);
+  static async getById(invoiceId: number): Promise<GetInvoiceDto> {
+    const contract: GetInvoiceDto = await invoicesApi.getById(invoiceId);
 
-  //     return contract;
-  //   }
+    return contract;
+  }
 }

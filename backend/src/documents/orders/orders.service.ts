@@ -175,6 +175,7 @@ export class OrdersService {
         'contract.id',
         'contract.name',
         'incoterms.name',
+        'order.transportPlace',
         // confirmation
         'confirmation.confirmationNumber',
         'confirmation.createdAt',
@@ -184,6 +185,7 @@ export class OrdersService {
         'confirmation.buyerWarehouseId',
         'confirmation.recipientId',
         'confirmation.recipientWarehouseId',
+        'confirmation.transportPlace',
         // lines
         'orderLine.qty',
         'orderLine.price',

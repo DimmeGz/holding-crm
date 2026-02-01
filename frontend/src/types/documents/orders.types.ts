@@ -77,6 +77,7 @@ export type Order = {
   currencyId: number;
   paymentDelay: number;
   incoterms?: { name: string };
+  transportPlace: string;
   contract: {
     id: number;
     name: string;
@@ -102,6 +103,7 @@ type Confirmation = {
   recipientWarehouseId?: number;
   paymentDelay: number;
   incoterms: { name: string };
+  transportPlace: string;
   expectedDate: Date;
   orderLines: OrderLine[];
 };

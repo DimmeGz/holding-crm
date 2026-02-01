@@ -28,6 +28,12 @@
     "payment": "Платіж",
     "byInvoice": "На підставі рахунку",
     "payed": "Сплачено",
-    "invoiced": "Виставлено"
+    "invoiced": "Виставлено",
+    "paymentBalance": "Залишок оплати",
+    "grossWeight": "Маса брутто",
+    "transportAmount": "Вартість перевезення",
+    "ordersSeparation": "Розділяти замовлення в звіті",
+    "reportPeriod": "Звітний період",
+    "additionalInfo": "Додаткова інформація"
   }
 }

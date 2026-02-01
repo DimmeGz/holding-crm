@@ -33,6 +33,10 @@ export type LocaleDict = {
       error: string;
       noData: string;
     };
+    common: {
+      kg: string;
+      days: string;
+    };
   };
   tables: {
     columns: {
@@ -92,6 +96,12 @@ export type LocaleDict = {
       byInvoice: string;
       payed: string;
       invoiced: string;
+      paymentBalance: string;
+      grossWeight: string;
+      transportAmount: string;
+      ordersSeparation: string;
+      reportPeriod: string;
+      additionalInfo: string;
     };
   };
 };

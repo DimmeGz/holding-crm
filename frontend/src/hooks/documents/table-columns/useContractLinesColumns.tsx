@@ -8,7 +8,7 @@ import type { ContractLine } from '@/types/documents/contracts.types';
 export function useContractLinesColumns(
   currency: string,
 ): MRT_ColumnDef<ContractLine>[] {
-  const { t } = useTranslation(['tables']),
+  const { t } = useTranslation(['common', 'tables']),
     commonColumns: UseProductTableColumns = useProductTableColumns(currency);
 
   return useMemo(
@@ -21,7 +21,7 @@ export function useContractLinesColumns(
         accessorKey: 'shipLeft',
         id: 'shipLeft',
         Cell: ({ cell }: { cell: MRT_Cell<ContractLine> }) =>
-          `${cell.getValue<number>()} ${t('tables:columns.kg')}`,
+          `${cell.getValue<number>()} ${t('common:common.kg')}`,
       },
       commonColumns.price<ContractLine>(),
       {
@@ -29,7 +29,7 @@ export function useContractLinesColumns(
         accessorKey: 'shipQty',
         id: 'shipQty',
         Cell: ({ cell }: { cell: MRT_Cell<ContractLine> }) =>
-          `${cell.getValue<number>()} ${t('tables:columns.kg')}`,
+          `${cell.getValue<number>()} ${t('common:common.kg')}`,
       },
     ],
     [commonColumns, t],

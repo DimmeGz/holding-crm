@@ -28,6 +28,12 @@
     "payment": "Platba",
     "byInvoice": "Na základě účtu",
     "payed": "Zaplaceno",
-    "invoiced": "Fakturováno"
+    "invoiced": "Fakturováno",
+    "paymentBalance": "Platební zůstatek",
+    "grossWeight": "Celková hmotnost",
+    "transportAmount": "Náklady na dopravu",
+    "ordersSeparation": "Rozdělení objednávek v přehledu",
+    "reportPeriod": "Vykazované období",
+    "additionalInfo": "Další informace"
   }
 }
