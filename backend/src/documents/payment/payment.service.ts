@@ -58,8 +58,6 @@ export class PaymentService {
     qb: SelectQueryBuilder<Payment>,
   ): SelectQueryBuilder<Payment> {
     return qb
-      .leftJoin('payment.seller', 'seller')
-      .leftJoin('payment.buyer', 'buyer')
       .leftJoin('payment.paymentLines', 'paymentLine')
       .leftJoin('paymentLine.invoice', 'invoice')
       .select([
@@ -67,8 +65,9 @@ export class PaymentService {
         'payment.status',
         'payment.documentSum',
         'payment.expectedDate',
-        'seller.name',
-        'buyer.name',
+        'payment.sellerId',
+        'payment.buyerId',
+        'payment.currencyId',
         'paymentLine.id',
         'paymentLine.amount',
         'invoice.id',
@@ -113,7 +112,7 @@ export class PaymentService {
       .getMany();
   }
 
-  async getPaymentById(paymentId: number): Promise<Payment> {
+  async getPaymentById(paymentId: number): Promise<{ payment: Payment }> {
     const payment = await this.applyPaymentDetailSelect(
       this.createBaseQueryBuilder(),
     )
@@ -124,7 +123,7 @@ export class PaymentService {
       throw new NotFoundException(`Payment with id: ${paymentId} not found`);
     }
 
-    return payment;
+    return { payment };
   }
 
   async getPaymentsByInvoiceId(invoiceId: number): Promise<Payment[]> {

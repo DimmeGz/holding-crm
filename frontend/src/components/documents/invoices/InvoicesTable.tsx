@@ -25,7 +25,11 @@ export function InvoicesTable(): ReactNode {
     <>
       {loading && <Spinner />}
 
-      {!loading && error && <h3>{t('common:messages.error')} {error}</h3>}
+      {!loading && error && (
+        <h3>
+          {t('common:messages.error')} {error}
+        </h3>
+      )}
 
       {!loading && !error && (
         <HoldingTable

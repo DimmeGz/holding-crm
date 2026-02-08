@@ -21,7 +21,7 @@ export function usePaymentsColumns(): MRT_ColumnDef<GetPaymentsDto>[] {
         Cell: ({ row }: { row: MRT_Row<GetPaymentsDto> }) => (
           <Text
             component='a'
-            href={`${UrlConstants.INVOICES_URL}/${row.original.id}`}
+            href={`${UrlConstants.PAYMENTS_URL}/${row.original.id}`}
             td='underline'
             style={{ cursor: 'pointer' }}
           >

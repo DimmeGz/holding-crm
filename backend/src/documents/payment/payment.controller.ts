@@ -29,7 +29,9 @@ export class PaymentController {
 
   @Get(':paymentId')
   @UsePipes(new ParseIntPipe())
-  getPaymentById(@Param('paymentId') paymentId: number): Promise<Payment> {
+  getPaymentById(
+    @Param('paymentId') paymentId: number,
+  ): Promise<{ payment: Payment }> {
     return this.paymentService.getPaymentById(paymentId);
   }
 
