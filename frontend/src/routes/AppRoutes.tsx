@@ -4,6 +4,7 @@ import MainLayout from '@/layout/MainLayout';
 import { contractsRoutes } from '@/routes/documents/contracts.routes';
 import { invoicesRoutes } from '@/routes/documents/invoices.routes';
 import { ordersRoutes } from '@/routes/documents/orders.routes';
+import { paymentsRoutes } from '@/routes/documents/payments.routes';
 
 export function AppRoutes(): ReactNode {
   return useRoutes([
@@ -18,6 +19,7 @@ export function AppRoutes(): ReactNode {
         ordersRoutes,
         contractsRoutes,
         invoicesRoutes,
+        paymentsRoutes,
       ],
     },
   ]);

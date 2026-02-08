@@ -24,7 +24,7 @@
     "cancel": "Zrušit"
   },
   "messages": {
-    "error": "Chyba při načítání dat",
+    "error": "Chyba při načítání dat:",
     "noData": "Žádná data"
   },
   "common": {

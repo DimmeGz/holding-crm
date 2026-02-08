@@ -68,7 +68,7 @@ export function OrderPage(): ReactNode {
     <>
       {loading && <Spinner />}
 
-      {!loading && error && <h3>Помилка завантаження даних: {error}</h3>}
+      {!loading && error && <h3>{t('common:messages.error')} {error}</h3>}
 
       {!loading && !error && order && (
         <>

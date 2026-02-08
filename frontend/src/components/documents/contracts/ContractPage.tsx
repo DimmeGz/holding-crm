@@ -57,7 +57,11 @@ export function ContractPage(): ReactNode {
     <>
       {loading && <Spinner />}
 
-      {!loading && error && <h3>Помилка завантаження даних: {error}</h3>}
+      {!loading && error && (
+        <h3>
+          {t('common:messages.error')} {error}
+        </h3>
+      )}
 
       {!loading && !error && contract && (
         <>
@@ -185,7 +189,10 @@ export function ContractPage(): ReactNode {
 
           {data?.orders && (
             <ContractRelatedDocuments
-              orders={transformContractRelatedDocumentsToTreeData(data.orders, t)}
+              orders={transformContractRelatedDocumentsToTreeData(
+                data.orders,
+                t,
+              )}
             />
           )}
         </>
