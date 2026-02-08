@@ -5,12 +5,16 @@ export type UseTableColumns = {
     T extends {
       sellerId: number;
     },
-  >() => MRT_ColumnDef<T>;
+  >(
+    columnName?: string,
+  ) => MRT_ColumnDef<T>;
   buyer: <
     T extends {
       buyerId: number;
     },
-  >() => MRT_ColumnDef<T>;
+  >(
+    columnName?: string,
+  ) => MRT_ColumnDef<T>;
   recipient: <
     T extends {
       recipientId: number;
@@ -20,7 +24,9 @@ export type UseTableColumns = {
     T extends {
       expectedDate?: Date;
     },
-  >() => MRT_ColumnDef<T>;
+  >(
+    columnName?: string,
+  ) => MRT_ColumnDef<T>;
   confirmDate: <
     T extends {
       confirmExpectedDate?: Date;

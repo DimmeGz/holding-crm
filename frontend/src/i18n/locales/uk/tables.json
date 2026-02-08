@@ -4,7 +4,9 @@
     "seller": "Продавець",
     "buyer": "Покупець",
     "recipient": "Отримувач",
+    "payer": "Платник",
     "expectedDate": "Дата",
+    "paymentDate": "Дата оплати",
     "signatureDate": "Дата підписання",
     "confirmDate": "Дата підтвердження",
     "expirationDate": "Термін дії",
@@ -26,7 +28,8 @@
     "cost": "Собівартість",
     "palletsQty": "Кількість палет",
     "countryOfOrigin": "Країна походження",
-    "byOrder": "Згідно замовлення"
+    "byOrder": "Згідно замовлення",
+    "byInvoice": "Згідно рахунку"
   },
   "showArchived": "показати архівні"
 }

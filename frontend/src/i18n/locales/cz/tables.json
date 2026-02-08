@@ -4,7 +4,9 @@
     "seller": "Prodávající",
     "buyer": "Kupující",
     "recipient": "Příjemce",
+    "payer": "Plátce",
     "expectedDate": "Datum",
+    "paymentDate": "Datum platby",
     "signatureDate": "Datum podpisu",
     "confirmDate": "Datum potvrzení",
     "expirationDate": "Datum spotřeby",
@@ -26,7 +28,8 @@
     "cost": "Náklady",
     "palletsQty": "Počet palet",
     "countryOfOrigin": "Země původu",
-    "byOrder": "Podle objednávky"
+    "byOrder": "Podle objednávky",
+    "byInvoice": "Podle účtu"
   },
   "showArchived": "zobrazit archivované"
 }

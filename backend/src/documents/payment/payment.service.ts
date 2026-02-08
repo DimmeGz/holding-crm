@@ -38,18 +38,18 @@ export class PaymentService {
     qb: SelectQueryBuilder<Payment>,
   ): SelectQueryBuilder<Payment> {
     return qb
-      .leftJoin('payment.seller', 'seller')
-      .leftJoin('payment.buyer', 'buyer')
       .leftJoin('payment.paymentLines', 'paymentLine')
       .leftJoin('paymentLine.invoice', 'invoice')
       .select([
         'payment.id',
+        'payment.sellerId',
+        'payment.buyerId',
         'payment.status',
         'payment.documentSum',
+        'payment.currencyId',
         'payment.expectedDate',
-        'seller.name',
-        'buyer.name',
         'paymentLine.id',
+        'invoice.id',
         'invoice.invoiceNumber',
       ]);
   }

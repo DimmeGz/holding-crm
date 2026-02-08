@@ -43,8 +43,10 @@ export type LocaleDict = {
       orderNumber: string;
       seller: string;
       buyer: string;
+      payer: string;
       recipient: string;
       expectedDate: string;
+      paymentDate: string;
       signatureDate: string;
       confirmDate: string;
       expirationDate: string;
@@ -67,6 +69,7 @@ export type LocaleDict = {
       palletsQty: string;
       countryOfOrigin: string;
       byOrder: string;
+      byInvoice: string;
     };
     showArchived: string;
   };
