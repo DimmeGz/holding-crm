@@ -14,7 +14,7 @@ import { CommissionInvoiceService } from './commission-invoice.service';
 import { CreateCommissionInvoiceDTO, UpdateCommissionInvoiceDTO } from './dto';
 import { CommissionInvoice } from './entities';
 
-@Controller('commission')
+@Controller('commissions')
 export class CommissionInvoiceController {
   constructor(
     private readonly commissionInvoiceService: CommissionInvoiceService,
@@ -22,7 +22,7 @@ export class CommissionInvoiceController {
 
   @Get()
   getCommissionInvoicess(): Promise<CommissionInvoice[]> {
-    return this.commissionInvoiceService.getCommissionInvoicess();
+    return this.commissionInvoiceService.getCommissionInvoices();
   }
 
   @Get(':commissionId')

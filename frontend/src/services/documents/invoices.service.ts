@@ -12,8 +12,8 @@ export class InvoicesService {
   }
 
   static async getById(invoiceId: number): Promise<GetInvoiceDto> {
-    const contract: GetInvoiceDto = await invoicesApi.getById(invoiceId);
+    const invoice: GetInvoiceDto = await invoicesApi.getById(invoiceId);
 
-    return contract;
+    return invoice;
   }
 }

@@ -5,4 +5,6 @@ export const CommonConstants: Record<string, string> = {
   COMA_SPACE: ', ',
   CHECK_MARK: '✔',
   X_MARK: '✘',
+  NUMBER: '№',
+  PERCENT: '%',
 };

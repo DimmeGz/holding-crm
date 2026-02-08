@@ -20,9 +20,6 @@ export class CommissionInvoiceService {
   private createBaseQueryBuilder(): SelectQueryBuilder<CommissionInvoice> {
     return this.commissionRepository
       .createQueryBuilder('commission')
-      .leftJoin('commission.seller', 'seller')
-      .leftJoin('commission.buyer', 'buyer')
-      .leftJoin('commission.currency', 'currency')
       .leftJoin('commission.invoice', 'invoice')
       .leftJoin('invoice.children', 'invoiceChildren');
   }
@@ -32,12 +29,12 @@ export class CommissionInvoiceService {
   ): SelectQueryBuilder<CommissionInvoice> {
     return qb.select([
       'commission.id',
+      'commission.sellerId',
+      'commission.buyerId',
       'commission.status',
       'commission.rate',
       'commission.documentSum',
-      'currency.name',
-      'seller.name',
-      'buyer.name',
+      'commission.currencyId',
       'invoice.id',
       'invoice.invoiceNumber',
       'invoiceChildren.id',
@@ -45,7 +42,7 @@ export class CommissionInvoiceService {
     ]);
   }
 
-  async getCommissionInvoicess(): Promise<CommissionInvoice[]> {
+  async getCommissionInvoices(): Promise<CommissionInvoice[]> {
     return await this.applyBaseSelect(this.createBaseQueryBuilder())
       .orderBy('commission.id', 'DESC')
       .getMany();

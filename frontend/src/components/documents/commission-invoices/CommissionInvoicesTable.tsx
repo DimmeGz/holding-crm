@@ -3,15 +3,16 @@ import { useTranslation } from 'react-i18next';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
-import { useInvoicesColumns } from '@/hooks/documents/table-columns/useInvoicesColumns';
-import { useInvoices } from '@/hooks/documents/useInvoices';
-import type { GetInvoicesDto } from '@/types/documents/invoices.types';
+import { useCommissionInvoicesColumns } from '@/hooks/documents/table-columns/useCommissionInvoicesColumns';
+import { useCommissionInvoices } from '@/hooks/documents/useCommissionInvoices';
+import type { GetCommissionInvoicesDto } from '@/types/documents/commission-invoices.types';
 
-export function InvoicesTable(): ReactNode {
+export function CommissionInvoicesTable(): ReactNode {
   const { t } = useTranslation(['common', 'tables']),
-  { data, loading, error } = useInvoices(),
-    columns: MRT_ColumnDef<GetInvoicesDto>[] = useInvoicesColumns(),
-    tableConfig: MRT_TableOptions<GetInvoicesDto> = {
+    { data, loading, error } = useCommissionInvoices(),
+    columns: MRT_ColumnDef<GetCommissionInvoicesDto>[] =
+      useCommissionInvoicesColumns(),
+    tableConfig: MRT_TableOptions<GetCommissionInvoicesDto> = {
       data: data ?? [],
       columns,
       mantineTableContainerProps: {

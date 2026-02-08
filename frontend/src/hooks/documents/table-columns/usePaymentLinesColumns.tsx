@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text } from '@mantine/core';
 import type { MRT_Cell, MRT_ColumnDef, MRT_Row } from 'mantine-react-table';
-import { UrlConstants } from '@/constants/url-constants';
+import { InvoiceLink } from '@/components/documents/invoices/InvoiceLink';
 import type { PaymentLine } from '@/types/documents/payments.types';
 
 export function usePaymentLinesColumns(
@@ -16,14 +15,7 @@ export function usePaymentLinesColumns(
         header: t('tables:columns.byInvoice'),
         id: 'byInvoice',
         Cell: ({ row }: { row: MRT_Row<PaymentLine> }) => (
-          <Text
-            component='a'
-            href={`${UrlConstants.INVOICES_URL}/${row.original.invoice.id}`}
-            td='underline'
-            style={{ cursor: 'pointer' }}
-          >
-            {row.original.invoice.invoiceNumber}
-          </Text>
+          <InvoiceLink invoice={row.original.invoice} />
         ),
       },
       {

@@ -70,6 +70,7 @@ export type LocaleDict = {
       countryOfOrigin: string;
       byOrder: string;
       byInvoice: string;
+      rate: string;
     };
     showArchived: string;
   };

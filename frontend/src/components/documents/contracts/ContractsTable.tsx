@@ -14,8 +14,8 @@ import type { GetContractsDto } from '@/types/documents/contracts.types';
 
 export function ContractsTable(): ReactNode {
   const { t } = useTranslation(['common', 'tables']),
-    columns: MRT_ColumnDef<GetContractsDto>[] = useContractColumns(),
     { data, loading, error } = useContracts(),
+    columns: MRT_ColumnDef<GetContractsDto>[] = useContractColumns(),
     [withArchived, setWithArchived] = useState(false),
     actualContracts: GetContractsDto[] = useMemo(() => {
       if (!data) return [];

@@ -62,7 +62,11 @@ export const documentsMenu: NavLinkGroupProps[] = [
     icon: IconFileEuroFilled,
     url: UrlConstants.PAYMENTS_URL,
   },
-  { labelKey: 'common:nav.commissionInvoices', icon: IconFileEuro },
+  {
+    labelKey: 'common:nav.commissionInvoices',
+    icon: IconFileEuro,
+    url: UrlConstants.COMMISSION_INVOICES_URL,
+  },
   { labelKey: 'common:nav.commissioPayments', icon: IconFileEuroFilled },
   { labelKey: 'common:nav.shipments', icon: IconTruck },
   { labelKey: 'common:nav.receives', icon: IconTruckFilled },

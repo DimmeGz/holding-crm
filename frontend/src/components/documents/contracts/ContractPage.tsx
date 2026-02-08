@@ -79,7 +79,8 @@ export function ContractPage(): ReactNode {
                     fw={StylesConstants.HEAVY_FONT_WEIGHT}
                     ml='xs'
                   >
-                    {t('documents:documents.contract')} №{contract.name}
+                    {t('documents:documents.contract')} {CommonConstants.NUMBER}
+                    {contract.name}
                   </Text>
                   {contract.status && (
                     <Text

@@ -9,8 +9,8 @@ import type { GetPaymentsDto } from '@/types/documents/payments.types';
 
 export function PaymentsTable(): ReactNode {
   const { t } = useTranslation(['common', 'tables']),
-    columns: MRT_ColumnDef<GetPaymentsDto>[] = usePaymentsColumns(),
     { data, loading, error } = usePayments(),
+    columns: MRT_ColumnDef<GetPaymentsDto>[] = usePaymentsColumns(),
     tableConfig: MRT_TableOptions<GetPaymentsDto> = {
       data: data ?? [],
       columns,

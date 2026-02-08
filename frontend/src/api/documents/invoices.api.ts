@@ -9,7 +9,7 @@ import type {
 
 export const invoicesApi: {
   getList(): Promise<GetInvoicesDto[]>;
-  getById(contractId: number): Promise<GetInvoiceDto>;
+  getById(invoiceId: number): Promise<GetInvoiceDto>;
 } = {
   async getList(): Promise<GetInvoicesDto[]> {
     try {

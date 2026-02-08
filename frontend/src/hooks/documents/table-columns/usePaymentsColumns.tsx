@@ -15,7 +15,7 @@ export function usePaymentsColumns(): MRT_ColumnDef<GetPaymentsDto>[] {
   return useMemo(
     () => [
       {
-        header: '№',
+        header: CommonConstants.NUMBER,
         id: 'id',
         size: 100,
         Cell: ({ row }: { row: MRT_Row<GetPaymentsDto> }) => (

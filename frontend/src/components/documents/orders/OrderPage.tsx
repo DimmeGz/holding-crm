@@ -68,7 +68,11 @@ export function OrderPage(): ReactNode {
     <>
       {loading && <Spinner />}
 
-      {!loading && error && <h3>{t('common:messages.error')} {error}</h3>}
+      {!loading && error && (
+        <h3>
+          {t('common:messages.error')} {error}
+        </h3>
+      )}
 
       {!loading && !error && order && (
         <>
@@ -86,7 +90,8 @@ export function OrderPage(): ReactNode {
                     fw={StylesConstants.HEAVY_FONT_WEIGHT}
                     ml='xs'
                   >
-                    {t('documents:documents.order')} №{order.orderNumber}
+                    {t('documents:documents.order')} {CommonConstants.NUMBER}
+                    {order.orderNumber}
                   </Text>
                 </Group>
               </Grid.Col>
@@ -94,7 +99,7 @@ export function OrderPage(): ReactNode {
               {order.confirmation && (
                 <Grid.Col span={4}>
                   <Text size='lg' fw={StylesConstants.HEAVY_FONT_WEIGHT}>
-                    {t('documents:documents.confirm')} №
+                    {t('documents:documents.confirm')} {CommonConstants.NUMBER}
                     {order.confirmation.confirmationNumber}
                   </Text>
                 </Grid.Col>

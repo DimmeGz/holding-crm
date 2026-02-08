@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_Row } from 'mantine-react-table';
-import { UrlConstants } from '@/constants/url-constants';
+import { InvoiceLink } from '@/components/documents/invoices/InvoiceLink';
+import { CommonConstants } from '@/constants/common.constants';
 import { useTableColumns } from '@/hooks/documents/table-columns/useTableColumns';
 import type { UseTableColumns } from '@/types/documents/common-documents.types';
 import type { GetInvoicesDto } from '@/types/documents/invoices.types';
@@ -14,17 +14,10 @@ export function useInvoicesColumns(): MRT_ColumnDef<GetInvoicesDto>[] {
   return useMemo(
     () => [
       {
-        header: '№',
+        header: CommonConstants.NUMBER,
         id: 'invoiceNumber',
         Cell: ({ row }: { row: MRT_Row<GetInvoicesDto> }) => (
-          <Text
-            component='a'
-            href={`${UrlConstants.INVOICES_URL}/${row.original.id}`}
-            td='underline'
-            style={{ cursor: 'pointer' }}
-          >
-            {row.original.invoiceNumber}
-          </Text>
+          <InvoiceLink invoice={row.original} />
         ),
       },
       commonColumns.date<GetInvoicesDto>(),
@@ -44,16 +37,7 @@ export function useInvoicesColumns(): MRT_ColumnDef<GetInvoicesDto>[] {
         header: t('documents:documents.byInvoice'),
         id: 'invoiceParent',
         Cell: ({ row }: { row: MRT_Row<GetInvoicesDto> }) =>
-          row.original.parent && (
-            <Text
-              component='a'
-              href={`${UrlConstants.INVOICES_URL}/${row.original.parent.id}`}
-              td='underline'
-              style={{ cursor: 'pointer' }}
-            >
-              {row.original.parent.invoiceNumber}
-            </Text>
-          ),
+          row.original.parent && <InvoiceLink invoice={row.original.parent} />,
       },
     ],
     [commonColumns, t],

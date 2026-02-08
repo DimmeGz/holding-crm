@@ -7,6 +7,7 @@ import {
   type TreeNodeData,
 } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
+import { CommonConstants } from '@/constants/common.constants';
 import type { ContractRelatedDocument } from '@/types/documents/contracts.types';
 
 export function getAllValues(nodes: TreeNodeData[]): string[] {
@@ -44,7 +45,7 @@ export function transformContractRelatedDocumentsToTreeData(
 ): TreeNodeData[] {
   return orders.map(order => ({
     value: `orders/${order.id}`,
-    label: `${t('documents:documents.order')} №${order.id}`,
+    label: `${t('documents:documents.order')} ${CommonConstants.NUMBER}${order.id}`,
     children: [
       ...(order.invoices?.map(invoice => ({
         value: `invoices/${invoice.id}`,
@@ -52,17 +53,17 @@ export function transformContractRelatedDocumentsToTreeData(
         children: [
           ...(invoice.shipments?.map(shipment => ({
             value: `shipments/${shipment.id}`,
-            label: `${t('documents:documents.shipment')} №${shipment.id}`,
+            label: `${t('documents:documents.shipment')} ${CommonConstants.NUMBER}${shipment.id}`,
             children: [
               ...(shipment.receives?.map(receive => ({
                 value: `receives/${receive.id}`,
-                label: `${t('documents:documents.receive')} №${receive.id}`,
+                label: `${t('documents:documents.receive')} ${CommonConstants.NUMBER}${receive.id}`,
               })) || []),
             ],
           })) || []),
           ...(invoice.payments?.map(payment => ({
             value: `payments/${payment.id}`,
-            label: `${t('documents:documents.payment')} №${payment.id}`,
+            label: `${t('documents:documents.payment')} ${CommonConstants.NUMBER}${payment.id}`,
           })) || []),
         ],
       })) || []),

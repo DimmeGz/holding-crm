@@ -29,7 +29,8 @@
     "palletsQty": "Počet palet",
     "countryOfOrigin": "Země původu",
     "byOrder": "Podle objednávky",
-    "byInvoice": "Podle účtu"
+    "byInvoice": "Podle účtu",
+    "rate": "Zajímat"
   },
   "showArchived": "zobrazit archivované"
 }

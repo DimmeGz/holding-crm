@@ -76,7 +76,8 @@ export function PaymentPage(): ReactNode {
                     fw={StylesConstants.HEAVY_FONT_WEIGHT}
                     ml='xs'
                   >
-                    {t('documents:documents.payment')} №{payment.id}
+                    {t('documents:documents.payment')} {CommonConstants.NUMBER}
+                    {payment.id}
                   </Text>
                 </Group>
               </Grid.Col>
