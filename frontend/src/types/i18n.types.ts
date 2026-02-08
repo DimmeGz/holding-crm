@@ -55,6 +55,7 @@ export type LocaleDict = {
       product: string;
       productMan: string;
       productBuy: string;
+      batch: string;
       batchRename: string;
       package: string;
       qty: string;
@@ -62,6 +63,10 @@ export type LocaleDict = {
       shipQty: string;
       price: string;
       name: string;
+      cost: string;
+      palletsQty: string;
+      countryOfOrigin: string;
+      byOrder: string;
     };
     showArchived: string;
   };

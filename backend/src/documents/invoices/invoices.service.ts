@@ -79,59 +79,51 @@ export class InvoiceService {
   private applyInvoiceDetailSelect(
     qb: SelectQueryBuilder<Invoice>,
   ): SelectQueryBuilder<Invoice> {
-    return (
-      qb
-        .leftJoin('invoice.parent', 'parent')
-        .leftJoin('invoice.incoterms', 'incoterms')
-        .leftJoin('invoice.invoiceLines', 'invoiceLine')
-        .leftJoin('invoiceLine.product', 'product')
-        .leftJoin('invoiceLine.batch', 'batch')
-        .leftJoin('invoiceLine.countryOfOrigin', 'countryOfOrigin')
-        .leftJoin('invoiceLine.package', 'package')
-        // .leftJoin('invoice.commissionInvoices', 'commissionInvoice')
-        // .leftJoin('commissionInvoice.commissionPayments', 'commissionPayment')
-        .leftJoin('invoice.children', 'children')
-        .select([
-          'invoice.invoiceNumber',
-          'invoice.status',
-          'invoice.expectedDate',
-          'parent.id',
-          'parent.invoiceNumber',
-          'invoice.sellerId',
-          'invoice.sellerWarehouseId',
-          'invoice.buyerId',
-          'invoice.buyerWarehouseId',
-          'invoice.recipientId',
-          'invoice.recipientWarehouseId',
-          'invoice.paymentBalance',
-          'invoice.currencyId',
-          'invoice.paymentDelay',
-          'incoterms.name',
-          'invoice.transportPlace',
-          'invoice.vat',
-          'invoice.ponz',
-          'invoice.grossWeight',
-          'invoice.transportAmount',
-          'invoice.separation',
-          'invoice.reportPeriod',
-          'invoice.contractInfo',
+    return qb
+      .leftJoin('invoice.parent', 'parent')
+      .leftJoin('invoice.incoterms', 'incoterms')
+      .leftJoin('invoice.invoiceLines', 'invoiceLine')
+      .leftJoin('invoiceLine.batch', 'batch')
+      .leftJoin('invoiceLine.order', 'order')
+      .select([
+        'invoice.invoiceNumber',
+        'invoice.status',
+        'invoice.expectedDate',
+        'parent.id',
+        'parent.invoiceNumber',
+        'invoice.sellerId',
+        'invoice.sellerWarehouseId',
+        'invoice.buyerId',
+        'invoice.buyerWarehouseId',
+        'invoice.recipientId',
+        'invoice.recipientWarehouseId',
+        'invoice.paymentBalance',
+        'invoice.currencyId',
+        'invoice.paymentDelay',
+        'incoterms.name',
+        'invoice.transportPlace',
+        'invoice.vat',
+        'invoice.ponz',
+        'invoice.grossWeight',
+        'invoice.transportAmount',
+        'invoice.separation',
+        'invoice.reportPeriod',
+        'invoice.contractInfo',
 
-          'invoice.comment',
-          // 'invoiceLine',
-          // 'product.name',
-          // 'batch.id',
-          // 'batch.name',
-          // 'countryOfOrigin.name',
-          // 'package.name',
-          // 'package.capacity',
-          // 'commissionInvoice.id',
-          // 'commissionInvoice.status',
-          // 'commissionPayment.id',
-          // 'commissionPayment.status',
-          'children.id',
-          'children.status',
-        ])
-    );
+        'invoice.comment',
+        'invoiceLine.productId',
+        'invoiceLine.packageId',
+        'invoiceLine.qty',
+        'invoiceLine.price',
+        'invoiceLine.cost',
+        'invoiceLine.palletsQty',
+        'invoiceLine.grossWeight',
+        'invoiceLine.countryOfOriginId',
+        'batch.id',
+        'batch.name',
+        'order.id',
+        'order.orderNumber',
+      ]);
   }
 
   private applyQueryFilter(

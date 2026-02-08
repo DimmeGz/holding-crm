@@ -1,15 +1,18 @@
 import { DocumentPageItem } from '../common/DocumentPageItem';
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Card, Grid, Group, Text } from '@mantine/core';
+import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
+import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
+import { useInvoiceLinesColumns } from '@/hooks/documents/table-columns/useInvoiceLinesColumns';
 import { useInvoice } from '@/hooks/documents/useInvoices';
 import { useLibsStore } from '@/stores/useLibsStore';
-import type { Invoice } from '@/types/documents/invoices.types';
+import type { Invoice, InvoiceLine } from '@/types/documents/invoices.types';
 
 export function InvoicePage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']),
@@ -24,29 +27,31 @@ export function InvoicePage(): ReactNode {
     getCurrencyName: (id: number) => string = useLibsStore(
       s => s.getCurrencyName,
     ),
-    invoice: Invoice | undefined = data?.invoice;
-  // columns: MRT_ColumnDef<OrderLine>[] = useOrderLinesColumns(
-  //   invoice ? getCurrencyName(invoice.currencyId) : CommonConstants.EMPTY_STRING,
-  // ),
-  // orderLinesTableConfig: MRT_TableOptions<OrderLine> = useMemo(
-  //   () => ({
-  //     data: order?.orderLines || [],
-  //     columns,
-  //     enablePagination: false,
-  //     enableSorting: false,
-  //     enableColumnFilters: false,
-  //     enableBottomToolbar: false,
-  //     enableColumnActions: false,
-  //     enableGlobalFilter: false,
-  //     enableFullScreenToggle: false,
-  //     enableHiding: false,
-  //     mantinePaperProps: {
-  //       shadow: 'sm',
-  //       radius: 'md',
-  //     },
-  //   }),
-  //   [order, columns],
-  // );
+    invoice: Invoice | undefined = data?.invoice,
+    columns: MRT_ColumnDef<InvoiceLine>[] = useInvoiceLinesColumns(
+      invoice
+        ? getCurrencyName(invoice.currencyId)
+        : CommonConstants.EMPTY_STRING,
+    ),
+    invoiceLinesTableConfig: MRT_TableOptions<InvoiceLine> = useMemo(
+      () => ({
+        data: invoice?.invoiceLines || [],
+        columns,
+        enablePagination: false,
+        enableSorting: false,
+        enableColumnFilters: false,
+        enableBottomToolbar: false,
+        enableColumnActions: false,
+        enableGlobalFilter: false,
+        enableFullScreenToggle: false,
+        enableHiding: false,
+        mantinePaperProps: {
+          shadow: 'sm',
+          radius: 'md',
+        },
+      }),
+      [invoice, columns],
+    );
 
   return (
     <>
@@ -245,6 +250,13 @@ export function InvoicePage(): ReactNode {
               />
             </Grid>
           </Card>
+
+          {invoice.invoiceLines && (
+            <HoldingTable
+              tableOptions={invoiceLinesTableConfig}
+              title={t('documents:documents.goods')}
+            />
+          )}
         </>
       )}
     </>

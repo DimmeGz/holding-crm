@@ -9,6 +9,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
     currencies: {},
     products: {},
     packages: {},
+    countries: {},
     isLoaded: false,
 
     loadAll: async (): Promise<void> => {
@@ -42,5 +43,9 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
     getPackageName: (id: number): string => {
       return get().packages[id] || `Unknown package (ID: ${id})`;
+    },
+
+    getCountryName: (id: number): string => {
+      return get().countries[id] || `Unknown country (ID: ${id})`;
     },
   }));

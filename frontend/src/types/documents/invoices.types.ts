@@ -45,5 +45,19 @@ export type Invoice = {
   separation: boolean;
   reportPeriod: Date;
   contractInfo: string;
-  // contractLines: ContractLine[];
+  invoiceLines: InvoiceLine[];
+  comment?: string;
+};
+
+export type InvoiceLine = {
+  order: { id: number; orderNumber: string };
+  productId: number;
+  batch: { id: number; name: string };
+  packageId: number;
+  qty: number;
+  price: number;
+  cost: number;
+  palletsQty: number;
+  grossWeight: number;
+  countryOfOriginId: number;
 };
