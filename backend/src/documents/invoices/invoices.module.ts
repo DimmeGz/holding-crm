@@ -10,8 +10,8 @@ import { WarehouseModule } from '../../warehouse';
 
 import { Invoice } from './entities';
 
-import { InvoiceService } from './invoice.service';
-import { InvoiceController } from './invoice.controller';
+import { InvoiceService } from './invoices.service';
+import { InvoiceController } from './invoices.controller';
 
 @Module({
   imports: [

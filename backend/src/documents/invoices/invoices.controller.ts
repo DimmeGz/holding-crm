@@ -11,7 +11,7 @@ import {
   UsePipes,
 } from '@nestjs/common';
 
-import { InvoiceService } from './invoice.service';
+import { InvoiceService } from './invoices.service';
 
 import { Invoice } from './entities';
 

@@ -1,17 +1,17 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type MRT_ColumnDef, type MRT_TableOptions } from 'mantine-react-table';
+import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
-import { useOrdersColumns } from '@/hooks/documents/table-columns/useOrderColumns';
-import { useOrders } from '@/hooks/documents/useOrders';
-import type { GetOrdersDto } from '@/types/documents/orders.types';
+import { useInvoicesColumns } from '@/hooks/documents/table-columns/useInvoicesColumns';
+import { useInvoices } from '@/hooks/documents/useInvoices';
+import type { GetInvoicesDto } from '@/types/documents/invoices.types';
 
-export function OrdersTable(): ReactNode {
-  const { t } = useTranslation(['common']),
-    { data, loading, error } = useOrders(),
-    columns: MRT_ColumnDef<GetOrdersDto>[] = useOrdersColumns(),
-    tableConfig: MRT_TableOptions<GetOrdersDto> = {
+export function InvoicesTable(): ReactNode {
+  const { t } = useTranslation(['common', 'tables']),
+    columns: MRT_ColumnDef<GetInvoicesDto>[] = useInvoicesColumns(),
+    { data, loading, error } = useInvoices(),
+    tableConfig: MRT_TableOptions<GetInvoicesDto> = {
       data: data ?? [],
       columns,
       mantineTableContainerProps: {
@@ -30,7 +30,7 @@ export function OrdersTable(): ReactNode {
       {!loading && !error && (
         <HoldingTable
           tableOptions={tableConfig}
-          title={t('common:nav.orders')}
+          title={t('common:nav.invoices')}
         />
       )}
     </>

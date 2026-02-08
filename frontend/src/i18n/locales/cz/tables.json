@@ -15,14 +15,18 @@
     "product": "Produkt",
     "productMan": "Produkt (název prodávajícího)",
     "productBuy": "Produkt (název kupujícího)",
+    "batch": "Zásilka",
     "batchRename": "Přejmenování šarže",
     "package": "Balení",
     "qty": "Množství",
     "shipLeft": "Zbývá už jen to odeslat",
     "shipQty": "Frekvence zásilek",
     "price": "Cena",
-    "kg": "kg",
-    "name": "Jméno"
+    "name": "Jméno",
+    "cost": "Náklady",
+    "palletsQty": "Počet palet",
+    "countryOfOrigin": "Země původu",
+    "byOrder": "Podle objednávky"
   },
   "showArchived": "zobrazit archivované"
 }

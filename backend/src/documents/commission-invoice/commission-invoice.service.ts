@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
-import { InvoiceService } from '../invoice';
+import { InvoiceService } from '../invoices';
 
 import { CommissionInvoice } from './entities';
 import { CreateCommissionInvoiceDTO, UpdateCommissionInvoiceDTO } from './dto';

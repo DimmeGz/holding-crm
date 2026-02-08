@@ -9,7 +9,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
-import { InvoiceService } from '../invoice';
+import { InvoiceService } from '../invoices';
 import { LibsService } from '../../libs';
 
 import { Payment } from './entities';

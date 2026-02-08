@@ -1,4 +1,4 @@
-import { InvoiceLine } from '../../documents/invoice/entities';
+import { InvoiceLine } from '../../documents/invoices/entities';
 import {
   ProductionInLine,
   ProductionOutLine,

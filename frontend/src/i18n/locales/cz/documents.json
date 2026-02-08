@@ -25,6 +25,15 @@
     "invoice": "Skóre",
     "shipment": "Zásilka",
     "receive": "Přicházející",
-    "payment": "Platba"
+    "payment": "Platba",
+    "byInvoice": "Na základě účtu",
+    "payed": "Zaplaceno",
+    "invoiced": "Fakturováno",
+    "paymentBalance": "Platební zůstatek",
+    "grossWeight": "Celková hmotnost",
+    "transportAmount": "Náklady na dopravu",
+    "ordersSeparation": "Rozdělení objednávek v přehledu",
+    "reportPeriod": "Vykazované období",
+    "additionalInfo": "Další informace"
   }
 }

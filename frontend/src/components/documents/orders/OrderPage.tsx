@@ -253,10 +253,19 @@ export function OrderPage(): ReactNode {
                   primary: 'documents:documents.incoterms',
                 }}
                 baseValue={{
-                  primary: order.incoterms?.name,
+                  primary: order.incoterms
+                    ? [order.incoterms.name, order.transportPlace].join(
+                        CommonConstants.COMA_SPACE,
+                      )
+                    : CommonConstants.EMPTY_STRING,
                 }}
                 confirmValue={{
-                  primary: order.confirmation?.incoterms?.name,
+                  primary: order.confirmation?.incoterms
+                    ? [
+                        order.confirmation.incoterms.name,
+                        order.confirmation.transportPlace,
+                      ].join(CommonConstants.COMA_SPACE)
+                    : CommonConstants.EMPTY_STRING,
                 }}
               />
             </Grid>

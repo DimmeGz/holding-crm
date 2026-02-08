@@ -33,6 +33,10 @@ export type LocaleDict = {
       error: string;
       noData: string;
     };
+    common: {
+      kg: string;
+      days: string;
+    };
   };
   tables: {
     columns: {
@@ -51,6 +55,7 @@ export type LocaleDict = {
       product: string;
       productMan: string;
       productBuy: string;
+      batch: string;
       batchRename: string;
       package: string;
       qty: string;
@@ -58,6 +63,10 @@ export type LocaleDict = {
       shipQty: string;
       price: string;
       name: string;
+      cost: string;
+      palletsQty: string;
+      countryOfOrigin: string;
+      byOrder: string;
     };
     showArchived: string;
   };
@@ -89,6 +98,15 @@ export type LocaleDict = {
       shipment: string;
       receive: string;
       payment: string;
+      byInvoice: string;
+      payed: string;
+      invoiced: string;
+      paymentBalance: string;
+      grossWeight: string;
+      transportAmount: string;
+      ordersSeparation: string;
+      reportPeriod: string;
+      additionalInfo: string;
     };
   };
 };

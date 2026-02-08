@@ -60,23 +60,19 @@ export class InvoiceService {
     qb: SelectQueryBuilder<Invoice>,
   ): SelectQueryBuilder<Invoice> {
     return qb
-      .leftJoin('invoice.seller', 'seller')
-      .leftJoin('invoice.buyer', 'buyer')
-      .leftJoin('invoice.recipient', 'recipient')
       .leftJoin('invoice.parent', 'parent')
       .select([
         'invoice.id',
-        'invoice.number',
-        'seller.id',
-        'seller.name',
-        'buyer.id',
-        'buyer.name',
-        'recipient.id',
-        'recipient.name',
+        'invoice.invoiceNumber',
+        'invoice.expectedDate',
+        'invoice.sellerId',
+        'invoice.buyerId',
+        'invoice.recipientId',
         'invoice.status',
         'invoice.documentSum',
+        'invoice.currencyId',
         'parent.id',
-        'parent.number',
+        'parent.invoiceNumber',
       ]);
   }
 
@@ -84,60 +80,49 @@ export class InvoiceService {
     qb: SelectQueryBuilder<Invoice>,
   ): SelectQueryBuilder<Invoice> {
     return qb
-      .leftJoin('invoice.seller', 'seller')
-      .leftJoin('invoice.sellerWarehouse', 'sellerWarehouse')
-      .leftJoin('invoice.buyer', 'buyer')
-      .leftJoin('invoice.buyerWarehouse', 'buyerWarehouse')
-      .leftJoin('invoice.recipient', 'recipient')
-      .leftJoin('invoice.recipientWarehouse', 'recipientWarehouse')
       .leftJoin('invoice.parent', 'parent')
-      .leftJoin('invoice.currency', 'currency')
+      .leftJoin('invoice.incoterms', 'incoterms')
       .leftJoin('invoice.invoiceLines', 'invoiceLine')
-      .leftJoin('invoiceLine.product', 'product')
       .leftJoin('invoiceLine.batch', 'batch')
-      .leftJoin('invoiceLine.countryOfOrigin', 'countryOfOrigin')
-      .leftJoin('invoiceLine.package', 'package')
-      .leftJoin('invoice.commissionInvoices', 'commissionInvoice')
-      .leftJoin('commissionInvoice.commissionPayments', 'commissionPayment')
-      .leftJoin('invoice.children', 'children')
+      .leftJoin('invoiceLine.order', 'order')
       .select([
         'invoice.invoiceNumber',
         'invoice.status',
         'invoice.expectedDate',
-        'invoice.paymentBalance',
         'parent.id',
         'parent.invoiceNumber',
-        'seller.name',
-        'sellerWarehouse.name',
-        'buyer.name',
-        'buyerWarehouse.name',
-        'recipient.name',
-        'recipientWarehouse.name',
-        'currency.name',
-        'invoice.vat',
+        'invoice.sellerId',
+        'invoice.sellerWarehouseId',
+        'invoice.buyerId',
+        'invoice.buyerWarehouseId',
+        'invoice.recipientId',
+        'invoice.recipientWarehouseId',
+        'invoice.paymentBalance',
+        'invoice.currencyId',
         'invoice.paymentDelay',
-        'invoice.incoterms',
+        'incoterms.name',
         'invoice.transportPlace',
+        'invoice.vat',
         'invoice.ponz',
         'invoice.grossWeight',
         'invoice.transportAmount',
-        'invoice.comment',
         'invoice.separation',
         'invoice.reportPeriod',
         'invoice.contractInfo',
-        'invoiceLine',
-        'product.name',
+
+        'invoice.comment',
+        'invoiceLine.productId',
+        'invoiceLine.packageId',
+        'invoiceLine.qty',
+        'invoiceLine.price',
+        'invoiceLine.cost',
+        'invoiceLine.palletsQty',
+        'invoiceLine.grossWeight',
+        'invoiceLine.countryOfOriginId',
         'batch.id',
         'batch.name',
-        'countryOfOrigin.name',
-        'package.name',
-        'package.capacity',
-        'commissionInvoice.id',
-        'commissionInvoice.status',
-        'commissionPayment.id',
-        'commissionPayment.status',
-        'children.id',
-        'children.status',
+        'order.id',
+        'order.orderNumber',
       ]);
   }
 
@@ -237,16 +222,16 @@ export class InvoiceService {
       throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
     }
 
-    const shipments =
-      await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
-    const payments =
-      await this.paymentsService.getPaymentsByInvoiceId(invoiceId);
-    const commissions = invoice.commissionInvoices;
-    delete invoice.commissionInvoices;
-    const childInvoices = invoice.children;
-    delete invoice.children;
+    // const shipments =
+    //   await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
+    // const payments =
+    //   await this.paymentsService.getPaymentsByInvoiceId(invoiceId);
+    // const commissions = invoice.commissionInvoices;
+    // delete invoice.commissionInvoices;
+    // const childInvoices = invoice.children;
+    // delete invoice.children;
 
-    return { invoice, shipments, payments, commissions, childInvoices };
+    return { invoice };
   }
 
   async getInvoicesByOrderId(orderId: number): Promise<Invoice[]> {

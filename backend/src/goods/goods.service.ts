@@ -8,7 +8,7 @@ import {
   ProductionInLine,
   ProductionOutLine,
 } from '../documents/production/entities';
-import { InvoiceLine } from '../documents/invoice/entities';
+import { InvoiceLine } from '../documents/invoices/entities';
 
 import { GetBatchDataResponseDTO, GetProductDataResponseDTO } from './dto';
 

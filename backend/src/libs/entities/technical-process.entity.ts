@@ -2,7 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 
 import { AbstractEntity } from '../../common/entities';
 import { Product, Service } from '../../goods/entities';
-import { Invoice } from '../../documents/invoice/entities';
+import { Invoice } from '../../documents/invoices/entities';
 import { CommissionInvoice } from '../../documents/commission-invoice/entities';
 
 @Entity({ name: 'warehouse_technicalprocess' })

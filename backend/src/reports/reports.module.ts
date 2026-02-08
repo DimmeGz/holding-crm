@@ -6,7 +6,7 @@ import { ProductionReportService } from './production-report.service';
 import { ReportsController } from './reports.controller';
 
 import { Company } from '../companies/entities';
-import { Invoice } from '../documents/invoice/entities';
+import { Invoice } from '../documents/invoices/entities';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Company, Invoice])],

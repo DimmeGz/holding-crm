@@ -32,13 +32,6 @@ export type UseTableColumns = {
       currencyId: number;
     },
   >() => MRT_ColumnDef<T>;
-  byContract: <
-    T extends {
-      contract: {
-        name: string;
-      };
-    },
-  >() => MRT_ColumnDef<T>;
   status: <
     T extends {
       status: boolean;

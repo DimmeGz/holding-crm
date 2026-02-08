@@ -10,7 +10,7 @@ import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { ContractsService } from '../contracts';
 import { GoodsService } from '../../goods';
-import { InvoiceService } from '../invoice';
+import { InvoiceService } from '../invoices';
 import { OrdersConfirmationService } from '../orders-confirmation';
 
 import {
@@ -175,6 +175,7 @@ export class OrdersService {
         'contract.id',
         'contract.name',
         'incoterms.name',
+        'order.transportPlace',
         // confirmation
         'confirmation.confirmationNumber',
         'confirmation.createdAt',
@@ -184,6 +185,7 @@ export class OrdersService {
         'confirmation.buyerWarehouseId',
         'confirmation.recipientId',
         'confirmation.recipientWarehouseId',
+        'confirmation.transportPlace',
         // lines
         'orderLine.qty',
         'orderLine.price',

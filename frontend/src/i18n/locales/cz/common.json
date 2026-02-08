@@ -26,5 +26,9 @@
   "messages": {
     "error": "Chyba při načítání dat",
     "noData": "Žádná data"
+  },
+  "common": {
+    "kg": "kg",
+    "days": "днів"
   }
 }

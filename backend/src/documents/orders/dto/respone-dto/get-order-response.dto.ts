@@ -1,4 +1,4 @@
-import { Invoice } from '../../../invoice/entities';
+import { Invoice } from '../../../invoices/entities';
 import { OrderConfirmation } from '../../../orders-confirmation/entities';
 import { Order } from '../../entities';
 

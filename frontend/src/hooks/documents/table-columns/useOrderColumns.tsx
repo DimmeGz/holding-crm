@@ -38,7 +38,11 @@ export function useOrdersColumns(): MRT_ColumnDef<GetOrdersDto>[] {
       commonColumns.date<GetOrdersDto>(),
       commonColumns.confirmDate<GetOrdersDto>(),
       commonColumns.amount<GetOrdersDto>(),
-      commonColumns.byContract<GetOrdersDto>(),
+      {
+        header: t('tables:columns.byContract'),
+        accessorFn: (row: GetOrdersDto) => row.contract.name,
+        id: 'contractName',
+      },
       commonColumns.status<GetOrdersDto>(),
       {
         header: t('tables:columns.goods'),
