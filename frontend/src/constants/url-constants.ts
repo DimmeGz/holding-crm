@@ -7,5 +7,6 @@ export const UrlConstants: Record<string, string> = {
   SHIPMENTS_URL: '/shipments',
   COMMISSION_PAYMENTS_URL: '/commission-payments',
   RECEIVES_URL: '/receives',
+  PRODUCTION_URL: '/production',
   LIBS_DATA_URL: '/store-data',
 };

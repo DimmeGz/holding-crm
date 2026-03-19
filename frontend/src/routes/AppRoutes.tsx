@@ -9,6 +9,7 @@ import { ordersRoutes } from '@/routes/documents/orders.routes';
 import { paymentsRoutes } from '@/routes/documents/payments.routes';
 import { shipmentsRoutes } from '@/routes/documents/shipments.routes';
 import { receivesRoutes } from '@/routes/documents/receives.routes';
+import { productionsRoutes } from '@/routes/documents/productions.routes';
 
 export function AppRoutes(): ReactNode {
   return useRoutes([
@@ -28,6 +29,7 @@ export function AppRoutes(): ReactNode {
         commissionPaymentsRoutes,
         shipmentsRoutes,
         receivesRoutes,
+        productionsRoutes,
       ],
     },
   ]);
