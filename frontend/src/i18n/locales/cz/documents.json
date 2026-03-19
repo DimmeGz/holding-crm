@@ -11,6 +11,8 @@
     "recipient": "Příjemce",
     "payer": "Plátce",
     "warehouse": "Složení",
+    "warehouseSender": "Odesílací sklad",
+    "warehouseReceive": "Přijímací sklad",
     "payDelivery": "Platba a dodání",
     "expectedDate": "Očekávané datum plnění",
     "vat": "DPH",

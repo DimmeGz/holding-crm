@@ -87,7 +87,11 @@ export const documentsMenu: NavLinkGroupProps[] = [
     icon: IconWreckingBall,
     url: UrlConstants.PRODUCTION_URL,
   },
-  { labelKey: 'common:nav.transportations', icon: IconArrowMoveRight },
+  {
+    labelKey: 'common:nav.transportations',
+    icon: IconArrowMoveRight,
+    url: UrlConstants.TRANSPORT_URL,
+  },
 ];
 
 export const adminMenu: NavLinkGroupProps[] = [

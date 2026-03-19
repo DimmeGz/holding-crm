@@ -32,16 +32,13 @@ export class ProductTransportService {
     qb: SelectQueryBuilder<ProductTransport>,
   ): SelectQueryBuilder<ProductTransport> {
     return qb
-      .leftJoin('productTransport.company', 'company')
-      .leftJoin('productTransport.warehouseSender', 'warehouseSender')
-      .leftJoin('productTransport.warehouseReceive', 'warehouseReceive')
       .select([
         'productTransport.id',
         'productTransport.status',
         'productTransport.expectedDate',
-        'company.name',
-        'warehouseSender.name',
-        'warehouseReceive.name',
+        'productTransport.warehouseSenderId',
+        'productTransport.warehouseReceiveId',
+        'productTransport.companyId'
       ]);
   }
 
@@ -49,28 +46,31 @@ export class ProductTransportService {
     qb: SelectQueryBuilder<ProductTransport>,
   ): SelectQueryBuilder<ProductTransport> {
     return qb
-      .leftJoin('productTransport.company', 'company')
-      .leftJoin('productTransport.warehouseSender', 'warehouseSender')
-      .leftJoin('productTransport.warehouseReceive', 'warehouseReceive')
       .leftJoin(
         'productTransport.productTransportLines',
         'productTransportLine',
       )
-      .leftJoin('productTransportLine.product', 'product')
+      .leftJoin(
+        'productTransport.productTransportServiceLines',
+        'productTransportServiceLine',
+      )
       .leftJoin('productTransportLine.batch', 'batch')
-      .leftJoin('productTransportLine.package', 'package')
       .select([
+        'productTransport.companyId',
+        'productTransport.warehouseSenderId',
+        'productTransport.warehouseReceiveId',
         'productTransport.id',
         'productTransport.status',
         'productTransport.expectedDate',
         'productTransport.comment',
-        'company.name',
-        'warehouseSender.name',
-        'warehouseReceive.name',
-        'productTransportLine',
-        'product.name',
+        'productTransportLine.productId',
+        'productTransportLine.packageId',
+        'productTransportLine.qty',
+        'productTransportServiceLine.id',
+        'productTransportServiceLine.serviceId',
+        'productTransportServiceLine.qty',
+        'productTransportServiceLine.price',
         'batch.name',
-        'package.name',
       ]);
   }
 
