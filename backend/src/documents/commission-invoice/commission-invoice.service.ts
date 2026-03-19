@@ -43,21 +43,27 @@ export class CommissionInvoiceService {
   }
 
   async getCommissionInvoices(): Promise<CommissionInvoice[]> {
-    return await this.applyBaseSelect(this.createBaseQueryBuilder())
-      .orderBy('commission.id', 'DESC')
-      .getMany();
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyBaseSelect(qb);
+
+    return qb.orderBy('commission.id', 'DESC').getMany();
   }
 
   async getCommissionInvoiceById(
     commissionId: number,
   ): Promise<CommissionInvoice> {
-    const commission = await this.applyBaseSelect(this.createBaseQueryBuilder())
-      .addSelect([
-        'commission.creationDate',
-        'commission.paymentBalance',
-        'invoice.documentSum',
-        'invoiceChildren.documentSum',
-      ])
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyBaseSelect(qb);
+    qb.addSelect([
+      'commission.creationDate',
+      'commission.paymentBalance',
+      'invoice.documentSum',
+      'invoiceChildren.documentSum',
+    ]);
+
+    const commission = await qb
       .where('commission.id = :commissionId', { commissionId })
       .getOne();
 

@@ -112,10 +112,12 @@ export class OrdersService {
   }
 
   async getOrders(query?: GetOrdersQueryDTO): Promise<Order[]> {
-    const orders = await this.applyQueryFilter(
-      this.applyOrderListSelect(this.createBaseQueryBuilder()),
-      query,
-    )
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyOrderListSelect(qb);
+    this.applyQueryFilter(qb, query);
+
+    const orders = await qb
       .orderBy('order.expectedDate', 'DESC', 'NULLS LAST')
       .getMany();
 

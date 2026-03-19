@@ -104,18 +104,20 @@ export class PaymentService {
   }
 
   async getPayments(query?: BaseDocumentsQueryDTO): Promise<Payment[]> {
-    return await this.applyQueryFilter(
-      this.applyPaymentListSelect(this.createBaseQueryBuilder()),
-      query,
-    )
-      .orderBy('payment.id', 'DESC')
-      .getMany();
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyPaymentListSelect(qb);
+    this.applyQueryFilter(qb, query);
+
+    return qb.orderBy('payment.id', 'DESC').getMany();
   }
 
   async getPaymentById(paymentId: number): Promise<{ payment: Payment }> {
-    const payment = await this.applyPaymentDetailSelect(
-      this.createBaseQueryBuilder(),
-    )
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyPaymentDetailSelect(qb);
+
+    const payment = await qb
       .where('payment.id = :paymentId', { paymentId })
       .getOne();
 

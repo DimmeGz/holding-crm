@@ -59,21 +59,19 @@ export class InvoiceService {
   private applyInvoiceListSelect(
     qb: SelectQueryBuilder<Invoice>,
   ): SelectQueryBuilder<Invoice> {
-    return qb
-      .leftJoin('invoice.parent', 'parent')
-      .select([
-        'invoice.id',
-        'invoice.invoiceNumber',
-        'invoice.expectedDate',
-        'invoice.sellerId',
-        'invoice.buyerId',
-        'invoice.recipientId',
-        'invoice.status',
-        'invoice.documentSum',
-        'invoice.currencyId',
-        'parent.id',
-        'parent.invoiceNumber',
-      ]);
+    return qb.leftJoin('invoice.parent', 'parent').select([
+      'invoice.id',
+      'invoice.invoiceNumber',
+      'invoice.expectedDate',
+      'invoice.sellerId',
+      'invoice.buyerId',
+      'invoice.recipientId',
+      'invoice.status',
+      'invoice.documentSum',
+      'invoice.currencyId',
+      'parent.id',
+      'parent.invoiceNumber',
+    ]);
   }
 
   private applyInvoiceDetailSelect(
@@ -109,7 +107,6 @@ export class InvoiceService {
         'invoice.separation',
         'invoice.reportPeriod',
         'invoice.contractInfo',
-
         'invoice.comment',
         'invoiceLine.productId',
         'invoiceLine.packageId',
@@ -203,18 +200,20 @@ export class InvoiceService {
   }
 
   async getInvoices(query?: GetInvoicesQueryDTO): Promise<Invoice[]> {
-    return await this.applyQueryFilter(
-      this.applyInvoiceListSelect(this.createBaseQueryBuilder()),
-      query,
-    )
-      .orderBy('invoice.id', 'DESC')
-      .getMany();
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyInvoiceListSelect(qb);
+    this.applyQueryFilter(qb, query);
+
+    return qb.orderBy('invoice.id', 'DESC').getMany();
   }
 
   async getInvoiceById(invoiceId: number): Promise<GetInvoiceResponseDTO> {
-    const invoice = await this.applyInvoiceDetailSelect(
-      this.createBaseQueryBuilder(),
-    )
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyInvoiceDetailSelect(qb);
+
+    const invoice = await qb
       .where('invoice.id = :invoiceId', { invoiceId })
       .getOne();
 

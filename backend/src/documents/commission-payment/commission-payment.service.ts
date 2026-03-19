@@ -42,17 +42,21 @@ export class CommissionPaymentService {
   }
 
   async getCommisionPayments(): Promise<CommissionPayment[]> {
-    return await this.applyBaseSelect(this.createBaseQueryBuilder())
-      .orderBy('commissionPayment.id', 'DESC')
-      .getMany();
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyBaseSelect(qb);
+
+    return qb.orderBy('commissionPayment.id', 'DESC').getMany();
   }
 
   async getCommisionPaymentById(
     commissionPaymentId: number,
   ): Promise<CommissionPayment> {
-    const commissionPayment = await this.applyBaseSelect(
-      this.createBaseQueryBuilder(),
-    )
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyBaseSelect(qb);
+
+    const commissionPayment = await qb
       .where('commissionPayment.id = :commissionPaymentId', {
         commissionPaymentId,
       })

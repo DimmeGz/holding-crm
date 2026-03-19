@@ -141,17 +141,22 @@ export class ContractsService {
   async getContracts(
     query: GetContractsQueryDTO,
   ): Promise<Partial<Contract>[]> {
-    const contracts = await this.applyContractListSelect(
-      this.ApplyQueryFilter(this.createBaseQueryBuilder(), query),
-    ).getMany();
+    const qb = this.createBaseQueryBuilder();
+
+    this.ApplyQueryFilter(qb, query);
+    this.applyContractListSelect(qb);
+
+    const contracts = await qb.getMany();
 
     return contracts;
   }
 
   async getContractById(contractId: number): Promise<GetContractResponseDTO> {
-    const contract = await this.applyContractDetailSelect(
-      this.createBaseQueryBuilder(),
-    )
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyContractDetailSelect(qb);
+
+    const contract = await qb
       .where('contract.id = :contractId', { contractId })
       .getOne();
 
