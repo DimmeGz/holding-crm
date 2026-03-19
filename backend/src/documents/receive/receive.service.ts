@@ -30,7 +30,7 @@ export class ReceiveService {
     private readonly goodsService: GoodsService,
     private readonly transitService: TransitService,
     private readonly warehouseService: WarehouseService,
-  ) {}
+  ) { }
 
   private createBaseQueryBuilder(): SelectQueryBuilder<Receive> {
     return this.receivesRepository.createQueryBuilder('receive');
@@ -40,19 +40,16 @@ export class ReceiveService {
     qb: SelectQueryBuilder<Receive>,
   ): SelectQueryBuilder<Receive> {
     return qb
-      .leftJoin('receive.seller', 'seller')
-      .leftJoin('receive.buyer', 'buyer')
       .leftJoin('receive.shipment', 'shipment')
-      .leftJoin('receive.currency', 'currency')
       .select([
         'receive.id',
+        'receive.sellerId',
+        'receive.buyerId',
         'receive.expectedDate',
         'receive.documentSum',
         'receive.status',
-        'seller.name',
-        'buyer.name',
         'shipment.id',
-        'currency.name',
+        'receive.currencyId',
       ]);
   }
 
@@ -60,18 +57,17 @@ export class ReceiveService {
     qb: SelectQueryBuilder<Receive>,
   ): SelectQueryBuilder<Receive> {
     return qb
-      .leftJoin('receive.seller', 'seller')
-      .leftJoin('receive.buyer', 'buyer')
-      .leftJoin('receive.buyerWarehouse', 'buyerWarehouse')
       .leftJoin('receive.shipment', 'shipment')
       .leftJoin('shipment.invoice', 'invoice')
-      .leftJoin('receive.currency', 'currency')
       .leftJoin('receive.receiveLines', 'receiveLine')
-      .leftJoin('receiveLine.product', 'product')
+      .leftJoin('receive.incoterms', 'incoterms')
       .leftJoin('receiveLine.batch', 'batch')
-      .leftJoin('receiveLine.package', 'package')
       .select([
         'receive.id',
+        'receive.sellerId',
+        'receive.buyerId',
+        'receive.buyerWarehouseId',
+        'receive.currencyId',
         'receive.expectedDate',
         'receive.documentSum',
         'receive.status',
@@ -79,19 +75,13 @@ export class ReceiveService {
         'receive.transportPlace',
         'receive.transportAmount',
         'receive.comment',
-        'seller.name',
-        'buyer.name',
-        'buyerWarehouse.name',
         'shipment.id',
         'invoice.id',
         'invoice.invoiceNumber',
-        'currency.name',
         'receiveLine',
-        'product.name',
         'batch.id',
         'batch.name',
-        'package.name',
-        'package.capacity',
+        'incoterms.name',
       ]);
   }
 

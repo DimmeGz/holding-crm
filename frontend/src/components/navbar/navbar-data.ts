@@ -77,7 +77,11 @@ export const documentsMenu: NavLinkGroupProps[] = [
     icon: IconTruck,
     url: UrlConstants.SHIPMENTS_URL
   },
-  { labelKey: 'common:nav.receives', icon: IconTruckFilled },
+  {
+    labelKey: 'common:nav.receives',
+    icon: IconTruckFilled,
+    url: UrlConstants.RECEIVES_URL,
+  },
   { labelKey: 'common:nav.production', icon: IconWreckingBall },
   { labelKey: 'common:nav.transportations', icon: IconArrowMoveRight },
 ];
