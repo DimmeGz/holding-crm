@@ -8,6 +8,9 @@ export type GetProductionsDto = {
   warehouse?: {
     name: string;
   };
+  productionOutLines?: {
+    productId: number;
+  }[];
 };
 
 export type ProductionLineBase = {

@@ -7,10 +7,14 @@ import { UrlConstants } from '@/constants/url-constants';
 import { useTableColumns } from '@/hooks/documents/table-columns/useTableColumns';
 import type { UseTableColumns } from '@/types/documents/common-documents.types';
 import type { GetProductionsDto } from '@/types/documents/productions.types';
+import { useLibsStore } from '@/stores/useLibsStore';
 
 export function useProductionsColumns(): MRT_ColumnDef<GetProductionsDto>[] {
   const { t } = useTranslation(['tables', 'documents']),
-    commonColumns: UseTableColumns = useTableColumns();
+    commonColumns: UseTableColumns = useTableColumns(),
+    getProductName: (id: number) => string = useLibsStore(
+      s => s.getProductName,
+    );
 
   return useMemo(
     () => [
@@ -41,9 +45,21 @@ export function useProductionsColumns(): MRT_ColumnDef<GetProductionsDto>[] {
         accessorFn: (row: GetProductionsDto): string =>
           row.warehouse?.name || CommonConstants.EMPTY_STRING,
       },
+      {
+        header: t('documents:documents.productionOutputProduct'),
+        id: 'productionOut',
+        accessorFn: (row: GetProductionsDto): string =>
+          row.productionOutLines?.length
+            ? [
+                ...new Set(row.productionOutLines.map((line) => line.productId)),
+              ]
+                .map((id) => getProductName(id))
+                .join(CommonConstants.COMA_SPACE)
+            : CommonConstants.EMPTY_STRING,
+      },
       commonColumns.date<GetProductionsDto>(),
       commonColumns.status<GetProductionsDto>(),
     ],
-    [commonColumns, t],
+    [commonColumns, t, getProductName],
   );
 }

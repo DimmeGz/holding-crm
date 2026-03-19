@@ -32,16 +32,15 @@ export class ProductionService {
     return qb
       .leftJoin('production.company', 'company')
       .leftJoin('production.warehouse', 'warehouse')
-      .leftJoin('production.productionInLines', 'productionInLine')
-      .leftJoin('productionInLine.product', 'product')
+      .leftJoin('production.productionOutLines', 'productionOutLine')
       .select([
         'production.id',
         'production.status',
         'production.expectedDate',
         'company.name',
         'warehouse.name',
-        'productionInLine.id',
-        'product.name',
+        'productionOutLine.id',
+        'productionOutLine.productId',
       ]);
   }
 

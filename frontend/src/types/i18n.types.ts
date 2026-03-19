@@ -107,6 +107,7 @@ export type LocaleDict = {
       receive: string;
       productionOut: string;
       productionIn: string;
+      productionOutputProduct: string;
       payment: string;
       byInvoice: string;
       payed: string;

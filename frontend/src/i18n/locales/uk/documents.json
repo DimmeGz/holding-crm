@@ -29,6 +29,7 @@
     "commissionInvoice": "Комісійний рахунок",
     "shipment": "Відвантаження",
     "receive": "Надходження",
+    "productionOutputProduct": "Вихідний продукт",
     "productionOut": "Списання",
     "productionIn": "Надходження",
     "payment": "Платіж",
