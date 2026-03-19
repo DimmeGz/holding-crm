@@ -20,25 +20,27 @@ export class CommissionPaymentService {
   private createBaseQueryBuilder(): SelectQueryBuilder<CommissionPayment> {
     return this.commissionPaymentsRepository
       .createQueryBuilder('commissionPayment')
-      .leftJoin('commissionPayment.seller', 'seller')
-      .leftJoin('commissionPayment.buyer', 'buyer')
-      .leftJoin('commissionPayment.commissionInvoice', 'commissionInvoice')
-      .leftJoin('commissionPayment.currency', 'currency');
   }
 
   private applyBaseSelect(
     qb: SelectQueryBuilder<CommissionPayment>,
   ): SelectQueryBuilder<CommissionPayment> {
-    return qb.select([
-      'commissionPayment.id',
-      'commissionPayment.status',
-      'commissionPayment.amount',
-      'commissionPayment.expectedDate',
-      'seller.name',
-      'buyer.name',
-      'commissionInvoice.id',
-      'currency.name',
-    ]);
+    return qb
+      .leftJoin(
+        'commissionPayment.commissionPaymentLines',
+        'commissionPaymentLine',
+      )
+      .select([
+        'commissionPayment.id',
+        'commissionPayment.sellerId',
+        'commissionPayment.buyerId',
+        'commissionPayment.status',
+        'commissionPayment.expectedDate',
+        'commissionPayment.currencyId',
+        'commissionPaymentLine.id',
+        'commissionPaymentLine.commissionInvoiceId',
+        'commissionPaymentLine.amount',
+      ]);
   }
 
   async getCommisionPayments(): Promise<CommissionPayment[]> {
@@ -46,7 +48,22 @@ export class CommissionPaymentService {
 
     this.applyBaseSelect(qb);
 
-    return qb.orderBy('commissionPayment.id', 'DESC').getMany();
+    const payments = await qb
+      .orderBy('commissionPayment.id', 'DESC')
+      .getMany();
+
+    return payments.map((payment) => {
+
+      const totalAmount =
+        payment.commissionPaymentLines?.reduce((acc, line) => {
+          return acc + ((line as { amount: number }).amount || 0);
+        }, 0) ?? 0;
+
+      return {
+        ...payment,
+        totalAmount,
+      } as CommissionPayment & { commissionLineIds: number[]; totalAmount: number };
+    });
   }
 
   async getCommisionPaymentById(
@@ -150,13 +167,14 @@ export class CommissionPaymentService {
 
     commissionPayment.status = !commissionPayment.status;
 
-    await this.companiesService.changeAccountsBalances({
-      sellerId: commissionPayment.sellerId,
-      buyerId: commissionPayment.buyerId,
-      currencyId: commissionPayment.currencyId,
-      status: commissionPayment.status,
-      amount: commissionPayment.amount,
-    });
+    // TODO: change amount by lines
+    // await this.companiesService.changeAccountsBalances({
+    //   sellerId: commissionPayment.sellerId,
+    //   buyerId: commissionPayment.buyerId,
+    //   currencyId: commissionPayment.currencyId,
+    //   status: commissionPayment.status,
+    //   amount: commissionPayment.amount,
+    // });
 
     return await this.commissionPaymentsRepository.save(commissionPayment);
   }

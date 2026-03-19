@@ -15,7 +15,7 @@ import { CommissionPaymentService } from './commission-payment.service';
 import { CreateCommissionPaymentDTO, UpdateCommissionPaymentDTO } from './dto';
 import { CommissionPayment } from './entities';
 
-@Controller('commission_payment')
+@Controller('commission-payments')
 export class CommissionPaymentController {
   constructor(
     private readonly commissionPaymentService: CommissionPaymentService,

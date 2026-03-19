@@ -37,6 +37,7 @@
     "ordersSeparation": "Розділяти замовлення в звіті",
     "reportPeriod": "Звітний період",
     "additionalInfo": "Додаткова інформація",
-    "subordinateInvoices": "Підлеглі рахунки"
+    "subordinateInvoices": "Підлеглі рахунки",
+    "commissionPayment": "Комісійний платіж"
   }
 }

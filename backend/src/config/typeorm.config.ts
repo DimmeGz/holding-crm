@@ -18,7 +18,6 @@ import {
   TechnicalProcess,
 } from '../libs/entities';
 import { Warehouse, WarehouseAccounting } from '../warehouse/entities';
-
 import {
   Contract,
   ContractLine,
@@ -38,8 +37,13 @@ import {
   InvoiceLine,
   InvoiceServiceLine,
 } from '../documents/invoices/entities';
-import { CommissionInvoice } from '../documents/commission-invoice/entities';
-import { CommissionPayment } from '../documents/commission-payment/entities';
+import {
+  CommissionInvoice,
+} from '../documents/commission-invoice/entities';
+import {
+  CommissionPayment,
+  CommissionPaymentLine
+} from '../documents/commission-payment/entities';
 import { Payment, PaymentLine } from '../documents/payment/entities';
 import {
   Shipment,
@@ -76,6 +80,7 @@ export const typeOrmConfig = (config: ConfigService): TypeOrmModuleOptions => ({
     BatchCustomField,
     CommissionInvoice,
     CommissionPayment,
+    CommissionPaymentLine,
     Company,
     Contract,
     ContractLine,

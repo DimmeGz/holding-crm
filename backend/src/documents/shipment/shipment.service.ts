@@ -36,7 +36,7 @@ export class ShipmentService {
     private readonly receiveService: ReceiveService,
     private readonly transitService: TransitService,
     private readonly warehouseService: WarehouseService,
-  ) { }
+  ) {}
 
   private createBaseQueryBuilder(): SelectQueryBuilder<Shipment> {
     return this.shipmentsRepository.createQueryBuilder('shipment');
