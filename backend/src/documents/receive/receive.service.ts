@@ -60,6 +60,7 @@ export class ReceiveService {
       .leftJoin('receive.shipment', 'shipment')
       .leftJoin('shipment.invoice', 'invoice')
       .leftJoin('receive.receiveLines', 'receiveLine')
+      .leftJoin('receive.receiveServiceLines', 'receiveServiceLine')
       .leftJoin('receive.incoterms', 'incoterms')
       .leftJoin('receiveLine.batch', 'batch')
       .select([
@@ -79,6 +80,10 @@ export class ReceiveService {
         'invoice.id',
         'invoice.invoiceNumber',
         'receiveLine',
+        'receiveServiceLine.id',
+        'receiveServiceLine.serviceId',
+        'receiveServiceLine.qty',
+        'receiveServiceLine.price',
         'batch.id',
         'batch.name',
         'incoterms.name',

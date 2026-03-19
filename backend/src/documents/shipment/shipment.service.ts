@@ -85,6 +85,7 @@ export class ShipmentService {
         'invoice.invoiceNumber',
         'shipmentLine',
         'shipmentServiceLine.id',
+        'shipmentServiceLine.serviceId',
         'shipmentServiceLine.qty',
         'shipmentServiceLine.price',
         'service.id',

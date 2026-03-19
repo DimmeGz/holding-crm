@@ -46,13 +46,14 @@ export type Invoice = {
   reportPeriod: Date;
   contractInfo: string;
   invoiceLines: InvoiceLine[];
+  invoiceServiceLines: InvoiceServiceLine[];
   comment?: string;
 };
 
 export type InvoiceLine = {
   order: { id: number; orderNumber: string };
   productId: number;
-  batch: { id: number; name: string };
+  batch?: { id: number; name: string };
   packageId: number;
   qty: number;
   price: number;
@@ -60,4 +61,11 @@ export type InvoiceLine = {
   palletsQty: number;
   grossWeight: number;
   countryOfOriginId: number;
+};
+
+export type InvoiceServiceLine = {
+  id: number;
+  serviceId: number;
+  qty: number;
+  price: number;
 };

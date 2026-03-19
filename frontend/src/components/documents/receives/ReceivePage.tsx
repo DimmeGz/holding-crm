@@ -14,7 +14,8 @@ import { UrlConstants } from '@/constants/url-constants';
 import { useLibsStore } from '@/stores/useLibsStore';
 import { useReceive } from '@/hooks/documents/useReceives';
 import { useReceiveLinesColumns } from '@/hooks/documents/table-columns/useReceiveLinesColumns';
-import type { ReceiveLine } from '@/types/documents/receives.types';
+import { useReceiveServiceLinesColumns } from '@/hooks/documents/table-columns/useReceiveServiceLinesColumns';
+import type { ReceiveLine, ReceiveServiceLine } from '@/types/documents/receives.types';
 
 export function ReceivePage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']),
@@ -35,6 +36,8 @@ export function ReceivePage(): ReactNode {
     columns: MRT_ColumnDef<ReceiveLine>[] = useReceiveLinesColumns(
       currencyName,
     ),
+    serviceColumns: MRT_ColumnDef<ReceiveServiceLine>[] =
+      useReceiveServiceLinesColumns(currencyName),
     receiveLinesTableConfig: MRT_TableOptions<ReceiveLine> = useMemo(
       () => ({
         data: receive?.receiveLines || [],
@@ -53,7 +56,28 @@ export function ReceivePage(): ReactNode {
         },
       }),
       [receive, columns],
-    );
+    ),
+    receiveServiceLinesTableConfig: MRT_TableOptions<ReceiveServiceLine> =
+      useMemo(
+        () => ({
+          data: receive?.receiveServiceLines || [],
+          columns: serviceColumns,
+          enablePagination: false,
+          enableSorting: false,
+          enableColumnFilters: false,
+          enableBottomToolbar: false,
+          enableColumnActions: false,
+          enableGlobalFilter: false,
+          enableFullScreenToggle: false,
+          enableHiding: false,
+          mantinePaperProps: {
+            shadow: 'sm',
+            radius: 'md',
+            mt: 'sm'
+          },
+        }),
+        [receive, serviceColumns],
+      );
 
   return (
     <>
@@ -165,6 +189,14 @@ export function ReceivePage(): ReactNode {
               title={t('documents:documents.goods')}
             />
           )}
+
+          {receive.receiveServiceLines &&
+            receive.receiveServiceLines.length > 0 && (
+              <HoldingTable
+                tableOptions={receiveServiceLinesTableConfig}
+                title={t('documents:documents.services')}
+              />
+            )}
         </>
       )}
     </>

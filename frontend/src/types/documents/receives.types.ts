@@ -34,6 +34,7 @@ export type Receive = {
   };
 
   receiveLines: ReceiveLine[];
+  receiveServiceLines: ReceiveServiceLine[];
 };
 
 export type ReceiveLine = {
@@ -48,4 +49,11 @@ export type ReceiveLine = {
     id: number;
     name: string;
   };
+};
+
+export type ReceiveServiceLine = {
+  id: number;
+  serviceId: number;
+  qty: number;
+  price: number;
 };

@@ -11,11 +11,13 @@ import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
 import { useShipmentLinesColumns } from '@/hooks/documents/table-columns/useShipmentLinesColumns';
+import { useShipmentServiceLinesColumns } from '@/hooks/documents/table-columns/useShipmentServiceLinesColumns';
 import { useShipment } from '@/hooks/documents/useShipments';
 import { useLibsStore } from '@/stores/useLibsStore';
 import type {
   Shipment,
   ShipmentLine,
+  ShipmentServiceLine,
 } from '@/types/documents/shipments.types';
 import { UrlConstants } from '@/constants/url-constants';
 
@@ -38,6 +40,12 @@ export function ShipmentPage(): ReactNode {
         ? getCurrencyName(shipment.currencyId)
         : CommonConstants.EMPTY_STRING,
     ),
+    serviceColumns: MRT_ColumnDef<ShipmentServiceLine>[] =
+      useShipmentServiceLinesColumns(
+        shipment
+          ? getCurrencyName(shipment.currencyId)
+          : CommonConstants.EMPTY_STRING,
+      ),
     shipmentLinesTableConfig: MRT_TableOptions<ShipmentLine> = useMemo(
       () => ({
         data: shipment?.shipmentLines || [],
@@ -56,7 +64,28 @@ export function ShipmentPage(): ReactNode {
         },
       }),
       [shipment, columns],
-    );
+    ),
+    shipmentServiceLinesTableConfig: MRT_TableOptions<ShipmentServiceLine> =
+      useMemo(
+        () => ({
+          data: shipment?.shipmentServiceLines || [],
+          columns: serviceColumns,
+          enablePagination: false,
+          enableSorting: false,
+          enableColumnFilters: false,
+          enableBottomToolbar: false,
+          enableColumnActions: false,
+          enableGlobalFilter: false,
+          enableFullScreenToggle: false,
+          enableHiding: false,
+          mantinePaperProps: {
+            shadow: 'sm',
+            radius: 'md',
+            mt: 'sm'
+          },
+        }),
+        [shipment, serviceColumns],
+      );
 
   console.log('shipment', shipment);
 
@@ -171,6 +200,13 @@ export function ShipmentPage(): ReactNode {
             <HoldingTable
               tableOptions={shipmentLinesTableConfig}
               title={t('documents:documents.goods')}
+            />
+          )}
+
+          {shipment.shipmentServiceLines?.length > 0 && (
+            <HoldingTable
+              tableOptions={shipmentServiceLinesTableConfig}
+              title={t('documents:documents.services')}
             />
           )}
         </>
