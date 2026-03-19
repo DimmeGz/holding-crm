@@ -8,6 +8,7 @@ import { invoicesRoutes } from '@/routes/documents/invoices.routes';
 import { ordersRoutes } from '@/routes/documents/orders.routes';
 import { paymentsRoutes } from '@/routes/documents/payments.routes';
 import { shipmentsRoutes } from '@/routes/documents/shipments.routes';
+import { receivesRoutes } from '@/routes/documents/receives.routes';
 
 export function AppRoutes(): ReactNode {
   return useRoutes([
@@ -26,6 +27,7 @@ export function AppRoutes(): ReactNode {
         commissionInvoicesRoutes,
         commissionPaymentsRoutes,
         shipmentsRoutes,
+        receivesRoutes,
       ],
     },
   ]);

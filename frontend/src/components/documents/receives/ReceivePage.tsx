@@ -2,53 +2,45 @@ import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Card, Grid, Group, Text } from '@mantine/core';
-import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
-import { DocumentLinkItem } from '@/components/documents/common/DocumentLinkItem';
-import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
+import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
+import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
+import { DocumentLinkItem } from '@/components/documents/common/DocumentLinkItem';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
-import { useShipmentLinesColumns } from '@/hooks/documents/table-columns/useShipmentLinesColumns';
-import { useShipmentServiceLinesColumns } from '@/hooks/documents/table-columns/useShipmentServiceLinesColumns';
-import { useShipment } from '@/hooks/documents/useShipments';
-import { useLibsStore } from '@/stores/useLibsStore';
-import type {
-  Shipment,
-  ShipmentLine,
-  ShipmentServiceLine,
-} from '@/types/documents/shipments.types';
 import { UrlConstants } from '@/constants/url-constants';
+import { useLibsStore } from '@/stores/useLibsStore';
+import { useReceive } from '@/hooks/documents/useReceives';
+import { useReceiveLinesColumns } from '@/hooks/documents/table-columns/useReceiveLinesColumns';
+import { useReceiveServiceLinesColumns } from '@/hooks/documents/table-columns/useReceiveServiceLinesColumns';
+import type { ReceiveLine, ReceiveServiceLine } from '@/types/documents/receives.types';
 
-export function ShipmentPage(): ReactNode {
+export function ReceivePage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']),
     { id } = useParams<{ id: string }>(),
-    { data, loading, error } = useShipment(Number(id)),
-    getCompanyName: (id: number) => string = useLibsStore(
+    { data: receive, loading, error } = useReceive(Number(id)),
+    getCompanyName: (companyId: number) => string = useLibsStore(
       s => s.getCompanyName,
     ),
-    getWarehouseName: (id: number) => string = useLibsStore(
+    getWarehouseName: (warehouseId: number) => string = useLibsStore(
       s => s.getWarehouseName,
     ),
-    getCurrencyName: (id: number) => string = useLibsStore(
+    getCurrencyName: (currencyId: number) => string = useLibsStore(
       s => s.getCurrencyName,
     ),
-    shipment: Shipment | undefined = data?.shipment,
-    columns: MRT_ColumnDef<ShipmentLine>[] = useShipmentLinesColumns(
-      shipment
-        ? getCurrencyName(shipment.currencyId)
-        : CommonConstants.EMPTY_STRING,
+    currencyName: string = receive
+      ? getCurrencyName(receive.currencyId)
+      : CommonConstants.EMPTY_STRING,
+    columns: MRT_ColumnDef<ReceiveLine>[] = useReceiveLinesColumns(
+      currencyName,
     ),
-    serviceColumns: MRT_ColumnDef<ShipmentServiceLine>[] =
-      useShipmentServiceLinesColumns(
-        shipment
-          ? getCurrencyName(shipment.currencyId)
-          : CommonConstants.EMPTY_STRING,
-      ),
-    shipmentLinesTableConfig: MRT_TableOptions<ShipmentLine> = useMemo(
+    serviceColumns: MRT_ColumnDef<ReceiveServiceLine>[] =
+      useReceiveServiceLinesColumns(currencyName),
+    receiveLinesTableConfig: MRT_TableOptions<ReceiveLine> = useMemo(
       () => ({
-        data: shipment?.shipmentLines || [],
+        data: receive?.receiveLines || [],
         columns,
         enablePagination: false,
         enableSorting: false,
@@ -63,12 +55,12 @@ export function ShipmentPage(): ReactNode {
           radius: 'md',
         },
       }),
-      [shipment, columns],
+      [receive, columns],
     ),
-    shipmentServiceLinesTableConfig: MRT_TableOptions<ShipmentServiceLine> =
+    receiveServiceLinesTableConfig: MRT_TableOptions<ReceiveServiceLine> =
       useMemo(
         () => ({
-          data: shipment?.shipmentServiceLines || [],
+          data: receive?.receiveServiceLines || [],
           columns: serviceColumns,
           enablePagination: false,
           enableSorting: false,
@@ -84,10 +76,8 @@ export function ShipmentPage(): ReactNode {
             mt: 'sm'
           },
         }),
-        [shipment, serviceColumns],
+        [receive, serviceColumns],
       );
-
-  console.log('shipment', shipment);
 
   return (
     <>
@@ -99,13 +89,13 @@ export function ShipmentPage(): ReactNode {
         </h3>
       )}
 
-      {!loading && !error && shipment && (
+      {!loading && !error && receive && (
         <>
           <Card shadow='sm' p='md' radius='md' withBorder mb='xs' mt='6'>
             <Grid gutter='xs' align='flex-start'>
               <Grid.Col span={12}>
                 <Group justify='flex-start' wrap='nowrap' gap='2'>
-                  {shipment.status ? (
+                  {receive.status ? (
                     <IconCircleFilled color='green' />
                   ) : (
                     <IconCircle color='grey' stroke={5} />
@@ -115,16 +105,17 @@ export function ShipmentPage(): ReactNode {
                     fw={StylesConstants.HEAVY_FONT_WEIGHT}
                     ml='xs'
                   >
-                    {t('documents:documents.shipment')} {CommonConstants.NUMBER}
-                    {shipment.id}
+                    {t('documents:documents.receive')}{' '}
+                    {CommonConstants.NUMBER}
+                    {receive.id}
                   </Text>
                 </Group>
               </Grid.Col>
 
               <Grid.Col span={12}>
                 <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                  {t('documents:documents.expectedDate')}:{' '}
-                  {new Date(shipment.expectedDate).toLocaleDateString('uk-UA')}
+                  {t('tables:columns.expectedDate')}:{' '}
+                  {new Date(receive.expectedDate).toLocaleDateString('uk-UA')}
                 </Text>
               </Grid.Col>
             </Grid>
@@ -137,22 +128,18 @@ export function ShipmentPage(): ReactNode {
             <Grid gutter='md' align='flex-start'>
               <DocumentPageItem
                 gridSpan={6}
-                translationKey={{
-                  primary: 'documents:documents.seller',
-                  secondary: 'documents:documents.warehouse',
-                }}
-                baseValue={{
-                  primary: getCompanyName(shipment.sellerId),
-                  secondary: getWarehouseName(shipment.sellerWarehouseId),
-                }}
+                translationKey={{ primary: 'documents:documents.seller' }}
+                baseValue={{ primary: getCompanyName(receive.sellerId) }}
               />
               <DocumentPageItem
                 gridSpan={6}
                 translationKey={{
                   primary: 'documents:documents.buyer',
+                  secondary: 'documents:documents.warehouse',
                 }}
                 baseValue={{
-                  primary: getCompanyName(shipment.buyerId),
+                  primary: getCompanyName(receive.buyerId),
+                  secondary: getWarehouseName(receive.buyerWarehouseId),
                 }}
               />
             </Grid>
@@ -163,55 +150,55 @@ export function ShipmentPage(): ReactNode {
               {t('documents:documents.payDelivery')}
             </Text>
             <Grid gutter='md' align='flex-start'>
-              <DocumentLinkItem
-                gridSpan={4}
-                translationKey='documents:documents.byInvoice'
-                value={{
-                  label: `${shipment.invoice.invoiceNumber}`,
-                  uri: `${UrlConstants.INVOICES_URL}/${shipment.invoice.id}`,
-                }}
-              />
+              {receive.shipment?.invoice?.id && (
+                <DocumentLinkItem
+                  gridSpan={4}
+                  translationKey='documents:documents.byInvoice'
+                  value={{
+                    label: `${receive.shipment.invoice.invoiceNumber}`,
+                    uri: `${UrlConstants.INVOICES_URL}/${receive.shipment.invoice.id}`,
+                  }}
+                />
+              )}
+
               <DocumentPageItem
                 gridSpan={4}
-                translationKey={{
-                  primary: 'documents:documents.incoterms',
-                }}
+                translationKey={{ primary: 'documents:documents.incoterms' }}
                 baseValue={{
-                  primary: shipment.incoterms
-                    ? [shipment.incoterms.name, shipment.transportPlace].join(
+                  primary: receive.incoterms
+                    ? [receive.incoterms.name, receive.transportPlace].join(
                       CommonConstants.COMA_SPACE,
                     )
-                    : CommonConstants.EMPTY_STRING,
+                    : receive.transportPlace,
                 }}
               />
+
               <DocumentPageItem
                 gridSpan={4}
-                translationKey={{
-                  primary: 'documents:documents.transportAmount',
-                }}
+                translationKey={{ primary: 'documents:documents.transportAmount' }}
                 baseValue={{
-                  primary: `${shipment.transportAmount} ${getCurrencyName(shipment.currencyId)}`,
+                  primary: `${receive.transportAmount} ${currencyName}`,
                 }}
               />
             </Grid>
           </Card>
 
-          {shipment.shipmentLines && (
+          {receive.receiveLines && (
             <HoldingTable
-              tableOptions={shipmentLinesTableConfig}
+              tableOptions={receiveLinesTableConfig}
               title={t('documents:documents.goods')}
             />
           )}
 
-          {shipment.shipmentServiceLines?.length > 0 && (
-            <HoldingTable
-              tableOptions={shipmentServiceLinesTableConfig}
-              title={t('documents:documents.services')}
-            />
-          )}
+          {receive.receiveServiceLines &&
+            receive.receiveServiceLines.length > 0 && (
+              <HoldingTable
+                tableOptions={receiveServiceLinesTableConfig}
+                title={t('documents:documents.services')}
+              />
+            )}
         </>
       )}
     </>
   );
 }
-

@@ -50,7 +50,7 @@ export class InvoiceService {
     private readonly goodsService: GoodsService,
     private readonly shipmentsService: ShipmentService,
     private readonly warehouseService: WarehouseService,
-  ) {}
+  ) { }
 
   private createBaseQueryBuilder(): SelectQueryBuilder<Invoice> {
     return this.invoiceRepository.createQueryBuilder('invoice');
@@ -83,6 +83,7 @@ export class InvoiceService {
       .leftJoin('invoice.invoiceLines', 'invoiceLine')
       .leftJoin('invoiceLine.batch', 'batch')
       .leftJoin('invoiceLine.order', 'order')
+      .leftJoin('invoice.invoiceServiceLines', 'invoiceServiceLine')
       .select([
         'invoice.invoiceNumber',
         'invoice.status',
@@ -120,6 +121,10 @@ export class InvoiceService {
         'batch.name',
         'order.id',
         'order.orderNumber',
+        'invoiceServiceLine.id',
+        'invoiceServiceLine.serviceId',
+        'invoiceServiceLine.qty',
+        'invoiceServiceLine.price',
       ]);
   }
 

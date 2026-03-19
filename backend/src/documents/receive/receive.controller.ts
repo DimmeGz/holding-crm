@@ -10,16 +10,12 @@ import {
   Query,
   UsePipes,
 } from '@nestjs/common';
-
 import { ReceiveService } from './receive.service';
-
 import { CreateReveiveDTO, UpdateReceiveDTO } from './dto';
-
 import { Receive } from './entities';
-
 import { GetReceivesQueryDTO } from './dto/query-dto';
 
-@Controller('receive')
+@Controller('receives')
 export class ReceiveController {
   constructor(private readonly receiveService: ReceiveService) {}
 

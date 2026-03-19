@@ -38,7 +38,7 @@ export function useInvoiceLinesColumns(
       commonColumns.product<InvoiceLine>(),
       {
         header: t('tables:columns.batch'),
-        accessorFn: (row: InvoiceLine) => row.batch.name,
+        accessorFn: (row: InvoiceLine) => row.batch?.name,
         id: 'batch',
         size: 100,
       },

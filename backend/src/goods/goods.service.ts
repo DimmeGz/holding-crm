@@ -231,4 +231,11 @@ export class GoodsService {
       .select(['package.id', 'package.name'])
       .getMany();
   }
+
+  async getServicesStoreData() {
+    return await this.servicesRepository
+      .createQueryBuilder('service')
+      .select(['service.id', 'service.name'])
+      .getMany();
+  }
 }

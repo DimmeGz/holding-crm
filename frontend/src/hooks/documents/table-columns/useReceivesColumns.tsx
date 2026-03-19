@@ -1,0 +1,57 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Text } from '@mantine/core';
+import type { MRT_ColumnDef, MRT_Row } from 'mantine-react-table';
+import { CommonConstants } from '@/constants/common.constants';
+import { UrlConstants } from '@/constants/url-constants';
+import { useTableColumns } from '@/hooks/documents/table-columns/useTableColumns';
+import type { UseTableColumns } from '@/types/documents/common-documents.types';
+import type { GetReceivesDto } from '@/types/documents/receives.types';
+
+export function useReceivesColumns(): MRT_ColumnDef<GetReceivesDto>[] {
+  const { t } = useTranslation(['tables', 'documents']),
+    commonColumns: UseTableColumns = useTableColumns();
+
+  return useMemo(
+    () => [
+      {
+        header: CommonConstants.NUMBER,
+        id: 'id',
+        size: 100,
+        Cell: ({ row }: { row: MRT_Row<GetReceivesDto> }) => (
+          <Text
+            component='a'
+            href={`${UrlConstants.RECEIVES_URL}/${row.original.id}`}
+            td='underline'
+            style={{ cursor: 'pointer' }}
+          >
+            {row.original.id}
+          </Text>
+        ),
+      },
+      commonColumns.seller<GetReceivesDto>(),
+      commonColumns.buyer<GetReceivesDto>(),
+      commonColumns.date<GetReceivesDto>(),
+      commonColumns.status<GetReceivesDto>(),
+      commonColumns.amount<GetReceivesDto>(),
+      {
+        header: t('documents:documents.shipment'),
+        id: 'shipmentId',
+        Cell: ({ row }: { row: MRT_Row<GetReceivesDto> }) =>
+          row.original.shipment?.id ? (
+            <Text
+              component='a'
+              href={`${UrlConstants.SHIPMENTS_URL}/${row.original.shipment.id}`}
+              td='underline'
+              style={{ cursor: 'pointer' }}
+            >
+              {t('documents:documents.shipment') + ` ${CommonConstants.NUMBER} ${row.original.shipment.id}`}
+            </Text>
+          ) : (
+            <>{CommonConstants.EMPTY_STRING}</>
+          ),
+      },
+    ],
+    [commonColumns, t],
+  );
+}

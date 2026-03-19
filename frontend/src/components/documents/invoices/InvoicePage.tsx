@@ -10,9 +10,10 @@ import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
 import { useInvoiceLinesColumns } from '@/hooks/documents/table-columns/useInvoiceLinesColumns';
+import { useInvoiceServiceLinesColumns } from '@/hooks/documents/table-columns/useInvoiceServiceLinesColumns';
 import { useInvoice } from '@/hooks/documents/useInvoices';
 import { useLibsStore } from '@/stores/useLibsStore';
-import type { Invoice, InvoiceLine } from '@/types/documents/invoices.types';
+import type { Invoice, InvoiceLine, InvoiceServiceLine } from '@/types/documents/invoices.types';
 
 export function InvoicePage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']),
@@ -29,6 +30,11 @@ export function InvoicePage(): ReactNode {
     ),
     invoice: Invoice | undefined = data?.invoice,
     columns: MRT_ColumnDef<InvoiceLine>[] = useInvoiceLinesColumns(
+      invoice
+        ? getCurrencyName(invoice.currencyId)
+        : CommonConstants.EMPTY_STRING,
+    ),
+    serviceColumns: MRT_ColumnDef<InvoiceServiceLine>[] = useInvoiceServiceLinesColumns(
       invoice
         ? getCurrencyName(invoice.currencyId)
         : CommonConstants.EMPTY_STRING,
@@ -51,7 +57,28 @@ export function InvoicePage(): ReactNode {
         },
       }),
       [invoice, columns],
-    );
+    ),
+    invoiceServiceLinesTableConfig: MRT_TableOptions<InvoiceServiceLine> =
+      useMemo(
+        () => ({
+          data: invoice?.invoiceServiceLines || [],
+          columns: serviceColumns,
+          enablePagination: false,
+          enableSorting: false,
+          enableColumnFilters: false,
+          enableBottomToolbar: false,
+          enableColumnActions: false,
+          enableGlobalFilter: false,
+          enableFullScreenToggle: false,
+          enableHiding: false,
+          mantinePaperProps: {
+            shadow: 'sm',
+            radius: 'md',
+            mt: 'sm'
+          },
+        }),
+        [invoice, serviceColumns],
+      );
 
   return (
     <>
@@ -185,8 +212,8 @@ export function InvoicePage(): ReactNode {
                 baseValue={{
                   primary: invoice.incoterms
                     ? [invoice.incoterms.name, invoice.transportPlace].join(
-                        CommonConstants.COMA_SPACE,
-                      )
+                      CommonConstants.COMA_SPACE,
+                    )
                     : CommonConstants.EMPTY_STRING,
                 }}
               />
@@ -259,6 +286,13 @@ export function InvoicePage(): ReactNode {
             <HoldingTable
               tableOptions={invoiceLinesTableConfig}
               title={t('documents:documents.goods')}
+            />
+          )}
+
+          {invoice.invoiceServiceLines?.length > 0 && (
+            <HoldingTable
+              tableOptions={invoiceServiceLinesTableConfig}
+              title={t('documents:documents.services')}
             />
           )}
         </>
