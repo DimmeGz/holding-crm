@@ -18,10 +18,17 @@ import type {
   TransportLine,
   TransportServiceLine,
 } from '@/types/documents/transports.types';
+import { useLibsStore } from '@/stores/useLibsStore';
 
 export function TransportPage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']),
     { id } = useParams<{ id: string }>(),
+    getCompanyName: (id: number) => string = useLibsStore(
+      s => s.getCompanyName,
+    ),
+    getWarehouseName: (id: number) => string = useLibsStore(
+      s => s.getWarehouseName,
+    ),
     { data: transport, loading, error } = useTransport(Number(id)),
     goodsColumns: MRT_ColumnDef<TransportLine>[] =
       useTransportLinesColumns(),
@@ -125,7 +132,7 @@ export function TransportPage(): ReactNode {
                   primary: 'documents:documents.company',
                 }}
                 baseValue={{
-                  primary: transport.company?.name ?? CommonConstants.EMPTY_STRING,
+                  primary: getCompanyName(transport.companyId),
                 }}
               />
               <DocumentPageItem
@@ -135,7 +142,7 @@ export function TransportPage(): ReactNode {
                 }}
                 baseValue={{
                   primary:
-                    transport.warehouseSender?.name ??
+                    getWarehouseName(transport.warehouseSenderId) ??
                     CommonConstants.EMPTY_STRING,
                 }}
               />
@@ -146,7 +153,7 @@ export function TransportPage(): ReactNode {
                 }}
                 baseValue={{
                   primary:
-                    transport.warehouseReceive?.name ??
+                    getWarehouseName(transport.warehouseReceiveId) ??
                     CommonConstants.EMPTY_STRING,
                 }}
               />

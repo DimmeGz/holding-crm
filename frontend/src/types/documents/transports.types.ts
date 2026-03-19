@@ -9,18 +9,12 @@ export type GetTransportsDto = {
 
 export type GetTransportDto = {
   id: number;
+  companyId: number;
   status: boolean;
   expectedDate: Date;
   comment?: string;
-  company?: {
-    name: string;
-  };
-  warehouseSender?: {
-    name: string;
-  };
-  warehouseReceive?: {
-    name: string;
-  };
+  warehouseSenderId: number;
+  warehouseReceiveId: number;
   productTransportLines: TransportLine[];
   productTransportServiceLines: TransportServiceLine[];
 };

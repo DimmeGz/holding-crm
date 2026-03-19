@@ -20,7 +20,7 @@ export class ProductTransportService {
     @InjectDataSource() private dataSource: DataSource,
     private readonly libsService: LibsService,
     private readonly warehouseService: WarehouseService,
-  ) { }
+  ) {}
 
   private createBaseQueryBuilder(): SelectQueryBuilder<ProductTransport> {
     return this.productTransportRepository.createQueryBuilder(
@@ -46,9 +46,6 @@ export class ProductTransportService {
     qb: SelectQueryBuilder<ProductTransport>,
   ): SelectQueryBuilder<ProductTransport> {
     return qb
-      .leftJoin('productTransport.company', 'company')
-      .leftJoin('productTransport.warehouseSender', 'warehouseSender')
-      .leftJoin('productTransport.warehouseReceive', 'warehouseReceive')
       .leftJoin(
         'productTransport.productTransportLines',
         'productTransportLine',
@@ -57,25 +54,23 @@ export class ProductTransportService {
         'productTransport.productTransportServiceLines',
         'productTransportServiceLine',
       )
-      .leftJoin('productTransportLine.product', 'product')
       .leftJoin('productTransportLine.batch', 'batch')
-      .leftJoin('productTransportLine.package', 'package')
       .select([
+        'productTransport.companyId',
+        'productTransport.warehouseSenderId',
+        'productTransport.warehouseReceiveId',
         'productTransport.id',
         'productTransport.status',
         'productTransport.expectedDate',
         'productTransport.comment',
-        'company.name',
-        'warehouseSender.name',
-        'warehouseReceive.name',
-        'productTransportLine',
+        'productTransportLine.productId',
+        'productTransportLine.packageId',
+        'productTransportLine.qty',
         'productTransportServiceLine.id',
         'productTransportServiceLine.serviceId',
         'productTransportServiceLine.qty',
         'productTransportServiceLine.price',
-        'product.name',
         'batch.name',
-        'package.name',
       ]);
   }
 
