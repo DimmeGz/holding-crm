@@ -22,12 +22,10 @@ export function useShipment(shipmentId: number): {
   error: string | null;
   refetch: () => void;
 } {
-  const res = useApiData<GetShipmentDto>(
+  return useApiData<GetShipmentDto>(
     () => ShipmentsService.getById(shipmentId),
     {
       dependencies: [shipmentId],
     },
   );
-  console.log('res', shipmentId, res)
-  return res;
 }

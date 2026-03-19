@@ -33,8 +33,6 @@ export const transportsApi: {
         GetTransportDto
       >(`${UrlConstants.TRANSPORT_URL}/${transportId}`);
 
-      console.log('response', `${UrlConstants.TRANSPORT_URL}/${transportId}`, response)
-
       return response.data;
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
