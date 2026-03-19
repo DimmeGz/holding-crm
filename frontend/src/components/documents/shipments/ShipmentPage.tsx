@@ -10,6 +10,7 @@ import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
+import { useShipmentLinesColumns } from '@/hooks/documents/table-columns/useShipmentLinesColumns';
 import { useShipment } from '@/hooks/documents/useShipments';
 import { useLibsStore } from '@/stores/useLibsStore';
 import type {
@@ -32,7 +33,11 @@ export function ShipmentPage(): ReactNode {
       s => s.getCurrencyName,
     ),
     shipment: Shipment | undefined = data?.shipment,
-    columns: MRT_ColumnDef<ShipmentLine>[] = [],
+    columns: MRT_ColumnDef<ShipmentLine>[] = useShipmentLinesColumns(
+      shipment
+        ? getCurrencyName(shipment.currencyId)
+        : CommonConstants.EMPTY_STRING,
+    ),
     shipmentLinesTableConfig: MRT_TableOptions<ShipmentLine> = useMemo(
       () => ({
         data: shipment?.shipmentLines || [],

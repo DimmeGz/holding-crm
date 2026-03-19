@@ -23,7 +23,6 @@ export type Shipment = {
   status: boolean;
   invoice: { id: number, invoiceNumber: string };
   incoterms?: { name: string };
-
   documentSum: number;
   expectedDate: Date;
   transportPlace: string;

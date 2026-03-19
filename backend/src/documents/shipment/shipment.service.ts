@@ -65,9 +65,6 @@ export class ShipmentService {
     return qb
       .leftJoin('shipment.invoice', 'invoice')
       .leftJoin('shipment.shipmentLines', 'shipmentLine')
-      .leftJoin('shipmentLine.product', 'product')
-      .leftJoin('shipmentLine.batch', 'batch')
-      .leftJoin('shipmentLine.package', 'package')
       .leftJoin('shipment.shipmentServiceLines', 'shipmentServiceLine')
       .leftJoin('shipmentServiceLine.service', 'service')
       .leftJoin('shipment.incoterms', 'incoterms')
@@ -87,13 +84,6 @@ export class ShipmentService {
         'invoice.id',
         'invoice.invoiceNumber',
         'shipmentLine',
-        'product.id',
-        'product.name',
-        'batch.id',
-        'batch.name',
-        'package.id',
-        'package.name',
-        'package.capacity',
         'shipmentServiceLine.id',
         'shipmentServiceLine.qty',
         'shipmentServiceLine.price',
