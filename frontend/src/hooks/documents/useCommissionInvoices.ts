@@ -19,7 +19,7 @@ export function useCommissionInvoices(): {
   );
 }
 
-export function useInvoice(commissionInvoiceId: number): {
+export function useCommissionInvoice(commissionInvoiceId: number): {
   data: GetCommissionInvoiceDto | null;
   loading: boolean;
   error: string | null;

@@ -8,6 +8,7 @@
     "seller": "Prodávající",
     "buyer": "Kupující",
     "recipient": "Příjemce",
+    "payer": "Plátce",
     "warehouse": "Složení",
     "payDelivery": "Platba a dodání",
     "expectedDate": "Očekávané datum plnění",
@@ -23,6 +24,7 @@
     "orderPrefix": "Předpona názvu objednávky",
     "relatedDocuments": "Související dokumenty",
     "invoice": "Skóre",
+    "commissionInvoice": "Účet provizí",
     "shipment": "Zásilka",
     "receive": "Přicházející",
     "payment": "Platba",
@@ -34,6 +36,7 @@
     "transportAmount": "Náklady na dopravu",
     "ordersSeparation": "Rozdělení objednávek v přehledu",
     "reportPeriod": "Vykazované období",
-    "additionalInfo": "Další informace"
+    "additionalInfo": "Další informace",
+    "subordinateInvoices": "Podřízené faktury"
   }
 }

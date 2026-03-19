@@ -83,6 +83,7 @@ export type LocaleDict = {
       mainInfo: string;
       seller: string;
       buyer: string;
+      payer: string;
       recipient: string;
       warehouse: string;
       payDelivery: string;
@@ -99,6 +100,7 @@ export type LocaleDict = {
       orderPrefix: string;
       relatedDocuments: string;
       invoice: string;
+      commissionInvoice: string;
       shipment: string;
       receive: string;
       payment: string;
@@ -111,6 +113,7 @@ export type LocaleDict = {
       ordersSeparation: string;
       reportPeriod: string;
       additionalInfo: string;
+      subordinateInvoices: string;
     };
   };
 };

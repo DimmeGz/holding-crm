@@ -8,6 +8,7 @@
     "seller": "Продавець",
     "buyer": "Покупець",
     "recipient": "Отримувач",
+    "payer": "Платник",
     "warehouse": "Склад",
     "payDelivery": "Оплата і доставка",
     "expectedDate": "Очікувана дата виконання",
@@ -23,6 +24,7 @@
     "orderPrefix": "Префікс назви замовлення",
     "relatedDocuments": "Пов'язані документи",
     "invoice": "Рахунок",
+    "commissionInvoice": "Комісійний рахунок",
     "shipment": "Відвантаження",
     "receive": "Надходження",
     "payment": "Платіж",
@@ -34,6 +36,7 @@
     "transportAmount": "Вартість перевезення",
     "ordersSeparation": "Розділяти замовлення в звіті",
     "reportPeriod": "Звітний період",
-    "additionalInfo": "Додаткова інформація"
+    "additionalInfo": "Додаткова інформація",
+    "subordinateInvoices": "Підлеглі рахунки"
   }
 }

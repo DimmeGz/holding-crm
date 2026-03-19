@@ -1,4 +1,3 @@
-import { ContractRelatedDocuments } from './ContractRelatedDocuments';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -6,6 +5,7 @@ import { Card, Grid, Group, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle } from '@tabler/icons-react';
 import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
+import { ContractRelatedDocuments } from '@/components/documents/contracts/ContractRelatedDocuments';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';

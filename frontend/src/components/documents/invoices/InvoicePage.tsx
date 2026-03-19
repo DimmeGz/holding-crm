@@ -1,10 +1,10 @@
-import { DocumentPageItem } from '../common/DocumentPageItem';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Card, Grid, Group, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
+import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
@@ -57,7 +57,11 @@ export function InvoicePage(): ReactNode {
     <>
       {loading && <Spinner />}
 
-      {!loading && error && <h3>{t('common:messages.error')} {error}</h3>}
+      {!loading && error && (
+        <h3>
+          {t('common:messages.error')} {error}
+        </h3>
+      )}
 
       {!loading && !error && invoice && (
         <>

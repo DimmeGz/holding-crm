@@ -1,4 +1,5 @@
 import type { RouteObject } from 'react-router-dom';
+import { CommissionInvoicePage } from '@/components/documents/commission-invoices/CommissionInvoicePage';
 import { CommissionInvoicesTable } from '@/components/documents/commission-invoices/CommissionInvoicesTable';
 import { UrlConstants } from '@/constants/url-constants';
 
@@ -9,9 +10,9 @@ export const commissionInvoicesRoutes: RouteObject = {
       index: true,
       element: <CommissionInvoicesTable />,
     },
-    // {
-    //   path: ':id',
-    //   element: <CommissionInvoicePage />,
-    // },
+    {
+      path: ':id',
+      element: <CommissionInvoicePage />,
+    },
   ],
 };

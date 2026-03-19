@@ -17,38 +17,21 @@ export type GetCommissionInvoicesDto = {
 };
 
 export type GetCommissionInvoiceDto = {
-  commissionInvoice: CommissionInvoice;
-};
-
-export type CommissionInvoice = {
   id: number;
-  invoiceNumber: string;
-  parent?: {
+  status: boolean;
+  sellerId: number;
+  buyerId: number;
+  creationDate: Date;
+  invoice: {
     id: number;
     invoiceNumber: string;
+    children: {
+      id: number;
+      invoiceNumber: string;
+    }[];
   };
-  status: boolean;
-  expectedDate: Date;
-  sellerId: number;
-  sellerWarehouseId: number;
-  buyerId: number;
-  buyerWarehouseId: number;
-  recipientId?: number;
-  recipientWarehouseId?: number;
-  vat: number;
-  paymentBalance: number;
-  paymentDelay: number;
+  documentSum: number;
   currencyId: number;
-  incoterms?: { name: string };
-  transportPlace: string;
-  ponz: number;
-  grossWeight: number;
-  transportAmount: number;
-  separation: boolean;
-  reportPeriod: Date;
-  contractInfo: string;
-  commissionInvoiceLines: CommissionInvoiceLine[];
-  comment?: string;
 };
 
 export type CommissionInvoiceLine = {
