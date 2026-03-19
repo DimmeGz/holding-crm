@@ -19,7 +19,7 @@ import { CreateShipmentDTO, UpdateShipmentDTO } from './dto';
 import { GetShipmentsQueryDTO } from './dto/query-dto';
 import { GetShipmentResponseDTO } from './dto/response-dto';
 
-@Controller('shipment')
+@Controller('shipments')
 export class ShipmentController {
   constructor(private readonly shipmentService: ShipmentService) {}
 
