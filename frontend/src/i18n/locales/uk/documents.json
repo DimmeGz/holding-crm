@@ -11,6 +11,8 @@
     "recipient": "Отримувач",
     "payer": "Платник",
     "warehouse": "Склад",
+    "warehouseSender": "Склад відправки",
+    "warehouseReceive": "Склад отримання",
     "payDelivery": "Оплата і доставка",
     "expectedDate": "Очікувана дата виконання",
     "vat": "ПДВ",

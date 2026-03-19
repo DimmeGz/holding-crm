@@ -88,6 +88,8 @@ export type LocaleDict = {
       payer: string;
       recipient: string;
       warehouse: string;
+      warehouseSender: string;
+      warehouseReceive: string;
       payDelivery: string;
       expectedDate: string;
       vat: string;

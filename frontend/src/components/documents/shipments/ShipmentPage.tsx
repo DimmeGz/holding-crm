@@ -87,8 +87,6 @@ export function ShipmentPage(): ReactNode {
         [shipment, serviceColumns],
       );
 
-  console.log('shipment', shipment);
-
   return (
     <>
       {loading && <Spinner />}

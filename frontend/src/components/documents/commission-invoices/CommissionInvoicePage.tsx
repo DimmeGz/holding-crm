@@ -27,8 +27,6 @@ export function CommissionInvoicePage(): ReactNode {
       s => s.getCurrencyName,
     );
 
-  console.log('commissionInvoice', commissionInvoice);
-
   return (
     <>
       {loading && <Spinner />}

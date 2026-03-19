@@ -51,7 +51,9 @@ export function useProductionsColumns(): MRT_ColumnDef<GetProductionsDto>[] {
         accessorFn: (row: GetProductionsDto): string =>
           row.productionOutLines?.length
             ? [
-                ...new Set(row.productionOutLines.map((line) => line.productId)),
+                ...new Set(
+                  row.productionOutLines.map((line) => line.productId),
+                ),
               ]
                 .map((id) => getProductName(id))
                 .join(CommonConstants.COMA_SPACE)
