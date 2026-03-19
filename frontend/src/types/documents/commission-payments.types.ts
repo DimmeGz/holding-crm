@@ -1,3 +1,9 @@
+export type CommissionPaymentLine = {
+  id: number;
+  commissionInvoiceId: number;
+  amount: number;
+};
+
 export type GetCommissionPaymentsDto = {
   id: number;
   sellerId: number;
@@ -7,11 +13,7 @@ export type GetCommissionPaymentsDto = {
   status: boolean;
   expectedDate: Date;
   commissionInvoiceId: number;
-  commissionPaymentLines: {
-    id: number,
-    commissionInvoiceId: number,
-    amount: number
-  }[]
+  commissionPaymentLines: CommissionPaymentLine[];
 };
 
 export type GetCommissionPaymentDto = {
@@ -21,6 +23,6 @@ export type GetCommissionPaymentDto = {
   currencyId: number;
   status: boolean;
   expectedDate: Date;
-  amount: number;
+  commissionPaymentLines?: CommissionPaymentLine[];
 };
 

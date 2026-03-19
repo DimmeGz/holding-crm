@@ -1,15 +1,18 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { Card, Grid, Group, Text } from '@mantine/core';
+import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
 import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
+import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
-import { UrlConstants } from '@/constants/url-constants';
 import { useCommissionPayment } from '@/hooks/documents/useCommissionPayments';
+import { useCommissionPaymentLinesColumns } from '@/hooks/documents/table-columns/useCommissionPaymentLinesColumns';
 import { useLibsStore } from '@/stores/useLibsStore';
+import type { CommissionPaymentLine } from '@/types/documents/commission-payments.types';
 
 export function CommissionPaymentPage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']),
@@ -24,9 +27,32 @@ export function CommissionPaymentPage(): ReactNode {
     ),
     getCurrencyName: (id: number) => string = useLibsStore(
       s => s.getCurrencyName,
-    );
-
-  console.log('commissionPayment', commissionPayment)
+    ),
+    currency: string = commissionPayment
+      ? getCurrencyName(commissionPayment.currencyId)
+      : CommonConstants.EMPTY_STRING,
+    columns: MRT_ColumnDef<CommissionPaymentLine>[] =
+      useCommissionPaymentLinesColumns(currency),
+    commissionPaymentLinesTableConfig: MRT_TableOptions<CommissionPaymentLine> =
+      useMemo(
+        () => ({
+          data: commissionPayment?.commissionPaymentLines || [],
+          columns,
+          enablePagination: false,
+          enableSorting: false,
+          enableColumnFilters: false,
+          enableBottomToolbar: false,
+          enableColumnActions: false,
+          enableGlobalFilter: false,
+          enableFullScreenToggle: false,
+          enableHiding: false,
+          mantinePaperProps: {
+            shadow: 'sm',
+            radius: 'md',
+          },
+        }),
+        [commissionPayment, columns],
+      );
 
   return (
     <>
@@ -97,6 +123,14 @@ export function CommissionPaymentPage(): ReactNode {
               />
             </Grid>
           </Card>
+
+          {commissionPayment.commissionPaymentLines &&
+            commissionPayment.commissionPaymentLines.length > 0 && (
+              <HoldingTable
+                tableOptions={commissionPaymentLinesTableConfig}
+                title={t('common:nav.commissionInvoices')}
+              />
+            )}
         </>
       )}
     </>
