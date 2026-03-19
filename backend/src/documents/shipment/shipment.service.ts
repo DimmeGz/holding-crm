@@ -36,7 +36,7 @@ export class ShipmentService {
     private readonly receiveService: ReceiveService,
     private readonly transitService: TransitService,
     private readonly warehouseService: WarehouseService,
-  ) {}
+  ) { }
 
   private createBaseQueryBuilder(): SelectQueryBuilder<Shipment> {
     return this.shipmentsRepository.createQueryBuilder('shipment');
@@ -46,21 +46,16 @@ export class ShipmentService {
     qb: SelectQueryBuilder<Shipment>,
   ): SelectQueryBuilder<Shipment> {
     return qb
-      .leftJoin('shipment.seller', 'seller')
-      .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('shipment.invoice', 'invoice')
-      .leftJoin('shipment.currency', 'currency')
-      .leftJoin('shipment.sellerWarehouse', 'sellerWarehouse')
       .select([
         'shipment.id',
+        'shipment.sellerId',
+        'shipment.buyerId',
+        'shipment.currencyId',
         'shipment.status',
         'shipment.documentSum',
         'shipment.expectedDate',
-        'seller.name',
-        'sellerWarehouse.name',
-        'buyer.name',
         'invoice.invoiceNumber',
-        'currency.name',
       ]);
   }
 
@@ -68,30 +63,29 @@ export class ShipmentService {
     qb: SelectQueryBuilder<Shipment>,
   ): SelectQueryBuilder<Shipment> {
     return qb
-      .leftJoin('shipment.seller', 'seller')
-      .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('shipment.invoice', 'invoice')
-      .leftJoin('shipment.currency', 'currency')
       .leftJoin('shipment.shipmentLines', 'shipmentLine')
       .leftJoin('shipmentLine.product', 'product')
       .leftJoin('shipmentLine.batch', 'batch')
       .leftJoin('shipmentLine.package', 'package')
       .leftJoin('shipment.shipmentServiceLines', 'shipmentServiceLine')
       .leftJoin('shipmentServiceLine.service', 'service')
+      .leftJoin('shipment.incoterms', 'incoterms')
       .select([
         'shipment.id',
+        'shipment.sellerId',
+        'shipment.sellerWarehouseId',
+        'shipment.buyerId',
+        'shipment.currencyId',
         'shipment.status',
         'shipment.documentSum',
         'shipment.expectedDate',
-        'shipment.incoterms',
+        'incoterms.name',
         'shipment.transportPlace',
         'shipment.transportAmount',
         'shipment.comment',
-        'seller.name',
-        'buyer.name',
         'invoice.id',
         'invoice.invoiceNumber',
-        'currency.name',
         'shipmentLine',
         'product.id',
         'product.name',
@@ -168,18 +162,20 @@ export class ShipmentService {
   }
 
   async getShipments(query?: GetShipmentsQueryDTO): Promise<Shipment[]> {
-    return await this.applyQueryFilter(
-      this.applyShipmentListSelect(this.createBaseQueryBuilder()),
-      query,
-    )
-      .orderBy('shipment.id', 'DESC')
-      .getMany();
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyShipmentListSelect(qb);
+    this.applyQueryFilter(qb, query);
+
+    return qb.orderBy('shipment.id', 'DESC').getMany();
   }
 
   async getShipmentById(shipmentId: number): Promise<GetShipmentResponseDTO> {
-    const shipment = await this.applyShipmentDetailSelect(
-      this.createBaseQueryBuilder(),
-    )
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyShipmentDetailSelect(qb);
+
+    const shipment = await qb
       .where('shipment.id = :shipmentId', { shipmentId })
       .getOne();
 
