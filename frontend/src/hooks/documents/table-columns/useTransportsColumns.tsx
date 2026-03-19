@@ -48,19 +48,19 @@ export function useTransportsColumns(): MRT_ColumnDef<GetTransportsDto>[] {
         id: 'warehouseSender',
         size: 200,
         accessorFn: (row: GetTransportsDto) =>
-          getWarehouseName(row.warehouseSenderId)
+          getWarehouseName(row.warehouseSenderId),
       },
       {
         header: t('documents:documents.warehouseReceive'),
         id: 'warehouseReceive',
         size: 200,
         accessorFn: (row: GetTransportsDto) =>
-          getWarehouseName(row.warehouseReceiveId)
+          getWarehouseName(row.warehouseReceiveId),
       },
       commonColumns.date<GetTransportsDto>(),
       commonColumns.status<GetTransportsDto>(),
     ],
-    [commonColumns, t],
+    [commonColumns, t, getCompanyName, getWarehouseName],
   );
 }
 

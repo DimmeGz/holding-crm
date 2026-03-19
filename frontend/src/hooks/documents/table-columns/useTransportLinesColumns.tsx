@@ -8,10 +8,12 @@ import type { TransportLine } from '@/types/documents/transports.types';
 
 export function useTransportLinesColumns(): MRT_ColumnDef<TransportLine>[] {
   const { t } = useTranslation(['tables']);
-  const { getProductName, getPackageName } = useLibsStore(s => ({
-    getProductName: s.getProductName,
-    getPackageName: s.getPackageName,
-  }));
+  const getProductName: (id: number) => string = useLibsStore(
+    s => s.getProductName,
+  );
+  const getPackageName: (id: number) => string = useLibsStore(
+    s => s.getPackageName,
+  );
 
   return useMemo(
     () => [

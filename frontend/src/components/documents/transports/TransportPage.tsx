@@ -120,7 +120,7 @@ export function TransportPage(): ReactNode {
             </Text>
             <Grid gutter='md' align='flex-start'>
               <DocumentPageItem
-                gridSpan={6}
+                gridSpan={4}
                 translationKey={{
                   primary: 'documents:documents.company',
                 }}
@@ -129,7 +129,7 @@ export function TransportPage(): ReactNode {
                 }}
               />
               <DocumentPageItem
-                gridSpan={6}
+                gridSpan={4}
                 translationKey={{
                   primary: 'documents:documents.warehouseSender',
                 }}
@@ -140,7 +140,7 @@ export function TransportPage(): ReactNode {
                 }}
               />
               <DocumentPageItem
-                gridSpan={12}
+                gridSpan={4}
                 translationKey={{
                   primary: 'documents:documents.warehouseReceive',
                 }}

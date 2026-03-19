@@ -9,9 +9,9 @@ import type { TransportServiceLine } from '@/types/documents/transports.types';
 
 export function useTransportServiceLinesColumns(): MRT_ColumnDef<TransportServiceLine>[] {
   const { t } = useTranslation(['tables']);
-  const { getServiceName } = useLibsStore(s => ({
-    getServiceName: s.getServiceName,
-  }));
+  const getServiceName: (id: number) => string = useLibsStore(
+    s => s.getServiceName,
+  );
 
   return useMemo(
     () => [
