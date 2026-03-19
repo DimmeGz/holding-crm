@@ -25,13 +25,7 @@ export type TransportLine = {
   batchId: number;
   packageId: number;
   qty: number;
-  product?: {
-    name: string;
-  };
   batch?: {
-    name: string;
-  };
-  package?: {
     name: string;
   };
 };

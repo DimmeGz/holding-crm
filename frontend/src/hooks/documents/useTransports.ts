@@ -25,13 +25,11 @@ export function useTransport(transportId: number): {
   error: string | null;
   refetch: () => void;
 } {
-  const res = useApiData<GetTransportDto>(
+  return useApiData<GetTransportDto>(
     () => TransportService.getById(transportId),
     {
       dependencies: [transportId],
     },
   );
-  console.log('res', transportId, res)
-  return res;
 }
 
