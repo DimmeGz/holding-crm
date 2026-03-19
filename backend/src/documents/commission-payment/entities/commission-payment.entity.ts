@@ -5,6 +5,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 import { DecimalColumnTransformer } from '../../../common/transformers';
@@ -12,6 +13,7 @@ import { DecimalColumnTransformer } from '../../../common/transformers';
 import { AbstractDocumentEntity } from '../../entities';
 import { CommissionInvoice } from '../../commission-invoice/entities';
 import { TechnicalProcess } from '../../../libs/entities';
+import { CommissionPaymentLine } from './commission-payment-line.entity';
 
 @Entity({ name: 'documents_commissionpayment' })
 export class CommissionPayment extends AbstractDocumentEntity<CommissionPayment> {
@@ -31,15 +33,6 @@ export class CommissionPayment extends AbstractDocumentEntity<CommissionPayment>
   })
   expectedDate: Date;
 
-  @Column({
-    type: 'decimal',
-    unsigned: true,
-    precision: 8,
-    scale: 2,
-    transformer: new DecimalColumnTransformer(),
-  })
-  amount: number;
-
   @ManyToMany(() => TechnicalProcess)
   @JoinTable({
     name: 'documents_commissionpayment_technical_process',
@@ -53,4 +46,13 @@ export class CommissionPayment extends AbstractDocumentEntity<CommissionPayment>
     },
   })
   technicalProcesses: TechnicalProcess[];
+
+  @OneToMany(
+    () => CommissionPaymentLine,
+    (commissionPaymentLine) => commissionPaymentLine.commissionPayment,
+    {
+      cascade: true,
+    }
+  )
+  commissionPaymentLines: Partial<CommissionPaymentLine>[];
 }

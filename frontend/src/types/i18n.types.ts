@@ -114,6 +114,7 @@ export type LocaleDict = {
       reportPeriod: string;
       additionalInfo: string;
       subordinateInvoices: string;
+      commissionPayment: string;
     };
   };
 };

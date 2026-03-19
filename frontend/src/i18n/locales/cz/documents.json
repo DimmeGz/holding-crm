@@ -37,6 +37,7 @@
     "ordersSeparation": "Rozdělení objednávek v přehledu",
     "reportPeriod": "Vykazované období",
     "additionalInfo": "Další informace",
-    "subordinateInvoices": "Podřízené faktury"
+    "subordinateInvoices": "Podřízené faktury",
+    "commissionPayment": "Platba provize"
   }
 }
