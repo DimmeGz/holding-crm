@@ -28,10 +28,19 @@ export type LocaleDict = {
       delete: string;
       save: string;
       cancel: string;
+      changeStatus: string;
+      confirmDelete: string;
+      confirmChangeStatus: string;
+      comingSoon: string;
     };
     messages: {
       error: string;
       noData: string;
+      saveSuccess: string;
+      deleteSuccess: string;
+      changeStatusSuccess: string;
+      confirmDeleteMessage: string;
+      confirmChangeStatusMessage: string;
     };
     common: {
       kg: string;

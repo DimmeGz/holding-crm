@@ -1,16 +1,20 @@
 import { ordersApi } from '@/api/documents/orders.api';
-import type { GetOrderDto, GetOrdersDto } from '@/types/documents/orders.types';
+import type { GetOrderDto, GetOrdersDto, Order } from '@/types/documents/orders.types';
 
 export class OrdersService {
   static async getList(): Promise<GetOrdersDto[]> {
-    const orders: GetOrdersDto[] = await ordersApi.getList();
-
-    return orders;
+    return ordersApi.getList();
   }
 
   static async getById(orderId: number): Promise<GetOrderDto> {
-    const order: GetOrderDto = await ordersApi.getById(orderId);
+    return ordersApi.getById(orderId);
+  }
 
-    return order;
+  static async remove(orderId: number): Promise<Order> {
+    return ordersApi.remove(orderId);
+  }
+
+  static async changeStatus(orderId: number): Promise<Order> {
+    return ordersApi.changeStatus(orderId);
   }
 }

@@ -21,11 +21,20 @@
     "edit": "Upravit",
     "delete": "Smazat",
     "save": "Uložit",
-    "cancel": "Zrušit"
+    "cancel": "Zrušit",
+    "changeStatus": "Změnit stav",
+    "confirmDelete": "Potvrdit smazání",
+    "confirmChangeStatus": "Potvrdit změnu stavu",
+    "comingSoon": "Již brzy"
   },
   "messages": {
     "error": "Chyba při načítání dat:",
-    "noData": "Žádná data"
+    "noData": "Žádná data",
+    "saveSuccess": "Úspěšně uloženo",
+    "deleteSuccess": "Úspěšně smazáno",
+    "changeStatusSuccess": "Stav úspěšně změněn",
+    "confirmDeleteMessage": "Opravdu chcete smazat tento dokument?",
+    "confirmChangeStatusMessage": "Opravdu chcete změnit stav tohoto dokumentu?"
   },
   "common": {
     "kg": "kg",
