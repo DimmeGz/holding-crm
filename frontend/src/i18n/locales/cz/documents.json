@@ -60,6 +60,27 @@
     "sellerRequired": "Vyberte prodávajícího",
     "buyerRequired": "Vyberte kupujícího",
     "currencyRequired": "Vyberte měnu",
-    "productLinesRequired": "Přidejte alespoň jednu položku zboží"
+    "productLinesRequired": "Přidejte alespoň jednu položku zboží",
+    "orderCreate": "Nová objednávka",
+    "orderEdit": "Úprava objednávky",
+    "cannotEditClosedOrder": "Uzavřenou objednávku nelze upravovat",
+    "orderNumber": "Číslo objednávky",
+    "orderNumberAuto": "Automaticky",
+    "expectedDateAsap": "ASAP",
+    "productMan": "Produkt (výrobce)",
+    "productBuy": "Produkt (kupující)",
+    "batchRename": "Přejmenování šarže",
+    "isHidden": "Skryté",
+    "orderChoices": "Hromadná faktura",
+    "groupInvoice": "Hromadná faktura",
+    "createInvoiceFromOrders": "Vytvořit fakturu",
+    "createOrderFromContract": "Vytvořit objednávku",
+    "expectedDateRequired": "Zadejte očekávané datum nebo ASAP",
+    "contractRequired": "Vyberte smlouvu",
+    "warehouseRequired": "Vyberte sklad",
+    "incotermsRequired": "Vyberte Incoterms",
+    "carPlate": "SPZ",
+    "filter": "Filtrovat",
+    "print": "Tisk"
   }
 }

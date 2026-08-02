@@ -14,11 +14,16 @@ import { StylesConstants } from '@/constants/styles.constants';
 import { UrlConstants } from '@/constants/url-constants';
 import { showError, showSuccess } from '@/helpers/notifications.helpers';
 import { useOrderLinesColumns } from '@/hooks/documents/table-columns/useOrderLinesColumns';
+import { useOrderServiceLinesColumns } from '@/hooks/documents/table-columns/useOrderServiceLinesColumns';
 import { useOrder } from '@/hooks/documents/useOrders';
 import { useMutation } from '@/hooks/useMutation';
 import { OrdersService } from '@/services/documents/orders.service';
 import { useLibsStore } from '@/stores/useLibsStore';
-import type { Order, OrderLine } from '@/types/documents/orders.types';
+import type {
+  Order,
+  OrderLine,
+  OrderServiceLine,
+} from '@/types/documents/orders.types';
 
 type PendingAction = 'delete' | 'changeStatus' | null;
 
@@ -91,9 +96,13 @@ export function OrderPage(): ReactNode {
           }
         : null;
 
-  const columns: MRT_ColumnDef<OrderLine>[] = useOrderLinesColumns(
-    order ? getCurrencyName(order.currencyId) : CommonConstants.EMPTY_STRING,
-  );
+  const currencyLabel = order
+    ? getCurrencyName(order.currencyId)
+    : CommonConstants.EMPTY_STRING;
+  const columns: MRT_ColumnDef<OrderLine>[] =
+    useOrderLinesColumns(currencyLabel);
+  const serviceLinesColumns: MRT_ColumnDef<OrderServiceLine>[] =
+    useOrderServiceLinesColumns(currencyLabel);
   const orderLinesTableConfig: MRT_TableOptions<OrderLine> = useMemo(
     () => ({
       data: order?.orderLines || [],
@@ -113,6 +122,26 @@ export function OrderPage(): ReactNode {
     }),
     [order, columns],
   );
+  const orderServiceLinesTableConfig: MRT_TableOptions<OrderServiceLine> =
+    useMemo(
+      () => ({
+        data: order?.orderServiceLines || [],
+        columns: serviceLinesColumns,
+        enablePagination: false,
+        enableSorting: false,
+        enableColumnFilters: false,
+        enableBottomToolbar: false,
+        enableColumnActions: false,
+        enableGlobalFilter: false,
+        enableFullScreenToggle: false,
+        enableHiding: false,
+        mantinePaperProps: {
+          shadow: 'sm',
+          radius: 'md',
+        },
+      }),
+      [order, serviceLinesColumns],
+    );
   const confirmOrderLinesTableConfig: MRT_TableOptions<OrderLine> | undefined =
     hasConfirmation
       ? {
@@ -192,9 +221,12 @@ export function OrderPage(): ReactNode {
               </Grid>
               <DocumentActions
                 loading={mutationLoading}
+                canEdit={!order.status}
+                onEdit={() =>
+                  navigate(`${UrlConstants.ORDERS_URL}/${orderId}/edit`)
+                }
                 onDelete={() => setPendingAction('delete')}
                 onChangeStatus={() => setPendingAction('changeStatus')}
-                canEdit={false}
               />
             </Group>
           </Card>
@@ -299,9 +331,11 @@ export function OrderPage(): ReactNode {
                   primary: 'documents:documents.expectedDate',
                 }}
                 baseValue={{
-                  primary: new Date(order.expectedDate).toLocaleDateString(
-                    'uk-UA',
-                  ),
+                  primary: order.isDateAsap
+                    ? t('documents:documents.expectedDateAsap')
+                    : order.expectedDate
+                      ? new Date(order.expectedDate).toLocaleDateString('uk-UA')
+                      : CommonConstants.EMPTY_STRING,
                 }}
                 confirmValue={
                   order.confirmation
@@ -405,6 +439,12 @@ export function OrderPage(): ReactNode {
                 }
               />
             )}
+          {order.orderServiceLines && order.orderServiceLines.length > 0 && (
+            <HoldingTable
+              tableOptions={orderServiceLinesTableConfig}
+              title={t('documents:documents.services')}
+            />
+          )}
         </>
       )}
     </>

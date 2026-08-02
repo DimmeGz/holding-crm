@@ -231,6 +231,16 @@ export function ContractPage(): ReactNode {
               />
             </Group>
             <Group justify='flex-end'>
+              {!contract.status && (
+                <Button
+                  variant='light'
+                  size='xs'
+                  component={Link}
+                  to={`${UrlConstants.ORDERS_URL}/new?contractId=${contractId}`}
+                >
+                  {t('documents:documents.createOrderFromContract')}
+                </Button>
+              )}
               <Button
                 variant='light'
                 size='xs'

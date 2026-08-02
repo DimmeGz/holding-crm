@@ -60,6 +60,27 @@
     "sellerRequired": "Оберіть продавця",
     "buyerRequired": "Оберіть покупця",
     "currencyRequired": "Оберіть валюту",
-    "productLinesRequired": "Додайте хоча б одну товарну позицію"
+    "productLinesRequired": "Додайте хоча б одну товарну позицію",
+    "orderCreate": "Нове замовлення",
+    "orderEdit": "Редагування замовлення",
+    "cannotEditClosedOrder": "Закрите замовлення не можна редагувати",
+    "orderNumber": "Номер замовлення",
+    "orderNumberAuto": "Авто",
+    "expectedDateAsap": "ASAP",
+    "productMan": "Продукт (виробник)",
+    "productBuy": "Продукт (покупець)",
+    "batchRename": "Перейменування партії",
+    "isHidden": "Приховане",
+    "orderChoices": "Груповий інвойс",
+    "groupInvoice": "Груповий інвойс",
+    "createInvoiceFromOrders": "Створити інвойс",
+    "createOrderFromContract": "Створити замовлення",
+    "expectedDateRequired": "Вкажіть очікувану дату або ASAP",
+    "contractRequired": "Оберіть контракт",
+    "warehouseRequired": "Оберіть склад",
+    "incotermsRequired": "Оберіть інкотермс",
+    "carPlate": "Номер авто",
+    "filter": "Фільтрувати",
+    "print": "Друк"
   }
 }

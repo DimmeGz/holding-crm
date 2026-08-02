@@ -1,4 +1,9 @@
 import type { RouteObject } from 'react-router-dom';
+import { OrderChoicesPage } from '@/components/documents/orders/OrderChoicesPage';
+import {
+  OrderCreatePage,
+  OrderEditPage,
+} from '@/components/documents/orders/OrderFormPage';
 import { OrderPage } from '@/components/documents/orders/OrderPage';
 import { OrdersTable } from '@/components/documents/orders/OrdersTable';
 import { UrlConstants } from '@/constants/url-constants';
@@ -9,6 +14,18 @@ export const ordersRoutes: RouteObject = {
     {
       index: true,
       element: <OrdersTable />,
+    },
+    {
+      path: 'new',
+      element: <OrderCreatePage />,
+    },
+    {
+      path: 'choices',
+      element: <OrderChoicesPage />,
+    },
+    {
+      path: ':id/edit',
+      element: <OrderEditPage />,
     },
     {
       path: ':id',

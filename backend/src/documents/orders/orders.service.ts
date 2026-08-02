@@ -74,11 +74,29 @@ export class OrdersService {
     query?: GetOrdersQueryDTO,
   ): SelectQueryBuilder<Order> {
     if (!query || Object.keys(query).length === 0) {
-      return qb; // Return the query builder unmodified if query is empty
+      return qb;
     }
 
-    if (query.status) {
+    if (query.status !== undefined) {
       qb.andWhere('order.status = :orderStatus', { orderStatus: query.status });
+    }
+
+    if (query.hidden !== undefined) {
+      qb.andWhere('order.isHidden = :isHidden', { isHidden: query.hidden });
+    }
+
+    if (query.sellerId) {
+      qb.andWhere('order.sellerId = :sellerId', { sellerId: query.sellerId });
+    }
+
+    if (query.buyerId) {
+      qb.andWhere('order.buyerId = :buyerId', { buyerId: query.buyerId });
+    }
+
+    if (query.recipientId) {
+      qb.andWhere('order.recipientId = :recipientId', {
+        recipientId: query.recipientId,
+      });
     }
 
     if (query.process) {
@@ -158,13 +176,16 @@ export class OrdersService {
       .leftJoin('order.contract', 'contract')
       .leftJoin('order.incoterms', 'incoterms')
       .leftJoin('order.orderLines', 'orderLine')
+      .leftJoin('order.orderServiceLines', 'orderServiceLine')
       .leftJoin('confirmation.orderLines', 'confirmOrderLine')
       .select([
         'order.id',
         'order.status',
         'order.orderNumber',
         'order.createdAt',
+        'order.signatureDate',
         'order.expectedDate',
+        'order.isDateAsap',
         'order.currencyId',
         'order.vat',
         'order.paymentDelay',
@@ -174,6 +195,11 @@ export class OrdersService {
         'order.sellerWarehouseId',
         'order.buyerWarehouseId',
         'order.recipientWarehouseId',
+        'order.contractId',
+        'order.incotermsId',
+        'order.comment',
+        'order.carPlate',
+        'order.isHidden',
         'contract.id',
         'contract.name',
         'incoterms.name',
@@ -189,12 +215,18 @@ export class OrdersService {
         'confirmation.recipientWarehouseId',
         'confirmation.transportPlace',
         // lines
+        'orderLine.id',
         'orderLine.qty',
         'orderLine.price',
         'orderLine.batchRename',
         'orderLine.productManId',
         'orderLine.productBuyId',
         'orderLine.packageId',
+        // service lines
+        'orderServiceLine.id',
+        'orderServiceLine.serviceId',
+        'orderServiceLine.qty',
+        'orderServiceLine.price',
         // confirmation lines
         'confirmOrderLine.qty',
         'confirmOrderLine.price',
@@ -254,8 +286,23 @@ export class OrdersService {
       ));
 
     newOrder.documentSum = this.calculateDocumentSum(createOrderDTO);
+    newOrder.sortingDate = this.resolveSortingDate(
+      newOrder.isDateAsap,
+      newOrder.expectedDate,
+    );
 
     return await this.ordersRepository.save(newOrder);
+  }
+
+  private resolveSortingDate(
+    isDateAsap?: boolean,
+    expectedDate?: Date,
+  ): Date | undefined {
+    if (isDateAsap) {
+      return new Date(2020, 0, 1);
+    }
+
+    return expectedDate;
   }
 
   private calculateDocumentSum(createOrderDTO: CreateOrderDTO): number {
@@ -331,6 +378,10 @@ export class OrdersService {
       await this.getTechnicalProcesses(updateOrderDTO);
 
     updated.documentSum = this.calculateDocumentSum(updated);
+    updated.sortingDate = this.resolveSortingDate(
+      updated.isDateAsap,
+      updated.expectedDate,
+    );
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();

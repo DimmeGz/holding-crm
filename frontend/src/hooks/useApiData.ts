@@ -28,7 +28,7 @@ export const useApiData: <T>(
     const [error, setError] = useState<string | null>(null);
 
     const fetchData: () => void = (): void => {
-      if (!options?.enabled) {
+      if (options?.enabled === false) {
         setLoading(false);
         return;
       }

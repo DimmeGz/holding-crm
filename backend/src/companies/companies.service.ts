@@ -176,6 +176,7 @@ export class CompaniesService {
       .select([
         'company.id',
         'company.name',
+        'company.defaultWarehouseId',
         'account.id',
         'account.balance',
         'account.debt',
