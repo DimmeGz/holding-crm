@@ -20,10 +20,12 @@ export function OrderProductLineEditor({
   lines,
   onChange,
   currencyLabel = '',
+  hideBatchRename = false,
 }: {
   lines: OrderProductLineFormValue[];
   onChange: (lines: OrderProductLineFormValue[]) => void;
   currencyLabel?: string;
+  hideBatchRename?: boolean;
 }): ReactNode {
   const { t } = useTranslation(['documents', 'tables', 'common']);
   const products = useLibsStore(s => s.products);
@@ -68,7 +70,9 @@ export function OrderProductLineEditor({
             <Table.Th>{t('documents:documents.productMan')}</Table.Th>
             <Table.Th>{t('documents:documents.productBuy')}</Table.Th>
             <Table.Th>{t('tables:columns.package')}</Table.Th>
-            <Table.Th>{t('documents:documents.batchRename')}</Table.Th>
+            {!hideBatchRename && (
+              <Table.Th>{t('documents:documents.batchRename')}</Table.Th>
+            )}
             <Table.Th>{t('tables:columns.qty')}</Table.Th>
             <Table.Th>
               {t('tables:columns.price')} {currencyLabel}
@@ -109,16 +113,20 @@ export function OrderProductLineEditor({
                   size='xs'
                 />
               </Table.Td>
-              <Table.Td>
-                <TextInput
-                  value={line.batchRename}
-                  onChange={event =>
-                    updateLine(index, { batchRename: event.currentTarget.value })
-                  }
-                  maxLength={10}
-                  size='xs'
-                />
-              </Table.Td>
+              {!hideBatchRename && (
+                <Table.Td>
+                  <TextInput
+                    value={line.batchRename}
+                    onChange={event =>
+                      updateLine(index, {
+                        batchRename: event.currentTarget.value,
+                      })
+                    }
+                    maxLength={10}
+                    size='xs'
+                  />
+                </Table.Td>
+              )}
               <Table.Td>
                 <NumberInput
                   value={line.qty}

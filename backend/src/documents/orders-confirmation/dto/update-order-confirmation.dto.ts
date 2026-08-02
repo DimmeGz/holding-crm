@@ -10,32 +10,14 @@ import {
   IsString,
   Length,
   Matches,
-  ValidateNested,
 } from 'class-validator';
 
+import { IsOneOfDtos } from '../../../common/decorators';
+
 import { CreateOrderConfirmationLineDTO } from './create-order-confirmation-line.dto';
+import { UpdateOrderConfirmationLineDTO } from './update-order-confirmation-line.dto';
 
-export class CreateOrderConfirmationDTO {
-  @IsPositive()
-  @IsInt()
-  orderId: number;
-
-  @IsPositive()
-  @IsInt()
-  sellerId: number;
-
-  @IsPositive()
-  @IsInt()
-  buyerId: number;
-
-  @IsPositive()
-  @IsInt()
-  currencyId: number;
-
-  @IsPositive()
-  @IsInt()
-  sellerWarehouseId: number;
-
+export class UpdateOrderConfirmationDTO {
   @IsPositive()
   @IsInt()
   buyerWarehouseId: number;
@@ -43,12 +25,12 @@ export class CreateOrderConfirmationDTO {
   @IsOptional()
   @IsPositive()
   @IsInt()
-  recipientId?: number;
+  recipientId?: number | null;
 
   @IsOptional()
   @IsPositive()
   @IsInt()
-  recipientWarehouseId?: number;
+  recipientWarehouseId?: number | null;
 
   @IsOptional()
   @IsPositive()
@@ -81,7 +63,7 @@ export class CreateOrderConfirmationDTO {
 
   @IsArray()
   @ArrayNotEmpty()
-  @ValidateNested({ each: true })
-  @Type(() => CreateOrderConfirmationLineDTO)
-  orderLines: CreateOrderConfirmationLineDTO[];
+  @Type(() => Object)
+  @IsOneOfDtos(CreateOrderConfirmationLineDTO, UpdateOrderConfirmationLineDTO)
+  orderLines: (CreateOrderConfirmationLineDTO | UpdateOrderConfirmationLineDTO)[];
 }

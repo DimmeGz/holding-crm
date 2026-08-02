@@ -1,7 +1,7 @@
 import { type ChangeEvent, type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Card, Grid, Group, Switch, Text } from '@mantine/core';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Button, Card, Grid, Group, Switch, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
 import { DocumentActions } from '@/components/documents/common/DocumentActions';
@@ -228,6 +228,28 @@ export function OrderPage(): ReactNode {
                 onDelete={() => setPendingAction('delete')}
                 onChangeStatus={() => setPendingAction('changeStatus')}
               />
+            </Group>
+            <Group justify='flex-end'>
+              {!order.status && (
+                <Button
+                  variant='light'
+                  size='xs'
+                  component={Link}
+                  to={`${UrlConstants.ORDERS_URL}/${orderId}/confirmation/new`}
+                >
+                  {t('documents:documents.createConfirmation')}
+                </Button>
+              )}
+              {hasConfirmation && (
+                <Button
+                  variant='light'
+                  size='xs'
+                  component={Link}
+                  to={`${UrlConstants.ORDERS_URL}/${orderId}/confirmation/edit`}
+                >
+                  {t('documents:documents.editConfirmation')}
+                </Button>
+              )}
             </Group>
           </Card>
 

@@ -81,6 +81,15 @@
     "incotermsRequired": "Vyberte Incoterms",
     "carPlate": "SPZ",
     "filter": "Filtrovat",
-    "print": "Tisk"
+    "print": "Tisk",
+    "confirmationCreate": "Nové potvrzení objednávky",
+    "confirmationEdit": "Úprava potvrzení objednávky",
+    "confirmationNumber": "Číslo potvrzení",
+    "confirmationNumberRequired": "Zadejte číslo potvrzení",
+    "confirmationNumberDigits": "Číslo potvrzení musí končit číslicemi",
+    "transportPlaceRequired": "Zadejte místo dodání",
+    "createConfirmation": "Vytvořit potvrzení",
+    "editConfirmation": "Upravit potvrzení",
+    "cannotCreateConfirmationClosedOrder": "Pro uzavřenou objednávku nelze vytvořit potvrzení"
   }
 }

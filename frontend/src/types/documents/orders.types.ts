@@ -124,16 +124,20 @@ export type OrderServiceLine = {
   price: number;
 };
 
-type Confirmation = {
+export type Confirmation = {
+  id: number;
   confirmationNumber: string;
   createdAt: Date;
+  sellerWarehouseId: number;
   buyerWarehouseId: number;
   recipientId?: number;
   recipientWarehouseId?: number;
   paymentDelay: number;
-  incoterms: { name: string };
+  incotermsId: number;
+  incoterms?: { name: string };
   transportPlace: string;
   expectedDate: Date;
+  comment?: string;
   orderLines: OrderLine[];
 };
 

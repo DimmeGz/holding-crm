@@ -178,6 +178,7 @@ export class OrdersService {
       .leftJoin('order.orderLines', 'orderLine')
       .leftJoin('order.orderServiceLines', 'orderServiceLine')
       .leftJoin('confirmation.orderLines', 'confirmOrderLine')
+      .leftJoin('confirmation.incoterms', 'confirmIncoterms')
       .select([
         'order.id',
         'order.status',
@@ -205,15 +206,19 @@ export class OrdersService {
         'incoterms.name',
         'order.transportPlace',
         // confirmation
+        'confirmation.id',
         'confirmation.confirmationNumber',
         'confirmation.createdAt',
         'confirmation.expectedDate',
         'confirmation.paymentDelay',
-        'confirmation.incoterms',
+        'confirmation.incotermsId',
         'confirmation.buyerWarehouseId',
+        'confirmation.sellerWarehouseId',
         'confirmation.recipientId',
         'confirmation.recipientWarehouseId',
         'confirmation.transportPlace',
+        'confirmation.comment',
+        'confirmIncoterms.name',
         // lines
         'orderLine.id',
         'orderLine.qty',
@@ -228,6 +233,7 @@ export class OrdersService {
         'orderServiceLine.qty',
         'orderServiceLine.price',
         // confirmation lines
+        'confirmOrderLine.id',
         'confirmOrderLine.qty',
         'confirmOrderLine.price',
         'confirmOrderLine.productManId',

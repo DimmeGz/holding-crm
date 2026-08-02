@@ -81,6 +81,15 @@
     "incotermsRequired": "Оберіть інкотермс",
     "carPlate": "Номер авто",
     "filter": "Фільтрувати",
-    "print": "Друк"
+    "print": "Друк",
+    "confirmationCreate": "Нове підтвердження замовлення",
+    "confirmationEdit": "Редагування підтвердження замовлення",
+    "confirmationNumber": "Номер підтвердження",
+    "confirmationNumberRequired": "Вкажіть номер підтвердження",
+    "confirmationNumberDigits": "Номер підтвердження має закінчуватись цифрами",
+    "transportPlaceRequired": "Вкажіть місце доставки",
+    "createConfirmation": "Створити підтвердження",
+    "editConfirmation": "Редагувати підтвердження",
+    "cannotCreateConfirmationClosedOrder": "Для закритого замовлення не можна створити підтвердження"
   }
 }

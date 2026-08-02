@@ -167,6 +167,15 @@ export type LocaleDict = {
       carPlate: string;
       filter: string;
       print: string;
+      confirmationCreate: string;
+      confirmationEdit: string;
+      confirmationNumber: string;
+      confirmationNumberRequired: string;
+      confirmationNumberDigits: string;
+      transportPlaceRequired: string;
+      createConfirmation: string;
+      editConfirmation: string;
+      cannotCreateConfirmationClosedOrder: string;
     };
   };
 };
