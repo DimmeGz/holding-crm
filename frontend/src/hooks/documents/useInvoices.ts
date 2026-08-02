@@ -16,13 +16,17 @@ export function useInvoices(): {
   });
 }
 
-export function useInvoice(invoiceId: number): {
+export function useInvoice(
+  invoiceId: number,
+  enabled = true,
+): {
   data: GetInvoiceDto | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 } {
   return useApiData<GetInvoiceDto>(() => InvoicesService.getById(invoiceId), {
-    dependencies: [invoiceId],
+    dependencies: [invoiceId, enabled],
+    enabled: enabled && invoiceId > 0,
   });
 }

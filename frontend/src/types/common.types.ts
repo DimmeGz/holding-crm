@@ -5,6 +5,11 @@ export type UseThemeProps = {
   toggleTheme: () => void;
 };
 
+export type BatchStoreItem = {
+  name: string;
+  productId: number;
+};
+
 export type LibsData = {
   companies: Record<number, string>;
   warehouses: Record<number, string>;
@@ -14,6 +19,7 @@ export type LibsData = {
   services: Record<number, string>;
   countries: Record<number, string>;
   incoterms: Record<number, string>;
+  batches: Record<number, BatchStoreItem>;
 };
 
 export type LibsStore = LibsData & {
@@ -28,4 +34,5 @@ export type LibsStore = LibsData & {
   getServiceName: (id: number) => string;
   getCountryName: (id: number) => string;
   getIncotermsName: (id: number) => string;
+  getBatchName: (id: number) => string;
 };

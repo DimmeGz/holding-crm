@@ -23,6 +23,7 @@ export class StoreDataService {
       services: {},
       countries: {},
       incoterms: {},
+      batches: {} as Record<number, { name: string; productId: number }>,
     };
 
     const rawCompanies = await this.companiesService.getStoreData();
@@ -33,6 +34,7 @@ export class StoreDataService {
     const rawServices = await this.goodsService.getServicesStoreData();
     const rawCountries = await this.libsService.getCountriesOfOriginStoreData();
     const rawIncoterms = await this.libsService.getIncotermsStoreData();
+    const rawBatches = await this.goodsService.getBatchesStoreData();
 
     rawCompanies.forEach(
       (company) => (allStoreData.companies[company.id] = company.name),
@@ -55,6 +57,13 @@ export class StoreDataService {
     );
     rawIncoterms.forEach(
       (incoterm) => (allStoreData.incoterms[incoterm.id] = incoterm.name),
+    );
+    rawBatches.forEach(
+      (batch) =>
+        (allStoreData.batches[batch.id] = {
+          name: batch.name,
+          productId: batch.productId,
+        }),
     );
 
     return allStoreData;

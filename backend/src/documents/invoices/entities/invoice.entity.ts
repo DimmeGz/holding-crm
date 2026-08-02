@@ -100,8 +100,8 @@ export class Invoice extends AbstractDocumentRecipientEntity<Invoice> {
   @JoinColumn({ name: 'parent_id' })
   parent: Invoice;
 
-  @Column({ name: 'parent_id' })
-  parentId: number;
+  @Column({ name: 'parent_id', nullable: true })
+  parentId: number | null;
 
   @OneToMany(() => Invoice, (invoice) => invoice.parent)
   children: Invoice[];

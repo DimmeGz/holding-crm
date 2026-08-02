@@ -85,6 +85,7 @@ export class InvoiceService {
       .leftJoin('invoiceLine.order', 'order')
       .leftJoin('invoice.invoiceServiceLines', 'invoiceServiceLine')
       .select([
+        'invoice.id',
         'invoice.invoiceNumber',
         'invoice.status',
         'invoice.expectedDate',
@@ -99,17 +100,23 @@ export class InvoiceService {
         'invoice.paymentBalance',
         'invoice.currencyId',
         'invoice.paymentDelay',
+        'invoice.incotermsId',
         'incoterms.name',
         'invoice.transportPlace',
+        'invoice.carPlate',
         'invoice.vat',
         'invoice.ponz',
         'invoice.grossWeight',
         'invoice.transportAmount',
         'invoice.separation',
         'invoice.reportPeriod',
+        'invoice.reportDuplicating',
         'invoice.contractInfo',
         'invoice.comment',
+        'invoiceLine.id',
         'invoiceLine.productId',
+        'invoiceLine.batchId',
+        'invoiceLine.orderId',
         'invoiceLine.packageId',
         'invoiceLine.qty',
         'invoiceLine.price',
@@ -260,7 +267,12 @@ export class InvoiceService {
   }
 
   async createInvoice(createInvoiceDTO: CreateInvoiceDTO): Promise<Invoice> {
-    const newInvoice = this.invoiceRepository.create(createInvoiceDTO);
+    const { invoiceId, ...invoiceData } = createInvoiceDTO;
+    const newInvoice = this.invoiceRepository.create(invoiceData);
+
+    if (invoiceId) {
+      newInvoice.parentId = invoiceId;
+    }
 
     newInvoice.technicalProcesses =
       await this.getTechnicalProcesses(createInvoiceDTO);

@@ -241,6 +241,16 @@ export function ContractPage(): ReactNode {
                   {t('documents:documents.createOrderFromContract')}
                 </Button>
               )}
+              {!contract.status && (
+                <Button
+                  variant='light'
+                  size='xs'
+                  component={Link}
+                  to={`${UrlConstants.INVOICES_URL}/new?contractId=${contractId}&byContract=1`}
+                >
+                  {t('documents:documents.createInvoiceFromContract')}
+                </Button>
+              )}
               <Button
                 variant='light'
                 size='xs'

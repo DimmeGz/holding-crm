@@ -90,6 +90,15 @@
     "transportPlaceRequired": "Вкажіть місце доставки",
     "createConfirmation": "Створити підтвердження",
     "editConfirmation": "Редагувати підтвердження",
-    "cannotCreateConfirmationClosedOrder": "Для закритого замовлення не можна створити підтвердження"
+    "cannotCreateConfirmationClosedOrder": "Для закритого замовлення не можна створити підтвердження",
+    "invoiceCreate": "Новий рахунок",
+    "invoiceEdit": "Редагування рахунку",
+    "createInvoiceFromContract": "Створити рахунок",
+    "createChildInvoice": "Створити рахунок",
+    "cannotEditClosedInvoice": "Закритий рахунок не можна редагувати",
+    "invoiceNumberRequired": "Вкажіть номер рахунку",
+    "invoiceNumberMaxLength": "Номер рахунку не може перевищувати 15 символів",
+    "cannotCreateChildInvoice": "Неможливо створити рахунок: у батьківського немає отримувача",
+    "reportDuplicating": "Дублювати у звіті"
   }
 }

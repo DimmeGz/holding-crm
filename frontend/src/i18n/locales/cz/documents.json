@@ -90,6 +90,15 @@
     "transportPlaceRequired": "Zadejte místo dodání",
     "createConfirmation": "Vytvořit potvrzení",
     "editConfirmation": "Upravit potvrzení",
-    "cannotCreateConfirmationClosedOrder": "Pro uzavřenou objednávku nelze vytvořit potvrzení"
+    "cannotCreateConfirmationClosedOrder": "Pro uzavřenou objednávku nelze vytvořit potvrzení",
+    "invoiceCreate": "Nová faktura",
+    "invoiceEdit": "Úprava faktury",
+    "createInvoiceFromContract": "Vytvořit fakturu",
+    "createChildInvoice": "Vytvořit fakturu",
+    "cannotEditClosedInvoice": "Uzavřenou fakturu nelze upravovat",
+    "invoiceNumberRequired": "Zadejte číslo faktury",
+    "invoiceNumberMaxLength": "Číslo faktury nesmí přesáhnout 15 znaků",
+    "cannotCreateChildInvoice": "Nelze vytvořit fakturu: u nadřazené chybí příjemce",
+    "reportDuplicating": "Duplikovat ve výkazu"
   }
 }

@@ -1,46 +1,50 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
 import type {
+  CreateInvoiceByContractPayload,
+  CreateInvoicePayload,
   GetInvoiceDto,
   GetInvoicesDto,
+  Invoice,
+  UpdateInvoicePayload,
 } from '@/types/documents/invoices.types';
 
-export const invoicesApi: {
-  getList(): Promise<GetInvoicesDto[]>;
-  getById(invoiceId: number): Promise<GetInvoiceDto>;
-} = {
-  async getList(): Promise<GetInvoicesDto[]> {
-    try {
-      const response: AxiosResponse<GetInvoicesDto[]> = await http.get<
-        GetInvoicesDto[]
-      >(UrlConstants.INVOICES_URL);
-
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
-
-      throw new Error('An unexpected error occurred');
-    }
+export const invoicesApi = {
+  getList(): Promise<GetInvoicesDto[]> {
+    return apiClient.get<GetInvoicesDto[]>(UrlConstants.INVOICES_URL);
   },
 
-  async getById(invoiceId: number): Promise<GetInvoiceDto> {
-    try {
-      const response: AxiosResponse<GetInvoiceDto> =
-        await http.get<GetInvoiceDto>(
-          `${UrlConstants.INVOICES_URL}/${invoiceId}`,
-        );
+  getById(invoiceId: number): Promise<GetInvoiceDto> {
+    return apiClient.get<GetInvoiceDto>(
+      `${UrlConstants.INVOICES_URL}/${invoiceId}`,
+    );
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  create(payload: CreateInvoicePayload): Promise<Invoice> {
+    return apiClient.post<Invoice>(UrlConstants.INVOICES_URL, payload);
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  createByContract(payload: CreateInvoiceByContractPayload): Promise<Invoice> {
+    return apiClient.post<Invoice>(
+      `${UrlConstants.INVOICES_URL}/by-contract`,
+      payload,
+    );
+  },
+
+  update(invoiceId: number, payload: UpdateInvoicePayload): Promise<Invoice> {
+    return apiClient.patch<Invoice>(
+      `${UrlConstants.INVOICES_URL}/${invoiceId}`,
+      payload,
+    );
+  },
+
+  remove(invoiceId: number): Promise<Invoice> {
+    return apiClient.del<Invoice>(`${UrlConstants.INVOICES_URL}/${invoiceId}`);
+  },
+
+  changeStatus(invoiceId: number): Promise<Invoice> {
+    return apiClient.patch<Invoice>(
+      `${UrlConstants.INVOICES_URL}/change-status/${invoiceId}`,
+    );
   },
 };

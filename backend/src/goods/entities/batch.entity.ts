@@ -17,6 +17,9 @@ export class Batch extends AbstractEntity {
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
+  @Column({ name: 'product_id' })
+  productId: number;
+
   @Column({
     type: 'varchar',
     length: 16,

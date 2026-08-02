@@ -12,6 +12,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
     services: {},
     countries: {},
     incoterms: {},
+    batches: {},
     isLoaded: false,
 
     loadAll: async (): Promise<void> => {
@@ -20,6 +21,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
         set({
           ...data,
+          batches: data.batches ?? {},
           isLoaded: true,
         });
       } catch (error) {
@@ -57,5 +59,9 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
     getIncotermsName: (id: number): string => {
       return get().incoterms[id] || `Unknown incoterms (ID: ${id})`;
+    },
+
+    getBatchName: (id: number): string => {
+      return get().batches[id]?.name || `Unknown batch (ID: ${id})`;
     },
   }));

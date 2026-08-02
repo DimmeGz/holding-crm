@@ -250,6 +250,14 @@ export function OrderPage(): ReactNode {
                   {t('documents:documents.editConfirmation')}
                 </Button>
               )}
+              <Button
+                variant='light'
+                size='xs'
+                component={Link}
+                to={`${UrlConstants.INVOICES_URL}/new?orderIds=${orderId}`}
+              >
+                {t('documents:documents.createInvoiceFromOrders')}
+              </Button>
             </Group>
           </Card>
 

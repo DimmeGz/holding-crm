@@ -176,6 +176,15 @@ export type LocaleDict = {
       createConfirmation: string;
       editConfirmation: string;
       cannotCreateConfirmationClosedOrder: string;
+      invoiceCreate: string;
+      invoiceEdit: string;
+      createInvoiceFromContract: string;
+      createChildInvoice: string;
+      cannotEditClosedInvoice: string;
+      invoiceNumberRequired: string;
+      invoiceNumberMaxLength: string;
+      cannotCreateChildInvoice: string;
+      reportDuplicating: string;
     };
   };
 };

@@ -1,48 +1,133 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { Card, Grid, Group, Text } from '@mantine/core';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Button, Card, Grid, Group, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
+import { DocumentActions } from '@/components/documents/common/DocumentActions';
 import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
+import { ConfirmActionModal } from '@/components/shared/ConfirmActionModal';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
+import { UrlConstants } from '@/constants/url-constants';
+import { showError, showSuccess } from '@/helpers/notifications.helpers';
 import { useInvoiceLinesColumns } from '@/hooks/documents/table-columns/useInvoiceLinesColumns';
 import { useInvoiceServiceLinesColumns } from '@/hooks/documents/table-columns/useInvoiceServiceLinesColumns';
 import { useInvoice } from '@/hooks/documents/useInvoices';
+import { useMutation } from '@/hooks/useMutation';
+import { InvoicesService } from '@/services/documents/invoices.service';
 import { useLibsStore } from '@/stores/useLibsStore';
-import type { Invoice, InvoiceLine, InvoiceServiceLine } from '@/types/documents/invoices.types';
+import type {
+  Invoice,
+  InvoiceLine,
+  InvoiceServiceLine,
+} from '@/types/documents/invoices.types';
+
+type PendingAction = 'delete' | 'changeStatus' | null;
 
 export function InvoicePage(): ReactNode {
-  const { t } = useTranslation(['common', 'documents']),
-    { id } = useParams<{ id: string }>(),
-    { data, loading, error } = useInvoice(Number(id)),
-    getCompanyName: (id: number) => string = useLibsStore(
-      s => s.getCompanyName,
-    ),
-    getWarehouseName: (id: number) => string = useLibsStore(
-      s => s.getWarehouseName,
-    ),
-    getCurrencyName: (id: number) => string = useLibsStore(
-      s => s.getCurrencyName,
-    ),
-    invoice: Invoice | undefined = data?.invoice,
-    columns: MRT_ColumnDef<InvoiceLine>[] = useInvoiceLinesColumns(
+  const { t } = useTranslation(['common', 'documents']);
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const invoiceId = Number(id);
+  const { data, loading, error, refetch } = useInvoice(invoiceId);
+  const getCompanyName = useLibsStore(s => s.getCompanyName);
+  const getWarehouseName = useLibsStore(s => s.getWarehouseName);
+  const getCurrencyName = useLibsStore(s => s.getCurrencyName);
+  const invoice: Invoice | undefined = data?.invoice;
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+
+  const { loading: mutationLoading, mutateAsync: runRemove } = useMutation(
+    (targetInvoiceId: number) => InvoicesService.remove(targetInvoiceId),
+    {
+      onSuccess: () => {
+        showSuccess(t('common:messages.deleteSuccess'));
+        setPendingAction(null);
+        navigate(UrlConstants.INVOICES_URL);
+      },
+      onError: (message: string) => {
+        showError(message);
+      },
+    },
+  );
+
+  const { mutateAsync: runChangeStatus } = useMutation(
+    (targetInvoiceId: number) => InvoicesService.changeStatus(targetInvoiceId),
+    {
+      onSuccess: () => {
+        showSuccess(t('common:messages.changeStatusSuccess'));
+        setPendingAction(null);
+        refetch();
+      },
+      onError: (message: string) => {
+        showError(message);
+      },
+    },
+  );
+
+  const handleConfirm = useCallback((): void => {
+    if (pendingAction === 'delete') {
+      void runRemove(invoiceId);
+      return;
+    }
+
+    if (pendingAction === 'changeStatus') {
+      void runChangeStatus(invoiceId);
+    }
+  }, [invoiceId, pendingAction, runChangeStatus, runRemove]);
+
+  const confirmModalProps =
+    pendingAction === 'delete'
+      ? {
+          title: t('common:actions.confirmDelete'),
+          message: t('common:messages.confirmDeleteMessage'),
+          confirmLabel: t('common:actions.delete'),
+          confirmColor: 'red',
+        }
+      : pendingAction === 'changeStatus'
+        ? {
+            title: t('common:actions.confirmChangeStatus'),
+            message: t('common:messages.confirmChangeStatusMessage'),
+            confirmLabel: t('common:actions.changeStatus'),
+            confirmColor: 'blue',
+          }
+        : null;
+
+  const columns: MRT_ColumnDef<InvoiceLine>[] = useInvoiceLinesColumns(
+    invoice ? getCurrencyName(invoice.currencyId) : CommonConstants.EMPTY_STRING,
+  );
+  const serviceColumns: MRT_ColumnDef<InvoiceServiceLine>[] =
+    useInvoiceServiceLinesColumns(
       invoice
         ? getCurrencyName(invoice.currencyId)
         : CommonConstants.EMPTY_STRING,
-    ),
-    serviceColumns: MRT_ColumnDef<InvoiceServiceLine>[] = useInvoiceServiceLinesColumns(
-      invoice
-        ? getCurrencyName(invoice.currencyId)
-        : CommonConstants.EMPTY_STRING,
-    ),
-    invoiceLinesTableConfig: MRT_TableOptions<InvoiceLine> = useMemo(
+    );
+  const invoiceLinesTableConfig: MRT_TableOptions<InvoiceLine> = useMemo(
+    () => ({
+      data: invoice?.invoiceLines || [],
+      columns,
+      enablePagination: false,
+      enableSorting: false,
+      enableColumnFilters: false,
+      enableBottomToolbar: false,
+      enableColumnActions: false,
+      enableGlobalFilter: false,
+      enableFullScreenToggle: false,
+      enableHiding: false,
+      mantinePaperProps: {
+        shadow: 'sm',
+        radius: 'md',
+      },
+    }),
+    [invoice, columns],
+  );
+  const invoiceServiceLinesTableConfig: MRT_TableOptions<InvoiceServiceLine> =
+    useMemo(
       () => ({
-        data: invoice?.invoiceLines || [],
-        columns,
+        data: invoice?.invoiceServiceLines || [],
+        columns: serviceColumns,
         enablePagination: false,
         enableSorting: false,
         enableColumnFilters: false,
@@ -54,31 +139,11 @@ export function InvoicePage(): ReactNode {
         mantinePaperProps: {
           shadow: 'sm',
           radius: 'md',
+          mt: 'sm',
         },
       }),
-      [invoice, columns],
-    ),
-    invoiceServiceLinesTableConfig: MRT_TableOptions<InvoiceServiceLine> =
-      useMemo(
-        () => ({
-          data: invoice?.invoiceServiceLines || [],
-          columns: serviceColumns,
-          enablePagination: false,
-          enableSorting: false,
-          enableColumnFilters: false,
-          enableBottomToolbar: false,
-          enableColumnActions: false,
-          enableGlobalFilter: false,
-          enableFullScreenToggle: false,
-          enableHiding: false,
-          mantinePaperProps: {
-            shadow: 'sm',
-            radius: 'md',
-            mt: 'sm'
-          },
-        }),
-        [invoice, serviceColumns],
-      );
+      [invoice, serviceColumns],
+    );
 
   return (
     <>
@@ -93,40 +158,78 @@ export function InvoicePage(): ReactNode {
       {!loading && !error && invoice && (
         <>
           <Card shadow='sm' p='md' radius='md' withBorder mb='xs' mt='6'>
-            <Grid gutter='xs' align='flex-start'>
-              <Grid.Col span={12}>
-                <Group justify='flex-start' wrap='nowrap' gap='2'>
-                  {invoice.status ? (
-                    <IconCircleFilled color='green' />
-                  ) : (
-                    <IconCircle color='grey' stroke={5} />
-                  )}
-                  <Text
-                    size='lg'
-                    fw={StylesConstants.HEAVY_FONT_WEIGHT}
-                    ml='xs'
-                  >
-                    {t('documents:documents.invoice')} {invoice.invoiceNumber}
-                  </Text>
-                </Group>
-              </Grid.Col>
+            <Group justify='space-between' align='flex-start'>
+              <Grid gutter='xs' align='flex-start' style={{ flex: 1 }}>
+                <Grid.Col span={12}>
+                  <Group justify='flex-start' wrap='nowrap' gap='2'>
+                    {invoice.status ? (
+                      <IconCircleFilled color='green' />
+                    ) : (
+                      <IconCircle color='grey' stroke={5} />
+                    )}
+                    <Text
+                      size='lg'
+                      fw={StylesConstants.HEAVY_FONT_WEIGHT}
+                      ml='xs'
+                    >
+                      {t('documents:documents.invoice')} {invoice.invoiceNumber}
+                    </Text>
+                  </Group>
+                </Grid.Col>
 
-              <Grid.Col span={4}>
-                <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                  {t('documents:documents.createdAt')}:{' '}
-                  {new Date(invoice.expectedDate).toLocaleDateString('uk-UA')}
-                </Text>
-              </Grid.Col>
-              {invoice.parent && (
                 <Grid.Col span={4}>
                   <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
-                    {t('documents:documents.byInvoice')}:{' '}
-                    {invoice.parent?.invoiceNumber}
+                    {t('documents:documents.createdAt')}:{' '}
+                    {new Date(invoice.expectedDate).toLocaleDateString('uk-UA')}
                   </Text>
                 </Grid.Col>
-              )}
-            </Grid>
+                {invoice.parent && (
+                  <Grid.Col span={4}>
+                    <Text size='sm' fw={StylesConstants.DEFAULT_FONT_WEIGHT}>
+                      {t('documents:documents.byInvoice')}:{' '}
+                      {invoice.parent?.invoiceNumber}
+                    </Text>
+                  </Grid.Col>
+                )}
+              </Grid>
+              <DocumentActions
+                loading={mutationLoading}
+                canEdit={!invoice.status}
+                canDelete={!invoice.status}
+                onEdit={() =>
+                  navigate(`${UrlConstants.INVOICES_URL}/${invoiceId}/edit`)
+                }
+                onDelete={() => setPendingAction('delete')}
+                onChangeStatus={() => setPendingAction('changeStatus')}
+              />
+            </Group>
+            {invoice.recipientId && (
+              <Group justify='flex-end' mt='xs'>
+                <Button
+                  variant='light'
+                  size='xs'
+                  component={Link}
+                  to={`${UrlConstants.INVOICES_URL}/new?invoiceId=${invoiceId}`}
+                >
+                  {t('documents:documents.createChildInvoice')}
+                </Button>
+              </Group>
+            )}
           </Card>
+
+          {confirmModalProps && (
+            <ConfirmActionModal
+              opened={pendingAction !== null}
+              title={confirmModalProps.title}
+              message={confirmModalProps.message}
+              confirmLabel={confirmModalProps.confirmLabel}
+              cancelLabel={t('common:actions.cancel')}
+              confirmColor={confirmModalProps.confirmColor}
+              loading={mutationLoading}
+              onConfirm={handleConfirm}
+              onCancel={() => setPendingAction(null)}
+            />
+          )}
 
           <Card shadow='sm' p='md' radius='md' withBorder mb='sm'>
             <Text fw={StylesConstants.HEAVY_FONT_WEIGHT} size='md' mb='5'>
@@ -212,8 +315,8 @@ export function InvoicePage(): ReactNode {
                 baseValue={{
                   primary: invoice.incoterms
                     ? [invoice.incoterms.name, invoice.transportPlace].join(
-                      CommonConstants.COMA_SPACE,
-                    )
+                        CommonConstants.COMA_SPACE,
+                      )
                     : CommonConstants.EMPTY_STRING,
                 }}
               />
@@ -223,7 +326,7 @@ export function InvoicePage(): ReactNode {
                   primary: 'PONZ',
                 }}
                 baseValue={{
-                  primary: invoice.ponz.toLocaleString(),
+                  primary: invoice.ponz?.toLocaleString() ?? CommonConstants.EMPTY_STRING,
                 }}
               />
               <DocumentPageItem
@@ -261,13 +364,15 @@ export function InvoicePage(): ReactNode {
                   primary: 'documents:documents.reportPeriod',
                 }}
                 baseValue={{
-                  primary: new Date(invoice.reportPeriod).toLocaleDateString(
-                    'uk-UA',
-                    {
-                      year: 'numeric',
-                      month: 'numeric',
-                    },
-                  ),
+                  primary: invoice.reportPeriod
+                    ? new Date(invoice.reportPeriod).toLocaleDateString(
+                        'uk-UA',
+                        {
+                          year: 'numeric',
+                          month: 'numeric',
+                        },
+                      )
+                    : CommonConstants.EMPTY_STRING,
                 }}
               />
               <DocumentPageItem

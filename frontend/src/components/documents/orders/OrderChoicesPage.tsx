@@ -1,6 +1,6 @@
 import { type FormEvent, type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Group, Select, Tooltip } from '@mantine/core';
 import {
   type MRT_ColumnDef,
@@ -9,6 +9,7 @@ import {
 } from 'mantine-react-table';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
+import { UrlConstants } from '@/constants/url-constants';
 import { recordToSelectData } from '@/helpers/select.helpers';
 import { useOrdersColumns } from '@/hooks/documents/table-columns/useOrderColumns';
 import { useOrders } from '@/hooks/documents/useOrders';
@@ -17,6 +18,7 @@ import type { GetOrdersDto } from '@/types/documents/orders.types';
 
 export function OrderChoicesPage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']);
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const companies = useLibsStore(s => s.companies);
   const companyOptions = useMemo(() => recordToSelectData(companies), [companies]);
@@ -84,6 +86,20 @@ export function OrderChoicesPage(): ReactNode {
     setSearchParams(next);
   };
 
+  const selectedOrderIds = Object.keys(rowSelection).filter(
+    key => rowSelection[key],
+  );
+
+  const handleCreateInvoice = (): void => {
+    if (selectedOrderIds.length === 0) {
+      return;
+    }
+
+    navigate(
+      `${UrlConstants.INVOICES_URL}/new?orderIds=${selectedOrderIds.join(',')}`,
+    );
+  };
+
   return (
     <>
       {loading && <Spinner />}
@@ -131,11 +147,12 @@ export function OrderChoicesPage(): ReactNode {
                 <Button type='submit' variant='light'>
                   {t('documents:documents.filter')}
                 </Button>
-                <Tooltip label={t('common:actions.comingSoon')}>
-                  <Button disabled>
-                    {t('documents:documents.createInvoiceFromOrders')}
-                  </Button>
-                </Tooltip>
+                <Button
+                  disabled={!canSelect || selectedOrderIds.length === 0}
+                  onClick={handleCreateInvoice}
+                >
+                  {t('documents:documents.createInvoiceFromOrders')}
+                </Button>
                 <Tooltip label={t('common:actions.comingSoon')}>
                   <Button disabled>{t('documents:documents.print')}</Button>
                 </Tooltip>
