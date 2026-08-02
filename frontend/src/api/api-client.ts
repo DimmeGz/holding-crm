@@ -49,6 +49,21 @@ export function toApiError(error: unknown): ApiError {
   };
 }
 
+export function getErrorMessage(
+  error: unknown,
+  fallback = 'Unknown error',
+): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message: string }).message);
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 async function request<T>(
   fn: () => Promise<AxiosResponse<T>>,
 ): Promise<T> {

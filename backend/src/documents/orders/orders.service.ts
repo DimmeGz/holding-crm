@@ -364,21 +364,28 @@ export class OrdersService {
       );
     }
 
-    const updatedOrderLinesIds = updateOrderDTO.orderLines
+    const orderLines = updateOrderDTO.orderLines ?? [];
+    const orderServiceLines = updateOrderDTO.orderServiceLines ?? [];
+
+    const updatedOrderLinesIds = orderLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const orderLinesToDelete = order.orderLines.filter(
       (line) => !updatedOrderLinesIds.includes(line.id),
     );
 
-    const updatedOrderServiceLinesIds = updateOrderDTO.orderServiceLines
+    const updatedOrderServiceLinesIds = orderServiceLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const orderServiceLinesToDelete = order.orderServiceLines.filter(
       (line) => !updatedOrderServiceLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(order, updateOrderDTO);
+    const updated = Object.assign(order, {
+      ...updateOrderDTO,
+      orderLines,
+      orderServiceLines,
+    });
 
     updated.technicalProcesses =
       await this.getTechnicalProcesses(updateOrderDTO);

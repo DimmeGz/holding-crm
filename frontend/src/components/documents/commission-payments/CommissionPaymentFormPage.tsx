@@ -61,6 +61,7 @@ export function CommissionPaymentFormPage({
 
   const companies = useLibsStore(s => s.companies);
   const currencies = useLibsStore(s => s.currencies);
+  const isLibsLoaded = useLibsStore(s => s.isLoaded);
   const getCurrencyName = useLibsStore(s => s.getCurrencyName);
   const { data: commissionInvoicesList } = useCommissionInvoices();
 
@@ -221,7 +222,12 @@ export function CommissionPaymentFormPage({
     void savePayment(form.values);
   };
 
-  if (mode === 'edit' && paymentLoading) {
+  const isLoading =
+    !isLibsLoaded ||
+    (mode === 'edit' && paymentLoading) ||
+    (mode === 'create' && !prefillDone);
+
+  if (isLoading) {
     return <Spinner />;
   }
 

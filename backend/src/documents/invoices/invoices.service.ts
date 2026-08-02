@@ -3,6 +3,8 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -47,6 +49,8 @@ import { Receive } from '../receive/entities';
 
 @Injectable()
 export class InvoiceService {
+  private readonly logger = new Logger(InvoiceService.name);
+
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
@@ -331,18 +335,29 @@ export class InvoiceService {
       try {
         if (receive?.id && recvPosted) {
           await this.receiveService.changeReceiveStatus(receive.id);
+          recvPosted = false;
         }
         if (shipment?.id && shipPosted) {
           await this.shipmentsService.changeShipmentStatus(shipment.id);
+          shipPosted = false;
         }
-        if (receive?.id && !recvPosted) {
+        if (receive?.id) {
           await this.receiveService.removeReceive(receive.id);
         }
-        if (shipment?.id && !shipPosted) {
+        if (shipment?.id) {
           await this.shipmentsService.removeShipment(shipment.id);
         }
-      } catch {
-        // best-effort compensation
+      } catch (compensationErr) {
+        this.logger.error(
+          `shipReceive compensation failed for invoice ${invoiceId}`,
+          compensationErr instanceof Error
+            ? compensationErr.stack
+            : String(compensationErr),
+        );
+        throw new InternalServerErrorException(
+          'Fast ship/receive failed and compensation could not complete',
+          { cause: err },
+        );
       }
 
       throw err;
@@ -605,21 +620,28 @@ export class InvoiceService {
       );
     }
 
-    const updatedInvoiceLinesIds = updateInvoiceDTO.invoiceLines
+    const invoiceLines = updateInvoiceDTO.invoiceLines ?? [];
+    const invoiceServiceLines = updateInvoiceDTO.invoiceServiceLines ?? [];
+
+    const updatedInvoiceLinesIds = invoiceLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const invoiceLinesToDelete = invoice.invoiceLines.filter(
       (line) => !updatedInvoiceLinesIds.includes(line.id),
     );
 
-    const updatedInvoiceServiceLinesIds = updateInvoiceDTO.invoiceServiceLines
+    const updatedInvoiceServiceLinesIds = invoiceServiceLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const invoiceServiceLinesToDelete = invoice.invoiceServiceLines.filter(
       (line) => !updatedInvoiceServiceLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(invoice, updateInvoiceDTO) as Invoice;
+    const updated = Object.assign(invoice, {
+      ...updateInvoiceDTO,
+      invoiceLines,
+      invoiceServiceLines,
+    }) as Invoice;
 
     updated.documentSum = this.calculateDocumentSum(updated);
 

@@ -163,7 +163,14 @@ export class OrdersConfirmationService {
       );
     }
 
-    const updatedOrderLinesIds = updateOrderConfirmationDTO.orderLines
+    if (order.status) {
+      throw new BadRequestException(
+        `Cannot update confirmation for closed order with id: ${order.id}`,
+      );
+    }
+
+    const orderLines = updateOrderConfirmationDTO.orderLines ?? [];
+    const updatedOrderLinesIds = orderLines
       .filter((line) => line['id'])
       .map((line) => line['id'] as number);
     const orderLinesToDelete = (confirmation.orderLines || []).filter(
@@ -181,10 +188,8 @@ export class OrdersConfirmationService {
       incotermsId: updateOrderConfirmationDTO.incotermsId,
       transportPlace: updateOrderConfirmationDTO.transportPlace || '',
       comment: updateOrderConfirmationDTO.comment || '',
-      orderLines: updateOrderConfirmationDTO.orderLines,
-      technicalProcesses: await this.getTechnicalProcesses(
-        updateOrderConfirmationDTO.orderLines,
-      ),
+      orderLines,
+      technicalProcesses: await this.getTechnicalProcesses(orderLines),
     });
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -203,7 +208,7 @@ export class OrdersConfirmationService {
         queryRunner.manager,
         order.id,
         updateOrderConfirmationDTO.expectedDate,
-        updateOrderConfirmationDTO.orderLines,
+        orderLines,
       );
       await queryRunner.commitTransaction();
       return saved;

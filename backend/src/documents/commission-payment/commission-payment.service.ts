@@ -166,14 +166,19 @@ export class CommissionPaymentService {
       );
     }
 
-    const updatedLineIds = (updateCommissionPaymentDTO.commissionPaymentLines || [])
+    const commissionPaymentLines =
+      updateCommissionPaymentDTO.commissionPaymentLines ?? [];
+    const updatedLineIds = commissionPaymentLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const linesToDelete = commissionPayment.commissionPaymentLines.filter(
       (line) => !updatedLineIds.includes(line.id),
     );
 
-    const updated = Object.assign(commissionPayment, updateCommissionPaymentDTO);
+    const updated = Object.assign(commissionPayment, {
+      ...updateCommissionPaymentDTO,
+      commissionPaymentLines,
+    });
 
     const { commissionInvoiceIds } = this.extractLinesData(
       updated.commissionPaymentLines,

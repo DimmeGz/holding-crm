@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { getErrorMessage } from '@/api/api-client';
 
 interface UseMutationOptions<TData> {
   onSuccess?: (data: TData) => void;
@@ -35,10 +36,7 @@ export function useMutation<TData, TVariables = void>(
         optionsRef.current?.onSuccess?.(data);
         return data;
       } catch (e: unknown) {
-        const message =
-          e && typeof e === 'object' && 'message' in e
-            ? String((e as { message: string }).message)
-            : 'Unknown error';
+        const message = getErrorMessage(e);
         setError(message);
         optionsRef.current?.onError?.(message);
         throw e;

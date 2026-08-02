@@ -61,6 +61,7 @@ export function PaymentFormPage({
 
   const companies = useLibsStore(s => s.companies);
   const currencies = useLibsStore(s => s.currencies);
+  const isLibsLoaded = useLibsStore(s => s.isLoaded);
   const getCurrencyName = useLibsStore(s => s.getCurrencyName);
 
   const companyOptions = useMemo(() => recordToSelectData(companies), [companies]);
@@ -221,7 +222,12 @@ export function PaymentFormPage({
     void savePayment(form.values);
   };
 
-  if (mode === 'edit' && paymentLoading) {
+  const isLoading =
+    !isLibsLoaded ||
+    (mode === 'edit' && paymentLoading) ||
+    (mode === 'create' && !prefillDone);
+
+  if (isLoading) {
     return <Spinner />;
   }
 

@@ -55,6 +55,7 @@ export function CommissionInvoiceFormPage({
   const companies = useLibsStore(s => s.companies);
   const companyTypes = useLibsStore(s => s.companyTypes);
   const currencies = useLibsStore(s => s.currencies);
+  const isLibsLoaded = useLibsStore(s => s.isLoaded);
   const { data: invoicesList } = useInvoices();
 
   const commissionerOptions = useMemo(
@@ -193,7 +194,12 @@ export function CommissionInvoiceFormPage({
     void saveCommission(form.values);
   };
 
-  if (mode === 'edit' && commissionLoading) {
+  const isLoading =
+    !isLibsLoaded ||
+    (mode === 'edit' && commissionLoading) ||
+    (mode === 'create' && !prefillDone);
+
+  if (isLoading) {
     return <Spinner />;
   }
 

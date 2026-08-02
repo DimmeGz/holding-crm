@@ -46,6 +46,7 @@ export function ProductionFormPage({
 
   const companies = useLibsStore(s => s.companies);
   const warehouses = useLibsStore(s => s.warehouses);
+  const isLibsLoaded = useLibsStore(s => s.isLoaded);
 
   const companyOptions = useMemo(() => recordToSelectData(companies), [companies]);
   const warehouseOptions = useMemo(
@@ -123,7 +124,9 @@ export function ProductionFormPage({
     void saveProduction(form.values);
   };
 
-  if (mode === 'edit' && productionLoading) {
+  const isLoading = !isLibsLoaded || (mode === 'edit' && productionLoading);
+
+  if (isLoading) {
     return <Spinner />;
   }
 

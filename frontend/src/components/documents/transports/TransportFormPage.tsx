@@ -47,6 +47,7 @@ export function TransportFormPage({
 
   const companies = useLibsStore(s => s.companies);
   const warehouses = useLibsStore(s => s.warehouses);
+  const isLibsLoaded = useLibsStore(s => s.isLoaded);
 
   const companyOptions = useMemo(() => recordToSelectData(companies), [companies]);
   const warehouseOptions = useMemo(
@@ -122,7 +123,9 @@ export function TransportFormPage({
     void saveTransport(form.values);
   };
 
-  if (mode === 'edit' && transportLoading) {
+  const isLoading = !isLibsLoaded || (mode === 'edit' && transportLoading);
+
+  if (isLoading) {
     return <Spinner />;
   }
 

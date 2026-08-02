@@ -60,6 +60,7 @@ export function ShipmentFormPage({
   const warehouses = useLibsStore(s => s.warehouses);
   const currencies = useLibsStore(s => s.currencies);
   const incoterms = useLibsStore(s => s.incoterms);
+  const isLibsLoaded = useLibsStore(s => s.isLoaded);
   const getCurrencyName = useLibsStore(s => s.getCurrencyName);
 
   const companyOptions = useMemo(() => recordToSelectData(companies), [companies]);
@@ -202,7 +203,12 @@ export function ShipmentFormPage({
     void saveShipment(form.values);
   };
 
-  if (mode === 'edit' && shipmentLoading) {
+  const isLoading =
+    !isLibsLoaded ||
+    (mode === 'edit' && shipmentLoading) ||
+    (mode === 'create' && !prefillDone);
+
+  if (isLoading) {
     return <Spinner />;
   }
 

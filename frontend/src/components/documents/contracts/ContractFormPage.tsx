@@ -151,6 +151,7 @@ export function ContractFormPage({ mode }: { mode: ContractFormMode }): ReactNod
         setParentPrefillDone(true);
       } catch {
         showError(t('common:messages.error'));
+        setParentPrefillDone(true);
       }
     };
 

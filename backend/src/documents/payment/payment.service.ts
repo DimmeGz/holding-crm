@@ -195,14 +195,18 @@ export class PaymentService {
       );
     }
 
-    const updatedPaymentLinesIds = updatePaymentDTO.paymentLines
+    const paymentLines = updatePaymentDTO.paymentLines ?? [];
+    const updatedPaymentLinesIds = paymentLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const paymentLinesToDelete = payment.paymentLines.filter(
       (line) => !updatedPaymentLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(payment, updatePaymentDTO);
+    const updated = Object.assign(payment, {
+      ...updatePaymentDTO,
+      paymentLines,
+    });
 
     const { invoiceIds, documentSum } = this.extractPaymentLinesData(
       updated.paymentLines,
