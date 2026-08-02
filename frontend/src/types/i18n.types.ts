@@ -207,6 +207,12 @@ export type LocaleDict = {
       shipmentEdit: string;
       cannotEditClosedShipment: string;
       createShipment: string;
+      createDeliveryNote: string;
+      fastShipReceive: string;
+      fastShipReceiveImpossible: string;
+      confirmFastShipReceive: string;
+      confirmFastShipReceiveMessage: string;
+      shipmentAlreadyExistsWarning: string;
       invoiceRequired: string;
       receiveCreate: string;
       receiveEdit: string;

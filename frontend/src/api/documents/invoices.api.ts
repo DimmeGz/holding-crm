@@ -6,6 +6,7 @@ import type {
   GetInvoiceDto,
   GetInvoicesDto,
   Invoice,
+  ShipReceiveResult,
   UpdateInvoicePayload,
 } from '@/types/documents/invoices.types';
 
@@ -45,6 +46,12 @@ export const invoicesApi = {
   changeStatus(invoiceId: number): Promise<Invoice> {
     return apiClient.patch<Invoice>(
       `${UrlConstants.INVOICES_URL}/change-status/${invoiceId}`,
+    );
+  },
+
+  shipReceive(invoiceId: number): Promise<ShipReceiveResult> {
+    return apiClient.post<ShipReceiveResult>(
+      `${UrlConstants.INVOICES_URL}/${invoiceId}/ship-receive`,
     );
   },
 };

@@ -21,6 +21,22 @@ export type GetInvoiceDto = {
   invoice: Invoice;
 };
 
+export type InvoiceRelatedReceive = {
+  id: number;
+  status: boolean;
+};
+
+export type InvoiceRelatedShipment = {
+  id: number;
+  status: boolean;
+  receives?: InvoiceRelatedReceive[];
+};
+
+export type ShipReceiveResult = {
+  receiveId: number;
+  shipmentId: number;
+};
+
 export type Invoice = {
   id: number;
   invoiceNumber: string;
@@ -54,6 +70,8 @@ export type Invoice = {
   invoiceLines: InvoiceLine[];
   invoiceServiceLines: InvoiceServiceLine[];
   comment?: string;
+  shipments?: InvoiceRelatedShipment[];
+  canFastShipReceive?: boolean;
 };
 
 export type InvoiceLine = {

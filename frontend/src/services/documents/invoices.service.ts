@@ -5,6 +5,7 @@ import type {
   GetInvoiceDto,
   GetInvoicesDto,
   Invoice,
+  ShipReceiveResult,
   UpdateInvoicePayload,
 } from '@/types/documents/invoices.types';
 
@@ -40,5 +41,9 @@ export class InvoicesService {
 
   static async changeStatus(invoiceId: number): Promise<Invoice> {
     return invoicesApi.changeStatus(invoiceId);
+  }
+
+  static async shipReceive(invoiceId: number): Promise<ShipReceiveResult> {
+    return invoicesApi.shipReceive(invoiceId);
   }
 }

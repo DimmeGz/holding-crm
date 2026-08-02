@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Card, Grid, Group, Text } from '@mantine/core';
+import { Button, Card, Grid, Group, Text, Tooltip } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
 import { DocumentActions } from '@/components/documents/common/DocumentActions';
@@ -10,9 +10,14 @@ import { ConfirmActionModal } from '@/components/shared/ConfirmActionModal';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
+import { CompanyType } from '@/constants/company-type.constants';
 import { StylesConstants } from '@/constants/styles.constants';
 import { UrlConstants } from '@/constants/url-constants';
-import { showError, showSuccess } from '@/helpers/notifications.helpers';
+import {
+  showError,
+  showSuccess,
+  showWarning,
+} from '@/helpers/notifications.helpers';
 import { useInvoiceLinesColumns } from '@/hooks/documents/table-columns/useInvoiceLinesColumns';
 import { useInvoiceServiceLinesColumns } from '@/hooks/documents/table-columns/useInvoiceServiceLinesColumns';
 import { useInvoice } from '@/hooks/documents/useInvoices';
@@ -25,7 +30,7 @@ import type {
   InvoiceServiceLine,
 } from '@/types/documents/invoices.types';
 
-type PendingAction = 'delete' | 'changeStatus' | null;
+type PendingAction = 'delete' | 'changeStatus' | 'shipReceive' | null;
 
 export function InvoicePage(): ReactNode {
   const { t } = useTranslation(['common', 'documents']);
@@ -36,10 +41,11 @@ export function InvoicePage(): ReactNode {
   const getCompanyName = useLibsStore(s => s.getCompanyName);
   const getWarehouseName = useLibsStore(s => s.getWarehouseName);
   const getCurrencyName = useLibsStore(s => s.getCurrencyName);
+  const companyTypes = useLibsStore(s => s.companyTypes);
   const invoice: Invoice | undefined = data?.invoice;
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  const { loading: mutationLoading, mutateAsync: runRemove } = useMutation(
+  const { loading: removeLoading, mutateAsync: runRemove } = useMutation(
     (targetInvoiceId: number) => InvoicesService.remove(targetInvoiceId),
     {
       onSuccess: () => {
@@ -53,19 +59,38 @@ export function InvoicePage(): ReactNode {
     },
   );
 
-  const { mutateAsync: runChangeStatus } = useMutation(
-    (targetInvoiceId: number) => InvoicesService.changeStatus(targetInvoiceId),
-    {
-      onSuccess: () => {
-        showSuccess(t('common:messages.changeStatusSuccess'));
-        setPendingAction(null);
-        refetch();
+  const { loading: changeStatusLoading, mutateAsync: runChangeStatus } =
+    useMutation(
+      (targetInvoiceId: number) => InvoicesService.changeStatus(targetInvoiceId),
+      {
+        onSuccess: () => {
+          showSuccess(t('common:messages.changeStatusSuccess'));
+          setPendingAction(null);
+          refetch();
+        },
+        onError: (message: string) => {
+          showError(message);
+        },
       },
-      onError: (message: string) => {
-        showError(message);
+    );
+
+  const { loading: shipReceiveLoading, mutateAsync: runShipReceive } =
+    useMutation(
+      (targetInvoiceId: number) => InvoicesService.shipReceive(targetInvoiceId),
+      {
+        onSuccess: result => {
+          showSuccess(t('common:messages.saveSuccess'));
+          setPendingAction(null);
+          navigate(`${UrlConstants.RECEIVES_URL}/${result.receiveId}`);
+        },
+        onError: (message: string) => {
+          showError(message);
+        },
       },
-    },
-  );
+    );
+
+  const mutationLoading =
+    removeLoading || changeStatusLoading || shipReceiveLoading;
 
   const handleConfirm = useCallback((): void => {
     if (pendingAction === 'delete') {
@@ -75,8 +100,19 @@ export function InvoicePage(): ReactNode {
 
     if (pendingAction === 'changeStatus') {
       void runChangeStatus(invoiceId);
+      return;
     }
-  }, [invoiceId, pendingAction, runChangeStatus, runRemove]);
+
+    if (pendingAction === 'shipReceive') {
+      void runShipReceive(invoiceId);
+    }
+  }, [
+    invoiceId,
+    pendingAction,
+    runChangeStatus,
+    runRemove,
+    runShipReceive,
+  ]);
 
   const confirmModalProps =
     pendingAction === 'delete'
@@ -93,7 +129,26 @@ export function InvoicePage(): ReactNode {
             confirmLabel: t('common:actions.changeStatus'),
             confirmColor: 'blue',
           }
-        : null;
+        : pendingAction === 'shipReceive'
+          ? {
+              title: t('documents:documents.confirmFastShipReceive'),
+              message: t('documents:documents.confirmFastShipReceiveMessage'),
+              confirmLabel: t('documents:documents.fastShipReceive'),
+              confirmColor: 'blue',
+            }
+          : null;
+
+  const createShipmentLabel =
+    companyTypes[invoice?.sellerId ?? 0] !== CompanyType.INNER_COMPANY
+      ? t('documents:documents.createDeliveryNote')
+      : t('documents:documents.createShipment');
+
+  const handleCreateShipment = useCallback((): void => {
+    if (invoice?.shipments && invoice.shipments.length > 0) {
+      showWarning(t('documents:documents.shipmentAlreadyExistsWarning'));
+    }
+    navigate(`${UrlConstants.SHIPMENTS_URL}/new?invoiceId=${invoiceId}`);
+  }, [invoice?.shipments, invoiceId, navigate, t]);
 
   const columns: MRT_ColumnDef<InvoiceLine>[] = useInvoiceLinesColumns(
     invoice ? getCurrencyName(invoice.currencyId) : CommonConstants.EMPTY_STRING,
@@ -215,11 +270,29 @@ export function InvoicePage(): ReactNode {
               <Button
                 variant='light'
                 size='xs'
-                component={Link}
-                to={`${UrlConstants.SHIPMENTS_URL}/new?invoiceId=${invoiceId}`}
+                onClick={handleCreateShipment}
               >
-                {t('documents:documents.createShipment')}
+                {createShipmentLabel}
               </Button>
+              {invoice.status &&
+                (invoice.canFastShipReceive ? (
+                  <Button
+                    variant='light'
+                    size='xs'
+                    loading={shipReceiveLoading}
+                    onClick={() => setPendingAction('shipReceive')}
+                  >
+                    {t('documents:documents.fastShipReceive')}
+                  </Button>
+                ) : (
+                  <Tooltip
+                    label={t('documents:documents.fastShipReceiveImpossible')}
+                  >
+                    <Button variant='light' size='xs' disabled>
+                      {t('documents:documents.fastShipReceiveImpossible')}
+                    </Button>
+                  </Tooltip>
+                ))}
               {invoice.recipientId && (
                 <>
                   <Button
@@ -352,7 +425,9 @@ export function InvoicePage(): ReactNode {
                   primary: 'PONZ',
                 }}
                 baseValue={{
-                  primary: invoice.ponz?.toLocaleString() ?? CommonConstants.EMPTY_STRING,
+                  primary:
+                    invoice.ponz?.toLocaleString() ??
+                    CommonConstants.EMPTY_STRING,
                 }}
               />
               <DocumentPageItem
@@ -412,6 +487,46 @@ export function InvoicePage(): ReactNode {
               />
             </Grid>
           </Card>
+
+          {invoice.shipments && invoice.shipments.length > 0 && (
+            <Card shadow='sm' p='md' radius='md' withBorder mb='sm'>
+              <Text fw={StylesConstants.HEAVY_FONT_WEIGHT} size='md' mb='5'>
+                {t('documents:documents.relatedDocuments')}
+              </Text>
+              {invoice.shipments.map(shipment => (
+                <Group key={shipment.id} gap='xs' mb='xs' align='flex-start'>
+                  <Button
+                    variant='light'
+                    size='xs'
+                    component={Link}
+                    to={`${UrlConstants.SHIPMENTS_URL}/${shipment.id}`}
+                  >
+                    {t('documents:documents.shipment')} {CommonConstants.NUMBER}
+                    {shipment.id}
+                    {shipment.status
+                      ? ` ${CommonConstants.CHECK_MARK}`
+                      : ` ${CommonConstants.X_MARK}`}
+                  </Button>
+                  {shipment.receives?.map(receive => (
+                    <Button
+                      key={receive.id}
+                      variant='light'
+                      size='xs'
+                      component={Link}
+                      to={`${UrlConstants.RECEIVES_URL}/${receive.id}`}
+                    >
+                      {t('documents:documents.receive')}{' '}
+                      {CommonConstants.NUMBER}
+                      {receive.id}
+                      {receive.status
+                        ? ` ${CommonConstants.CHECK_MARK}`
+                        : ` ${CommonConstants.X_MARK}`}
+                    </Button>
+                  ))}
+                </Group>
+              ))}
+            </Card>
+          )}
 
           {invoice.invoiceLines && (
             <HoldingTable

@@ -21,7 +21,10 @@ import {
   UpdateInvoiceDTO,
 } from './dto';
 import { GetInvoicesQueryDTO } from './dto/query-dto';
-import { GetInvoiceResponseDTO } from './dto/response-dto';
+import {
+  GetInvoiceResponseDTO,
+  ShipReceiveResponseDTO,
+} from './dto/response-dto';
 
 @Controller('invoices')
 export class InvoiceController {
@@ -52,6 +55,13 @@ export class InvoiceController {
     return this.invoiceService.createInvoiceByContract(
       createInvoiceByContractDTO,
     );
+  }
+
+  @Post(':invoiceId/ship-receive')
+  shipReceive(
+    @Param('invoiceId', new ParseIntPipe()) invoiceId: number,
+  ): Promise<ShipReceiveResponseDTO> {
+    return this.invoiceService.shipReceive(invoiceId);
   }
 
   @Patch(':invoiceId')

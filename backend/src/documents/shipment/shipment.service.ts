@@ -380,7 +380,7 @@ export class ShipmentService {
 
   private async updateWarehouseAccounting(shipment: Shipment): Promise<void> {
     const warehousePromises = shipment.shipmentLines.map((line) => {
-      if (!shipment.status) {
+      if (shipment.status) {
         return this.warehouseService.decreaseShipGoodsCount({
           companyId: shipment.sellerId,
           warehouseId: shipment.sellerWarehouseId,
