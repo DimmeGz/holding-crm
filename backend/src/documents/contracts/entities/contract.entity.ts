@@ -74,19 +74,20 @@ export class Contract extends AbstractDocumentEntity<Contract> {
   @JoinColumn({ name: 'parent_id' })
   parent: Contract;
 
-  @Column({ name: 'parent_id' })
+  @Column({ name: 'parent_id', nullable: true })
   parentId: number;
 
   @OneToMany(() => Contract, (contract) => contract.parent)
   children: Contract[];
 
   @ManyToOne(() => Incoterms, {
+    nullable: true,
     onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'incoterms_id' })
   incoterms: Incoterms;
 
-  @Column({ name: 'incoterms_id' })
+  @Column({ name: 'incoterms_id', nullable: true })
   incotermsId: number;
 
   @Column({

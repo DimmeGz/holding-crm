@@ -22,6 +22,7 @@ export class StoreDataService {
       packages: {},
       services: {},
       countries: {},
+      incoterms: {},
     };
 
     const rawCompanies = await this.companiesService.getStoreData();
@@ -31,6 +32,7 @@ export class StoreDataService {
     const rawPackages = await this.goodsService.getPackagesStoreData();
     const rawServices = await this.goodsService.getServicesStoreData();
     const rawCountries = await this.libsService.getCountriesOfOriginStoreData();
+    const rawIncoterms = await this.libsService.getIncotermsStoreData();
 
     rawCompanies.forEach(
       (company) => (allStoreData.companies[company.id] = company.name),
@@ -50,6 +52,9 @@ export class StoreDataService {
     );
     rawCountries.forEach(
       (country) => (allStoreData.countries[country.id] = country.name),
+    );
+    rawIncoterms.forEach(
+      (incoterm) => (allStoreData.incoterms[incoterm.id] = incoterm.name),
     );
 
     return allStoreData;

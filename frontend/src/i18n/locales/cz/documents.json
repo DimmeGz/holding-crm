@@ -45,6 +45,21 @@
     "reportPeriod": "Vykazované období",
     "additionalInfo": "Další informace",
     "subordinateInvoices": "Podřízené faktury",
-    "commissionPayment": "Platba provize"
+    "commissionPayment": "Platba provize",
+    "contractCreate": "Nová smlouva",
+    "contractEdit": "Úprava smlouvy",
+    "productLines": "Položky zboží",
+    "serviceLines": "Služby",
+    "parentContract": "Na základě",
+    "transportPlace": "Místo dodání",
+    "comment": "Komentář",
+    "currency": "Měna",
+    "cannotEditClosed": "Uzavřenou smlouvu nelze upravovat",
+    "createSubContract": "Vytvořit specifikaci",
+    "contractNameRequired": "Zadejte název smlouvy",
+    "sellerRequired": "Vyberte prodávajícího",
+    "buyerRequired": "Vyberte kupujícího",
+    "currencyRequired": "Vyberte měnu",
+    "productLinesRequired": "Přidejte alespoň jednu položku zboží"
   }
 }

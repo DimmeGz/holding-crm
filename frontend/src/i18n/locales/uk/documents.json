@@ -45,6 +45,21 @@
     "reportPeriod": "Звітний період",
     "additionalInfo": "Додаткова інформація",
     "subordinateInvoices": "Підлеглі рахунки",
-    "commissionPayment": "Комісійний платіж"
+    "commissionPayment": "Комісійний платіж",
+    "contractCreate": "Новий контракт",
+    "contractEdit": "Редагування контракту",
+    "productLines": "Товарні позиції",
+    "serviceLines": "Послуги",
+    "parentContract": "На підставі",
+    "transportPlace": "Місце доставки",
+    "comment": "Коментар",
+    "currency": "Валюта",
+    "cannotEditClosed": "Закритий контракт не можна редагувати",
+    "createSubContract": "Створити специфікацію",
+    "contractNameRequired": "Вкажіть назву контракту",
+    "sellerRequired": "Оберіть продавця",
+    "buyerRequired": "Оберіть покупця",
+    "currencyRequired": "Оберіть валюту",
+    "productLinesRequired": "Додайте хоча б одну товарну позицію"
   }
 }

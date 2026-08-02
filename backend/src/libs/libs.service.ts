@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CountryOfOrigin, Currency, TechnicalProcess } from './entities';
+import { CountryOfOrigin, Currency, Incoterms, TechnicalProcess } from './entities';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
@@ -12,6 +12,8 @@ export class LibsService {
     private readonly currenciesRepository: Repository<Currency>,
     @InjectRepository(CountryOfOrigin)
     private readonly countriesOfOriginRepository: Repository<CountryOfOrigin>,
+    @InjectRepository(Incoterms)
+    private readonly incotermsRepository: Repository<Incoterms>,
   ) {}
 
   private createBaseQueryBuilder(): SelectQueryBuilder<TechnicalProcess> {
@@ -74,6 +76,13 @@ export class LibsService {
     return await this.countriesOfOriginRepository
       .createQueryBuilder('countryOfOrigin')
       .select(['countryOfOrigin.id', 'countryOfOrigin.name'])
+      .getMany();
+  }
+
+  async getIncotermsStoreData() {
+    return await this.incotermsRepository
+      .createQueryBuilder('incoterms')
+      .select(['incoterms.id', 'incoterms.name'])
       .getMany();
   }
 }

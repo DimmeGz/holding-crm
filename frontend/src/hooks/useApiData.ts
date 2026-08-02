@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 interface UseApiDataOptions<T> {
   initialData?: T;
   dependencies?: unknown[];
+  enabled?: boolean;
 }
 
 export const useApiData: <T>(
@@ -27,6 +28,11 @@ export const useApiData: <T>(
     const [error, setError] = useState<string | null>(null);
 
     const fetchData: () => void = (): void => {
+      if (!options?.enabled) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
 

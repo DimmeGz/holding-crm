@@ -51,7 +51,7 @@ export function useMutation<TData, TVariables = void>(
 
   const mutate = useCallback(
     (variables: TVariables): void => {
-      void mutateAsync(variables);
+      void mutateAsync(variables).catch(() => undefined);
     },
     [mutateAsync],
   );

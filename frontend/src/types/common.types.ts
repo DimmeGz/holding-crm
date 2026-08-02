@@ -13,6 +13,7 @@ export type LibsData = {
   packages: Record<number, string>;
   services: Record<number, string>;
   countries: Record<number, string>;
+  incoterms: Record<number, string>;
 };
 
 export type LibsStore = LibsData & {
@@ -26,4 +27,5 @@ export type LibsStore = LibsData & {
   getPackageName: (id: number) => string;
   getServiceName: (id: number) => string;
   getCountryName: (id: number) => string;
+  getIncotermsName: (id: number) => string;
 };

@@ -11,6 +11,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
     packages: {},
     services: {},
     countries: {},
+    incoterms: {},
     isLoaded: false,
 
     loadAll: async (): Promise<void> => {
@@ -52,5 +53,9 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
     getCountryName: (id: number): string => {
       return get().countries[id] || `Unknown country (ID: ${id})`;
+    },
+
+    getIncotermsName: (id: number): string => {
+      return get().incoterms[id] || `Unknown incoterms (ID: ${id})`;
     },
   }));
