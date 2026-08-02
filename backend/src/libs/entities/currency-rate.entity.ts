@@ -11,13 +11,13 @@ export class CurrencyRate extends AbstractEntity {
   date: Date;
 
   @ManyToOne(() => Currency, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'base_currency_id' })
   baseCurrency: Currency;
 
   @ManyToOne(() => Currency, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'quote_currency_id' })
   quoteCurrency: Currency;

@@ -11,7 +11,7 @@ import { Warehouse } from './warehouse.entity';
 @Entity({ name: 'warehouse_warehouseaccounting' })
 export class WarehouseAccounting extends AbstractEntity {
   @ManyToOne(() => Batch, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
@@ -20,7 +20,7 @@ export class WarehouseAccounting extends AbstractEntity {
   batchId: number;
 
   @ManyToOne(() => Package, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'package_id' })
   package: Package;
@@ -29,7 +29,7 @@ export class WarehouseAccounting extends AbstractEntity {
   packageId: number;
 
   @ManyToOne(() => Warehouse, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'warehouse_id' })
   warehouse: Warehouse;
@@ -38,7 +38,7 @@ export class WarehouseAccounting extends AbstractEntity {
   warehouseId: number;
 
   @ManyToOne(() => Company, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'company_id' })
   company: Company;
@@ -62,7 +62,7 @@ export class WarehouseAccounting extends AbstractEntity {
   cost: number;
 
   @ManyToOne(() => Currency, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'currency_id' })
   currency: Currency;

@@ -12,7 +12,7 @@ import {
 @Entity({ name: 'warehouse_batch' })
 export class Batch extends AbstractEntity {
   @ManyToOne(() => Product, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'product_id' })
   product: Product;
@@ -28,7 +28,7 @@ export class Batch extends AbstractEntity {
   isArchived: boolean;
 
   @ManyToOne(() => CountryOfOrigin, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'default_country_of_origin_id' })
   countryOfOrigin: CountryOfOrigin;

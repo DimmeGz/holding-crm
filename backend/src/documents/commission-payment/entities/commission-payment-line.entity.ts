@@ -3,7 +3,7 @@ import { CommissionPayment } from './commission-payment.entity';
 import { CommissionInvoice } from '../../../documents/commission-invoice/entities';
 import { AbstractEntity } from '../../../common/entities';
 
-@Entity({ name: 'documents_commissionpaymentline', schema: 'ivan_igantiev_2557' })
+@Entity({ name: 'documents_commissionpaymentline' })
 export class CommissionPaymentLine extends AbstractEntity {
   @ManyToOne(() => CommissionPayment, {
     onDelete: 'CASCADE',
@@ -12,7 +12,7 @@ export class CommissionPaymentLine extends AbstractEntity {
   commissionPayment: CommissionPayment;
 
   @ManyToOne(() => CommissionInvoice, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'commission_invoice_id' })
   commissionInvoice: CommissionInvoice;

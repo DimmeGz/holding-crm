@@ -7,13 +7,13 @@ import { CustomField } from './custom-field.entity';
 @Entity({ name: 'warehouse_batchescustomfields' })
 export class BatchCustomField extends AbstractEntity {
   @ManyToOne(() => Batch, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'batch_id' })
   batch: Batch;
 
   @ManyToOne(() => CustomField, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'custom_field_id' })
   customField: CustomField;

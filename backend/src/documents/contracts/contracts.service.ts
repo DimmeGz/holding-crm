@@ -33,7 +33,7 @@ export class ContractsService {
     private readonly shipmentsService: ShipmentService,
     private readonly goodsService: GoodsService,
     @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  ) { }
 
   private createBaseQueryBuilder(): SelectQueryBuilder<Contract> {
     return this.contractsRepository.createQueryBuilder('contract');
@@ -300,14 +300,22 @@ export class ContractsService {
   async removeContract(contractId: number): Promise<Contract> {
     const contract = await this.contractsRepository.findOne({
       where: { id: contractId },
-      relations: ['contractLines', 'contractServiceLines'],
+      select: ['id', 'name'],
     });
 
     if (!contract) {
       throw new NotFoundException(`Contract with id: ${contractId} not found`);
     }
 
-    return await this.contractsRepository.remove(contract);
+    const { affected } = await this.contractsRepository.delete({
+      id: contractId,
+    });
+
+    if (!affected) {
+      throw new NotFoundException(`Contract with id: ${contractId} not found`);
+    }
+
+    return contract;
   }
 
   async changeContractStatus(contractId: number): Promise<Contract> {
