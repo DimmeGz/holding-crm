@@ -1,47 +1,53 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
 import type {
+  CreateCommissionInvoicePayload,
   GetCommissionInvoiceDto,
   GetCommissionInvoicesDto,
+  UpdateCommissionInvoicePayload,
 } from '@/types/documents/commission-invoices.types';
 
-export const commissionInvoicesApi: {
-  getList(): Promise<GetCommissionInvoicesDto[]>;
-  getById(commissionInvoiceId: number): Promise<GetCommissionInvoiceDto>;
-} = {
-  async getList(): Promise<GetCommissionInvoicesDto[]> {
-    try {
-      const response: AxiosResponse<GetCommissionInvoicesDto[]> =
-        await http.get<GetCommissionInvoicesDto[]>(
-          UrlConstants.COMMISSION_INVOICES_URL,
-        );
-
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
-
-      throw new Error('An unexpected error occurred');
-    }
+export const commissionInvoicesApi = {
+  getList(): Promise<GetCommissionInvoicesDto[]> {
+    return apiClient.get<GetCommissionInvoicesDto[]>(
+      UrlConstants.COMMISSION_INVOICES_URL,
+    );
   },
 
-  async getById(commissionInvoiceId: number): Promise<GetCommissionInvoiceDto> {
-    try {
-      const response: AxiosResponse<GetCommissionInvoiceDto> =
-        await http.get<GetCommissionInvoiceDto>(
-          `${UrlConstants.COMMISSION_INVOICES_URL}/${commissionInvoiceId}`,
-        );
+  getById(commissionInvoiceId: number): Promise<GetCommissionInvoiceDto> {
+    return apiClient.get<GetCommissionInvoiceDto>(
+      `${UrlConstants.COMMISSION_INVOICES_URL}/${commissionInvoiceId}`,
+    );
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  create(
+    payload: CreateCommissionInvoicePayload,
+  ): Promise<GetCommissionInvoiceDto> {
+    return apiClient.post<GetCommissionInvoiceDto>(
+      UrlConstants.COMMISSION_INVOICES_URL,
+      payload,
+    );
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  update(
+    commissionInvoiceId: number,
+    payload: UpdateCommissionInvoicePayload,
+  ): Promise<GetCommissionInvoiceDto> {
+    return apiClient.patch<GetCommissionInvoiceDto>(
+      `${UrlConstants.COMMISSION_INVOICES_URL}/${commissionInvoiceId}`,
+      payload,
+    );
+  },
+
+  remove(commissionInvoiceId: number): Promise<GetCommissionInvoiceDto> {
+    return apiClient.del<GetCommissionInvoiceDto>(
+      `${UrlConstants.COMMISSION_INVOICES_URL}/${commissionInvoiceId}`,
+    );
+  },
+
+  changeStatus(commissionInvoiceId: number): Promise<GetCommissionInvoiceDto> {
+    return apiClient.patch<GetCommissionInvoiceDto>(
+      `${UrlConstants.COMMISSION_INVOICES_URL}/change-status/${commissionInvoiceId}`,
+    );
   },
 };

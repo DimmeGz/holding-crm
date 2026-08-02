@@ -1,6 +1,7 @@
 import { type ChangeEvent, type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Switch } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
+import { Button, Group, Switch } from '@mantine/core';
 import {
   type MRT_ColumnDef,
   MRT_ExpandButton,
@@ -8,29 +9,32 @@ import {
 } from 'mantine-react-table';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
+import { UrlConstants } from '@/constants/url-constants';
 import { useContractColumns } from '@/hooks/documents/table-columns/useContractColumns';
 import { useContracts } from '@/hooks/documents/useContracts';
 import type { GetContractsDto } from '@/types/documents/contracts.types';
 
 export function ContractsTable(): ReactNode {
-  const { t } = useTranslation(['common', 'tables']),
-    { data, loading, error } = useContracts(),
-    columns: MRT_ColumnDef<GetContractsDto>[] = useContractColumns(),
-    [withArchived, setWithArchived] = useState(false),
-    actualContracts: GetContractsDto[] = useMemo(() => {
-      if (!data) return [];
+  const { t } = useTranslation(['common', 'tables']);
+  const navigate = useNavigate();
+  const { data, loading, error } = useContracts();
+  const columns: MRT_ColumnDef<GetContractsDto>[] = useContractColumns();
+  const [withArchived, setWithArchived] = useState(false);
 
-      return data
-        .filter(
-          contract =>
-            !contract.isArchived ||
-            contract.children?.some(child => !child.isArchived),
-        )
-        .map(contract => ({
-          ...contract,
-          children: contract.children?.filter(child => !child.isArchived) || [],
-        }));
-    }, [data]);
+  const actualContracts: GetContractsDto[] = useMemo(() => {
+    if (!data) return [];
+
+    return data
+      .filter(
+        contract =>
+          !contract.isArchived ||
+          contract.children?.some(child => !child.isArchived),
+      )
+      .map(contract => ({
+        ...contract,
+        children: contract.children?.filter(child => !child.isArchived) || [],
+      }));
+  }, [data]);
 
   const tableOptions: MRT_TableOptions<GetContractsDto> = {
     columns,
@@ -80,13 +84,18 @@ export function ContractsTable(): ReactNode {
           tableOptions={tableOptions}
           title={t('common:nav.contracts')}
           toolBarControls={
-            <Switch
-              checked={withArchived}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                setWithArchived(event.currentTarget.checked)
-              }
-              label={t('tables:showArchived')}
-            />
+            <Group gap='sm'>
+              <Button onClick={() => navigate(`${UrlConstants.CONTRACTS_URL}/new`)}>
+                {t('common:actions.create')}
+              </Button>
+              <Switch
+                checked={withArchived}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setWithArchived(event.currentTarget.checked)
+                }
+                label={t('tables:showArchived')}
+              />
+            </Group>
           }
         />
       )}

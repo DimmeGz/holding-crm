@@ -3,15 +3,19 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Brackets, DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
+import { CompanyType } from '../../companies/enums';
 import { GoodsService } from '../../goods';
 import { OrdersService } from '../orders';
 import { PaymentService } from '../payment';
+import { ReceiveService } from '../receive';
 import { ShipmentService } from '../shipment';
 import { WarehouseService } from '../../warehouse';
 
@@ -31,13 +35,22 @@ import {
 } from './dto';
 
 import { CreateOrderDTO, CreateOrderLineDTO } from '../orders/dto';
-import { GetInvoiceResponseDTO } from './dto/response-dto';
+import { CreateReveiveDTO } from '../receive/dto';
+import { CreateShipmentDTO } from '../shipment/dto';
+import {
+  GetInvoiceResponseDTO,
+  ShipReceiveResponseDTO,
+} from './dto/response-dto';
 import { GetInvoicesQueryDTO } from './dto/query-dto';
 import { DocumentTypeEnum } from '../common/enums';
 import { MONTHS_BY_QUATER, OLD_RECORDS_LIMIT } from '../common/constants';
+import { Shipment } from '../shipment/entities';
+import { Receive } from '../receive/entities';
 
 @Injectable()
 export class InvoiceService {
+  private readonly logger = new Logger(InvoiceService.name);
+
   constructor(
     @InjectRepository(Invoice)
     private readonly invoiceRepository: Repository<Invoice>,
@@ -49,6 +62,7 @@ export class InvoiceService {
     private readonly companiesService: CompaniesService,
     private readonly goodsService: GoodsService,
     private readonly shipmentsService: ShipmentService,
+    private readonly receiveService: ReceiveService,
     private readonly warehouseService: WarehouseService,
   ) { }
 
@@ -68,6 +82,7 @@ export class InvoiceService {
       'invoice.recipientId',
       'invoice.status',
       'invoice.documentSum',
+      'invoice.paymentBalance',
       'invoice.currencyId',
       'parent.id',
       'parent.invoiceNumber',
@@ -85,6 +100,7 @@ export class InvoiceService {
       .leftJoin('invoiceLine.order', 'order')
       .leftJoin('invoice.invoiceServiceLines', 'invoiceServiceLine')
       .select([
+        'invoice.id',
         'invoice.invoiceNumber',
         'invoice.status',
         'invoice.expectedDate',
@@ -99,17 +115,23 @@ export class InvoiceService {
         'invoice.paymentBalance',
         'invoice.currencyId',
         'invoice.paymentDelay',
+        'invoice.incotermsId',
         'incoterms.name',
         'invoice.transportPlace',
+        'invoice.carPlate',
         'invoice.vat',
         'invoice.ponz',
         'invoice.grossWeight',
         'invoice.transportAmount',
         'invoice.separation',
         'invoice.reportPeriod',
+        'invoice.reportDuplicating',
         'invoice.contractInfo',
         'invoice.comment',
+        'invoiceLine.id',
         'invoiceLine.productId',
+        'invoiceLine.batchId',
+        'invoiceLine.orderId',
         'invoiceLine.packageId',
         'invoiceLine.qty',
         'invoiceLine.price',
@@ -226,16 +248,194 @@ export class InvoiceService {
       throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
     }
 
-    // const shipments =
-    //   await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
-    // const payments =
-    //   await this.paymentsService.getPaymentsByInvoiceId(invoiceId);
-    // const commissions = invoice.commissionInvoices;
-    // delete invoice.commissionInvoices;
-    // const childInvoices = invoice.children;
-    // delete invoice.children;
+    invoice['shipments'] =
+      await this.shipmentsService.getShipmentsByInvoiceId(invoiceId);
+    invoice['canFastShipReceive'] =
+      await this.checkCanFastShipReceive(invoice);
 
     return { invoice };
+  }
+
+  private async checkCanFastShipReceive(invoice: Invoice): Promise<boolean> {
+    if (!invoice.status) {
+      return false;
+    }
+
+    const [sellerType, buyerType] = await Promise.all([
+      this.companiesService.getCompanyType(invoice.sellerId),
+      this.companiesService.getCompanyType(invoice.buyerId),
+    ]);
+
+    if (
+      sellerType !== CompanyType.INNER_COMPANY ||
+      buyerType !== CompanyType.INNER_COMPANY
+    ) {
+      return false;
+    }
+
+    const lines = invoice.invoiceLines ?? [];
+
+    for (const line of lines) {
+      const hasEnough = await this.warehouseService.hasEnoughQty({
+        companyId: invoice.sellerId,
+        warehouseId: invoice.sellerWarehouseId,
+        batchId: line.batchId,
+        packageId: line.packageId,
+        qty: line.qty,
+      });
+
+      if (!hasEnough) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  async shipReceive(invoiceId: number): Promise<ShipReceiveResponseDTO> {
+    const invoice = await this.getInvoiceEntityForShipReceive(invoiceId);
+
+    if (!invoice.status) {
+      throw new BadRequestException('Invoice must be posted');
+    }
+
+    const canFastShipReceive = await this.checkCanFastShipReceive(invoice);
+    if (!canFastShipReceive) {
+      throw new BadRequestException('Fast ship/receive is not possible');
+    }
+
+    if (!invoice.incotermsId) {
+      throw new BadRequestException('Invoice incoterms is required');
+    }
+
+    if (!invoice.buyerWarehouseId) {
+      throw new BadRequestException('Invoice buyer warehouse is required');
+    }
+
+    let shipment: Shipment | undefined;
+    let receive: Receive | undefined;
+    let shipPosted = false;
+    let recvPosted = false;
+
+    try {
+      shipment = await this.shipmentsService.createShipment(
+        this.buildCreateShipmentDto(invoice),
+      );
+      await this.shipmentsService.changeShipmentStatus(shipment.id);
+      shipPosted = true;
+
+      receive = await this.receiveService.createReceive(
+        this.buildCreateReceiveDto(invoice, shipment.id),
+      );
+      await this.receiveService.changeReceiveStatus(receive.id);
+      recvPosted = true;
+
+      return { receiveId: receive.id, shipmentId: shipment.id };
+    } catch (err) {
+      try {
+        if (receive?.id && recvPosted) {
+          await this.receiveService.changeReceiveStatus(receive.id);
+          recvPosted = false;
+        }
+        if (shipment?.id && shipPosted) {
+          await this.shipmentsService.changeShipmentStatus(shipment.id);
+          shipPosted = false;
+        }
+        if (receive?.id) {
+          await this.receiveService.removeReceive(receive.id);
+        }
+        if (shipment?.id) {
+          await this.shipmentsService.removeShipment(shipment.id);
+        }
+      } catch (compensationErr) {
+        this.logger.error(
+          `shipReceive compensation failed for invoice ${invoiceId}`,
+          compensationErr instanceof Error
+            ? compensationErr.stack
+            : String(compensationErr),
+        );
+        throw new InternalServerErrorException(
+          'Fast ship/receive failed and compensation could not complete',
+          { cause: err },
+        );
+      }
+
+      throw err;
+    }
+  }
+
+  private async getInvoiceEntityForShipReceive(
+    invoiceId: number,
+  ): Promise<Invoice> {
+    const qb = this.createBaseQueryBuilder();
+    this.applyInvoiceDetailSelect(qb);
+
+    const invoice = await qb
+      .where('invoice.id = :invoiceId', { invoiceId })
+      .getOne();
+
+    if (!invoice) {
+      throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
+    }
+
+    return invoice;
+  }
+
+  private buildCreateShipmentDto(invoice: Invoice): CreateShipmentDTO {
+    return {
+      sellerId: invoice.sellerId,
+      sellerWarehouseId: invoice.sellerWarehouseId,
+      buyerId: invoice.buyerId,
+      currencyId: invoice.currencyId,
+      invoiceId: invoice.id,
+      expectedDate: invoice.expectedDate || new Date(),
+      incotermsId: invoice.incotermsId,
+      transportPlace: invoice.transportPlace || '',
+      transportAmount: invoice.transportAmount || 0,
+      comment: '',
+      shipmentLines: (invoice.invoiceLines ?? []).map((line) => ({
+        productId: line.productId,
+        batchId: line.batchId,
+        packageId: line.packageId,
+        qty: line.qty,
+        price: line.price,
+      })),
+      shipmentServiceLines: (invoice.invoiceServiceLines ?? []).map((line) => ({
+        serviceId: line.serviceId,
+        qty: line.qty,
+        price: line.price,
+      })),
+    };
+  }
+
+  private buildCreateReceiveDto(
+    invoice: Invoice,
+    shipmentId: number,
+  ): CreateReveiveDTO {
+    return {
+      sellerId: invoice.sellerId,
+      buyerId: invoice.buyerId,
+      buyerWarehouseId: invoice.buyerWarehouseId,
+      currencyId: invoice.currencyId,
+      shipmentId,
+      expectedDate: invoice.expectedDate || new Date(),
+      incotermsId: invoice.incotermsId,
+      transportPlace: invoice.transportPlace || '',
+      transportAmount: invoice.transportAmount || 0,
+      comment: '',
+      receiveLines: (invoice.invoiceLines ?? []).map((line) => ({
+        productId: line.productId,
+        batchId: line.batchId,
+        packageId: line.packageId,
+        qty: line.qty,
+        price: line.price,
+      })),
+      receiveServiceLines: (invoice.invoiceServiceLines ?? []).map((line) => ({
+        serviceId: line.serviceId,
+        qty: line.qty,
+        price: line.price,
+      })),
+    };
   }
 
   async getInvoicesByOrderId(orderId: number): Promise<Invoice[]> {
@@ -260,7 +460,12 @@ export class InvoiceService {
   }
 
   async createInvoice(createInvoiceDTO: CreateInvoiceDTO): Promise<Invoice> {
-    const newInvoice = this.invoiceRepository.create(createInvoiceDTO);
+    const { invoiceId, ...invoiceData } = createInvoiceDTO;
+    const newInvoice = this.invoiceRepository.create(invoiceData);
+
+    if (invoiceId) {
+      newInvoice.parentId = invoiceId;
+    }
 
     newInvoice.technicalProcesses =
       await this.getTechnicalProcesses(createInvoiceDTO);
@@ -415,21 +620,28 @@ export class InvoiceService {
       );
     }
 
-    const updatedInvoiceLinesIds = updateInvoiceDTO.invoiceLines
+    const invoiceLines = updateInvoiceDTO.invoiceLines ?? [];
+    const invoiceServiceLines = updateInvoiceDTO.invoiceServiceLines ?? [];
+
+    const updatedInvoiceLinesIds = invoiceLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const invoiceLinesToDelete = invoice.invoiceLines.filter(
       (line) => !updatedInvoiceLinesIds.includes(line.id),
     );
 
-    const updatedInvoiceServiceLinesIds = updateInvoiceDTO.invoiceServiceLines
+    const updatedInvoiceServiceLinesIds = invoiceServiceLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const invoiceServiceLinesToDelete = invoice.invoiceServiceLines.filter(
       (line) => !updatedInvoiceServiceLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(invoice, updateInvoiceDTO) as Invoice;
+    const updated = Object.assign(invoice, {
+      ...updateInvoiceDTO,
+      invoiceLines,
+      invoiceServiceLines,
+    }) as Invoice;
 
     updated.documentSum = this.calculateDocumentSum(updated);
 

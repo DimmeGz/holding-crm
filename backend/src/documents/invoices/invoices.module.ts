@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { CompaniesModule } from '../../companies';
 import { GoodsModule } from '../../goods';
+import { ReceiveModule } from '../receive';
 import { ShipmentModule } from '../shipment';
 import { OrdersModule } from '../orders';
 import { PaymentModule } from '../payment';
@@ -20,6 +21,7 @@ import { InvoiceController } from './invoices.controller';
     GoodsModule,
     forwardRef(() => PaymentModule),
     ShipmentModule,
+    ReceiveModule,
     WarehouseModule,
     forwardRef(() => OrdersModule),
   ],

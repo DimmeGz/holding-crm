@@ -1,46 +1,44 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
 import type {
+  Contract,
+  CreateContractPayload,
   GetContractDto,
   GetContractsDto,
+  UpdateContractPayload,
 } from '@/types/documents/contracts.types';
 
-export const contractsApi: {
-  getList(): Promise<GetContractsDto[]>;
-  getById(contractId: number): Promise<GetContractDto>;
-} = {
-  async getList(): Promise<GetContractsDto[]> {
-    try {
-      const response: AxiosResponse<GetContractsDto[]> = await http.get<
-        GetContractsDto[]
-      >(UrlConstants.CONTRACTS_URL);
-
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
-
-      throw new Error('An unexpected error occurred');
-    }
+export const contractsApi = {
+  getList(): Promise<GetContractsDto[]> {
+    return apiClient.get<GetContractsDto[]>(UrlConstants.CONTRACTS_URL);
   },
 
-  async getById(contractId: number): Promise<GetContractDto> {
-    try {
-      const response: AxiosResponse<GetContractDto> =
-        await http.get<GetContractDto>(
-          `${UrlConstants.CONTRACTS_URL}/${contractId}`,
-        );
+  getById(contractId: number): Promise<GetContractDto> {
+    return apiClient.get<GetContractDto>(
+      `${UrlConstants.CONTRACTS_URL}/${contractId}`,
+    );
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  create(payload: CreateContractPayload): Promise<Contract> {
+    return apiClient.post<Contract>(UrlConstants.CONTRACTS_URL, payload);
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  update(contractId: number, payload: UpdateContractPayload): Promise<Contract> {
+    return apiClient.patch<Contract>(
+      `${UrlConstants.CONTRACTS_URL}/${contractId}`,
+      payload,
+    );
+  },
+
+  remove(contractId: number): Promise<Contract> {
+    return apiClient.del<Contract>(
+      `${UrlConstants.CONTRACTS_URL}/${contractId}`,
+    );
+  },
+
+  changeStatus(contractId: number): Promise<Contract> {
+    return apiClient.patch<Contract>(
+      `${UrlConstants.CONTRACTS_URL}/change-status/${contractId}`,
+    );
   },
 };

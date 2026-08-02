@@ -3,10 +3,12 @@ import {
   IsBoolean,
   IsDate,
   IsInt,
+  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   Length,
+  Min,
   ValidateIf,
 } from 'class-validator';
 
@@ -43,12 +45,12 @@ export class BaseOrderDTO {
   @IsOptional()
   @IsPositive()
   @IsInt()
-  recipientId?: number;
+  recipientId?: number | null;
 
   @IsOptional()
   @IsPositive()
   @IsInt()
-  recipientWarehouseId?: number;
+  recipientWarehouseId?: number | null;
 
   @ValidateIf((o) => !o.isDateAsap || o.expectedDate)
   @IsDate()
@@ -64,14 +66,14 @@ export class BaseOrderDTO {
   currencyId: number;
 
   @IsOptional()
-  @IsPositive()
-  @IsInt()
+  @IsNumber()
+  @Min(0)
   vat?: number;
 
   @IsOptional()
-  @IsPositive()
   @IsInt()
-  paymentDelay: number;
+  @Min(0)
+  paymentDelay?: number;
 
   @IsPositive()
   @IsInt()
@@ -79,12 +81,12 @@ export class BaseOrderDTO {
 
   @IsOptional()
   @IsString()
-  @Length(1, 20)
+  @Length(0, 20)
   transportPlace?: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 30)
+  @Length(0, 30)
   carPlate?: string;
 
   @IsOptional()

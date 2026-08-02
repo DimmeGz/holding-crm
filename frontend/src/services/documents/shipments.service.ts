@@ -1,19 +1,37 @@
 import { shipmentsApi } from '@/api/documents/shipments.api';
 import type {
+  CreateShipmentPayload,
   GetShipmentDto,
   GetShipmentsDto,
+  Shipment,
+  UpdateShipmentPayload,
 } from '@/types/documents/shipments.types';
 
 export class ShipmentsService {
   static async getList(): Promise<GetShipmentsDto[]> {
-    const shipments: GetShipmentsDto[] = await shipmentsApi.getList();
-
-    return shipments;
+    return shipmentsApi.getList();
   }
 
   static async getById(shipmentId: number): Promise<GetShipmentDto> {
-    const shipment: GetShipmentDto = await shipmentsApi.getById(shipmentId);
+    return shipmentsApi.getById(shipmentId);
+  }
 
-    return shipment;
+  static async create(payload: CreateShipmentPayload): Promise<Shipment> {
+    return shipmentsApi.create(payload);
+  }
+
+  static async update(
+    shipmentId: number,
+    payload: UpdateShipmentPayload,
+  ): Promise<Shipment> {
+    return shipmentsApi.update(shipmentId, payload);
+  }
+
+  static async remove(shipmentId: number): Promise<Shipment> {
+    return shipmentsApi.remove(shipmentId);
+  }
+
+  static async changeStatus(shipmentId: number): Promise<Shipment> {
+    return shipmentsApi.changeStatus(shipmentId);
   }
 }

@@ -19,7 +19,10 @@ export function useCommissionPayments(): {
   );
 }
 
-export function useCommissionPayment(commissionPaymentId: number): {
+export function useCommissionPayment(
+  commissionPaymentId: number,
+  enabled = true,
+): {
   data: GetCommissionPaymentDto | null;
   loading: boolean;
   error: string | null;
@@ -28,8 +31,8 @@ export function useCommissionPayment(commissionPaymentId: number): {
   return useApiData<GetCommissionPaymentDto>(
     () => CommissionPaymentsService.getById(commissionPaymentId),
     {
-      dependencies: [commissionPaymentId],
+      dependencies: [commissionPaymentId, enabled],
+      enabled: enabled && commissionPaymentId > 0,
     },
   );
 }
-

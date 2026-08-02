@@ -151,6 +151,19 @@ export class CompaniesService {
     }
   }
 
+  async getCompanyType(companyId: number): Promise<CompanyType> {
+    const company = await this.companiesRepository.findOne({
+      where: { id: companyId },
+      select: ['id', 'companyType'],
+    });
+
+    if (!company) {
+      throw new NotFoundException(`Company with id ${companyId} not found`);
+    }
+
+    return company.companyType;
+  }
+
   async getCompanyById(companyId: number): Promise<Company> {
     const company = await this.companiesRepository
       .createQueryBuilder('company')
@@ -176,6 +189,7 @@ export class CompaniesService {
       .select([
         'company.id',
         'company.name',
+        'company.defaultWarehouseId',
         'account.id',
         'account.balance',
         'account.debt',
@@ -225,7 +239,7 @@ export class CompaniesService {
   async getStoreData() {
     return await this.companiesRepository
       .createQueryBuilder('company')
-      .select(['company.id', 'company.name'])
+      .select(['company.id', 'company.name', 'company.companyType'])
       .getMany();
   }
 }

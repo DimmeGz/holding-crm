@@ -77,12 +77,14 @@ export class ShipmentService {
         'shipment.status',
         'shipment.documentSum',
         'shipment.expectedDate',
+        'shipment.incotermsId',
         'incoterms.name',
         'shipment.transportPlace',
         'shipment.transportAmount',
         'shipment.comment',
         'invoice.id',
         'invoice.invoiceNumber',
+        'invoice.buyerWarehouseId',
         'shipmentLine',
         'shipmentServiceLine.id',
         'shipmentServiceLine.serviceId',
@@ -290,24 +292,31 @@ export class ShipmentService {
       );
     }
 
-    const updatedShipmentLinesIds = updateShipmentDTO.shipmentLines
+    const shipmentLines = updateShipmentDTO.shipmentLines ?? [];
+    const shipmentServiceLines =
+      updateShipmentDTO.shipmentServiceLines ?? [];
+
+    const updatedShipmentLinesIds = shipmentLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const shipmentLinesToDelete = shipment.shipmentLines.filter(
       (line) => !updatedShipmentLinesIds.includes(line.id),
     );
 
-    const updatedShipmentServiceLinesIds =
-      updateShipmentDTO.shipmentServiceLines
-        .filter((line) => line['id'])
-        .map((line) => line['id']);
+    const updatedShipmentServiceLinesIds = shipmentServiceLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const shipmentServiceLinesToDelete = shipment.shipmentServiceLines.filter(
       (line) => !updatedShipmentServiceLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(shipment, updateShipmentDTO);
+    const updated = Object.assign(shipment, {
+      ...updateShipmentDTO,
+      shipmentLines,
+      shipmentServiceLines,
+    });
     updated.technicalProcesses =
-      await this.getTechnicalProcesses(updateShipmentDTO);
+      await this.getTechnicalProcesses(updated);
     updated.documentSum = this.calculateDocumentSum(updated);
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -371,7 +380,7 @@ export class ShipmentService {
 
   private async updateWarehouseAccounting(shipment: Shipment): Promise<void> {
     const warehousePromises = shipment.shipmentLines.map((line) => {
-      if (!shipment.status) {
+      if (shipment.status) {
         return this.warehouseService.decreaseShipGoodsCount({
           companyId: shipment.sellerId,
           warehouseId: shipment.sellerWarehouseId,

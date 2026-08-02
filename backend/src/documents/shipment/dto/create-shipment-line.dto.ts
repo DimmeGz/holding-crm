@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsPositive } from 'class-validator';
+import { IsInt, IsNumber, IsPositive, Min } from 'class-validator';
 
 export class CreateShipmentLineDTO {
   @IsPositive()
@@ -17,7 +17,7 @@ export class CreateShipmentLineDTO {
   @IsInt()
   qty: number;
 
-  @IsPositive()
   @IsNumber({ maxDecimalPlaces: 3 })
+  @Min(0)
   price: number;
 }

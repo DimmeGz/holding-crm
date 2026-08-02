@@ -10,19 +10,21 @@ export class AbstractDocumentRecipientEntity<
 > extends AbstractDocumentWarehouseEntity<T> {
   @ManyToOne(() => Company, {
     onDelete: 'RESTRICT',
+    nullable: true,
   })
   @JoinColumn({ name: 'recipient_id' })
-  recipient: Company;
+  recipient: Company | null;
 
-  @Column({ name: 'recipient_id' })
-  recipientId: number;
+  @Column({ name: 'recipient_id', nullable: true })
+  recipientId: number | null;
 
   @ManyToOne(() => Warehouse, {
     onDelete: 'RESTRICT',
+    nullable: true,
   })
   @JoinColumn({ name: 'recipient_warehouse_id' })
-  recipientWarehouse: Warehouse;
+  recipientWarehouse: Warehouse | null;
 
-  @Column({ name: 'recipient_warehouse_id' })
-  recipientWarehouseId: number;
+  @Column({ name: 'recipient_warehouse_id', nullable: true })
+  recipientWarehouseId: number | null;
 }

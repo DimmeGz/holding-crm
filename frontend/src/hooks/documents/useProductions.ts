@@ -16,7 +16,10 @@ export function useProductions(): {
   });
 }
 
-export function useProduction(productionId: number): {
+export function useProduction(
+  productionId: number,
+  enabled = true,
+): {
   data: Production | null;
   loading: boolean;
   error: string | null;
@@ -25,7 +28,8 @@ export function useProduction(productionId: number): {
   return useApiData<Production>(
     () => ProductionsService.getById(productionId),
     {
-      dependencies: [productionId],
+      dependencies: [productionId, enabled],
+      enabled: enabled && productionId > 0,
     },
   );
 }

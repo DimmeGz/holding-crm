@@ -19,7 +19,10 @@ export function useCommissionInvoices(): {
   );
 }
 
-export function useCommissionInvoice(commissionInvoiceId: number): {
+export function useCommissionInvoice(
+  commissionInvoiceId: number,
+  enabled = true,
+): {
   data: GetCommissionInvoiceDto | null;
   loading: boolean;
   error: string | null;
@@ -28,7 +31,8 @@ export function useCommissionInvoice(commissionInvoiceId: number): {
   return useApiData<GetCommissionInvoiceDto>(
     () => CommissionInvoicesService.getById(commissionInvoiceId),
     {
-      dependencies: [commissionInvoiceId],
+      dependencies: [commissionInvoiceId, enabled],
+      enabled: enabled && commissionInvoiceId > 0,
     },
   );
 }

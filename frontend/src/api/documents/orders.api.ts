@@ -1,42 +1,86 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
-import type { GetOrderDto, GetOrdersDto } from '@/types/documents/orders.types';
+import type {
+  CreateOrderPayload,
+  GetOrderDto,
+  GetOrdersDto,
+  GetOrdersQuery,
+  Order,
+  UpdateOrderPayload,
+} from '@/types/documents/orders.types';
 
-export const ordersApi: {
-  getList(): Promise<GetOrdersDto[]>;
-  getById(orderId: number): Promise<GetOrderDto>;
-} = {
-  async getList(): Promise<GetOrdersDto[]> {
-    try {
-      const response: AxiosResponse<GetOrdersDto[]> = await http.get<
-        GetOrdersDto[]
-      >(UrlConstants.ORDERS_URL);
+function buildOrdersQueryString(query?: GetOrdersQuery): string {
+  if (!query) {
+    return '';
+  }
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  const params = new URLSearchParams();
 
-      throw new Error('An unexpected error occurred');
-    }
+  if (query.status !== undefined) {
+    params.set('status', String(query.status));
+  }
+
+  if (query.hidden !== undefined) {
+    params.set('hidden', String(query.hidden));
+  }
+
+  if (query.sellerId !== undefined) {
+    params.set('sellerId', String(query.sellerId));
+  }
+
+  if (query.buyerId !== undefined) {
+    params.set('buyerId', String(query.buyerId));
+  }
+
+  if (query.recipientId !== undefined) {
+    params.set('recipientId', String(query.recipientId));
+  }
+
+  if (query.year !== undefined) {
+    params.set('year', String(query.year));
+  }
+
+  if (query.type !== undefined) {
+    params.set('type', query.type);
+  }
+
+  if (query.process !== undefined) {
+    params.set('process', String(query.process));
+  }
+
+  const qs = params.toString();
+  return qs ? `?${qs}` : '';
+}
+
+export const ordersApi = {
+  getList(query?: GetOrdersQuery): Promise<GetOrdersDto[]> {
+    return apiClient.get<GetOrdersDto[]>(
+      `${UrlConstants.ORDERS_URL}${buildOrdersQueryString(query)}`,
+    );
   },
 
-  async getById(orderId: number): Promise<GetOrderDto> {
-    try {
-      const response: AxiosResponse<GetOrderDto> = await http.get<GetOrderDto>(
-        `${UrlConstants.ORDERS_URL}/${orderId}`,
-      );
+  getById(orderId: number): Promise<GetOrderDto> {
+    return apiClient.get<GetOrderDto>(`${UrlConstants.ORDERS_URL}/${orderId}`);
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  create(payload: CreateOrderPayload): Promise<Order> {
+    return apiClient.post<Order>(UrlConstants.ORDERS_URL, payload);
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  update(orderId: number, payload: UpdateOrderPayload): Promise<Order> {
+    return apiClient.patch<Order>(
+      `${UrlConstants.ORDERS_URL}/${orderId}`,
+      payload,
+    );
+  },
+
+  remove(orderId: number): Promise<Order> {
+    return apiClient.del<Order>(`${UrlConstants.ORDERS_URL}/${orderId}`);
+  },
+
+  changeStatus(orderId: number): Promise<Order> {
+    return apiClient.patch<Order>(
+      `${UrlConstants.ORDERS_URL}/change-status/${orderId}`,
+    );
   },
 };

@@ -1,35 +1,13 @@
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsPositive,
-} from 'class-validator';
+import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 
-export class CreateCommissionPaymentDTO {
-  @IsPositive()
-  @IsInt()
-  sellerId: number;
+import { BaseCommissionPaymentDTO } from './base-commission-payment.dto';
+import { CreateCommissionPaymentLineDTO } from './create-commission-payment-line.dto';
 
-  @IsPositive()
-  @IsInt()
-  buyerId: number;
-
-  @IsPositive()
-  @IsInt()
-  commissionInvoiceId: number;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  expectedDate?: Date;
-
-  @IsPositive()
-  @IsInt()
-  currencyId: number;
-
-  @IsPositive()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  amount: number;
+export class CreateCommissionPaymentDTO extends BaseCommissionPaymentDTO {
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => CreateCommissionPaymentLineDTO)
+  commissionPaymentLines: CreateCommissionPaymentLineDTO[];
 }

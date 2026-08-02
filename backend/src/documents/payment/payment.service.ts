@@ -48,6 +48,7 @@ export class PaymentService {
         'payment.documentSum',
         'payment.currencyId',
         'payment.expectedDate',
+        'payment.createdAt',
         'paymentLine.id',
         'invoice.id',
         'invoice.invoiceNumber',
@@ -68,6 +69,7 @@ export class PaymentService {
         'payment.sellerId',
         'payment.buyerId',
         'payment.currencyId',
+        'payment.comment',
         'paymentLine.id',
         'paymentLine.amount',
         'invoice.id',
@@ -110,6 +112,14 @@ export class PaymentService {
     this.applyQueryFilter(qb, query);
 
     return qb.orderBy('payment.id', 'DESC').getMany();
+  }
+
+  async getPaymentsByCreation(): Promise<Payment[]> {
+    const qb = this.createBaseQueryBuilder();
+
+    this.applyPaymentListSelect(qb);
+
+    return qb.orderBy('payment.createdAt', 'DESC').getMany();
   }
 
   async getPaymentById(paymentId: number): Promise<{ payment: Payment }> {
@@ -185,14 +195,18 @@ export class PaymentService {
       );
     }
 
-    const updatedPaymentLinesIds = updatePaymentDTO.paymentLines
+    const paymentLines = updatePaymentDTO.paymentLines ?? [];
+    const updatedPaymentLinesIds = paymentLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const paymentLinesToDelete = payment.paymentLines.filter(
       (line) => !updatedPaymentLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(payment, updatePaymentDTO);
+    const updated = Object.assign(payment, {
+      ...updatePaymentDTO,
+      paymentLines,
+    });
 
     const { invoiceIds, documentSum } = this.extractPaymentLinesData(
       updated.paymentLines,

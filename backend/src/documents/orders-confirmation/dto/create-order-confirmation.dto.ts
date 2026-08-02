@@ -1,12 +1,19 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsDate,
   IsInt,
   IsNotEmpty,
   IsOptional,
   IsPositive,
   IsString,
+  Length,
+  Matches,
+  ValidateNested,
 } from 'class-validator';
+
+import { CreateOrderConfirmationLineDTO } from './create-order-confirmation-line.dto';
 
 export class CreateOrderConfirmationDTO {
   @IsPositive()
@@ -36,20 +43,24 @@ export class CreateOrderConfirmationDTO {
   @IsOptional()
   @IsPositive()
   @IsInt()
-  recipientId: number;
+  recipientId?: number;
 
   @IsOptional()
   @IsPositive()
   @IsInt()
-  recipientWarehouseId: number;
+  recipientWarehouseId?: number;
 
   @IsOptional()
   @IsPositive()
   @IsInt()
-  paymentDelay: number;
+  paymentDelay?: number;
 
   @IsString()
   @IsNotEmpty()
+  @Length(1, 15)
+  @Matches(/\d+$/, {
+    message: 'Confirmation number must end with digits',
+  })
   confirmationNumber: string;
 
   @IsDate()
@@ -67,4 +78,10 @@ export class CreateOrderConfirmationDTO {
   @IsOptional()
   @IsString()
   comment?: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrderConfirmationLineDTO)
+  orderLines: CreateOrderConfirmationLineDTO[];
 }

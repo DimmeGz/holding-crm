@@ -16,7 +16,10 @@ export function useContracts(): {
   });
 }
 
-export function useContract(contractId: number): {
+export function useContract(
+  contractId: number,
+  enabled = true,
+): {
   data: GetContractDto | null;
   loading: boolean;
   error: string | null;
@@ -25,7 +28,8 @@ export function useContract(contractId: number): {
   return useApiData<GetContractDto>(
     () => ContractsService.getById(contractId),
     {
-      dependencies: [contractId],
+      dependencies: [contractId, enabled],
+      enabled: enabled && contractId > 0,
     },
   );
 }

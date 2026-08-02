@@ -1,41 +1,132 @@
-import { type ChangeEvent, type ReactNode, useMemo, useState } from 'react';
+import { type ChangeEvent, type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
-import { Card, Grid, Group, Switch, Text } from '@mantine/core';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Button, Card, Grid, Group, Switch, Text } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { IconCircle, IconCircleFilled } from '@tabler/icons-react';
+import { DocumentActions } from '@/components/documents/common/DocumentActions';
 import { DocumentPageItem } from '@/components/documents/common/DocumentPageItem';
+import { ConfirmActionModal } from '@/components/shared/ConfirmActionModal';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
 import { StylesConstants } from '@/constants/styles.constants';
+import { UrlConstants } from '@/constants/url-constants';
+import { showError, showSuccess } from '@/helpers/notifications.helpers';
 import { useOrderLinesColumns } from '@/hooks/documents/table-columns/useOrderLinesColumns';
+import { useOrderServiceLinesColumns } from '@/hooks/documents/table-columns/useOrderServiceLinesColumns';
 import { useOrder } from '@/hooks/documents/useOrders';
+import { useMutation } from '@/hooks/useMutation';
+import { OrdersService } from '@/services/documents/orders.service';
 import { useLibsStore } from '@/stores/useLibsStore';
-import type { Order, OrderLine } from '@/types/documents/orders.types';
+import type {
+  Order,
+  OrderLine,
+  OrderServiceLine,
+} from '@/types/documents/orders.types';
+
+type PendingAction = 'delete' | 'changeStatus' | null;
 
 export function OrderPage(): ReactNode {
-  const { t } = useTranslation(['documents']),
-    { id } = useParams<{ id: string }>(),
-    { data, loading, error } = useOrder(Number(id)),
-    getCompanyName: (id: number) => string = useLibsStore(
-      s => s.getCompanyName,
-    ),
-    getWarehouseName: (id: number) => string = useLibsStore(
-      s => s.getWarehouseName,
-    ),
-    getCurrencyName: (id: number) => string = useLibsStore(
-      s => s.getCurrencyName,
-    ),
-    order: Order | undefined = data?.order,
-    hasConfirmation: boolean = Boolean(order?.confirmation),
-    columns: MRT_ColumnDef<OrderLine>[] = useOrderLinesColumns(
-      order ? getCurrencyName(order.currencyId) : CommonConstants.EMPTY_STRING,
-    ),
-    orderLinesTableConfig: MRT_TableOptions<OrderLine> = useMemo(
+  const { t } = useTranslation(['common', 'documents']);
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const orderId = Number(id);
+  const { data, loading, error, refetch } = useOrder(orderId);
+  const getCompanyName = useLibsStore(s => s.getCompanyName);
+  const getWarehouseName = useLibsStore(s => s.getWarehouseName);
+  const getCurrencyName = useLibsStore(s => s.getCurrencyName);
+  const order: Order | undefined = data?.order;
+  const hasConfirmation: boolean = Boolean(order?.confirmation);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
+
+  const { loading: mutationLoading, mutateAsync: runRemove } = useMutation(
+    (targetOrderId: number) => OrdersService.remove(targetOrderId),
+    {
+      onSuccess: () => {
+        showSuccess(t('common:messages.deleteSuccess'));
+        setPendingAction(null);
+        navigate(UrlConstants.ORDERS_URL);
+      },
+      onError: (message: string) => {
+        showError(message);
+      },
+    },
+  );
+
+  const { mutateAsync: runChangeStatus } = useMutation(
+    (targetOrderId: number) => OrdersService.changeStatus(targetOrderId),
+    {
+      onSuccess: () => {
+        showSuccess(t('common:messages.changeStatusSuccess'));
+        setPendingAction(null);
+        refetch();
+      },
+      onError: (message: string) => {
+        showError(message);
+      },
+    },
+  );
+
+  const handleConfirm = useCallback((): void => {
+    if (pendingAction === 'delete') {
+      void runRemove(orderId);
+      return;
+    }
+
+    if (pendingAction === 'changeStatus') {
+      void runChangeStatus(orderId);
+    }
+  }, [orderId, pendingAction, runChangeStatus, runRemove]);
+
+  const confirmModalProps =
+    pendingAction === 'delete'
+      ? {
+          title: t('common:actions.confirmDelete'),
+          message: t('common:messages.confirmDeleteMessage'),
+          confirmLabel: t('common:actions.delete'),
+          confirmColor: 'red',
+        }
+      : pendingAction === 'changeStatus'
+        ? {
+            title: t('common:actions.confirmChangeStatus'),
+            message: t('common:messages.confirmChangeStatusMessage'),
+            confirmLabel: t('common:actions.changeStatus'),
+            confirmColor: 'blue',
+          }
+        : null;
+
+  const currencyLabel = order
+    ? getCurrencyName(order.currencyId)
+    : CommonConstants.EMPTY_STRING;
+  const columns: MRT_ColumnDef<OrderLine>[] =
+    useOrderLinesColumns(currencyLabel);
+  const serviceLinesColumns: MRT_ColumnDef<OrderServiceLine>[] =
+    useOrderServiceLinesColumns(currencyLabel);
+  const orderLinesTableConfig: MRT_TableOptions<OrderLine> = useMemo(
+    () => ({
+      data: order?.orderLines || [],
+      columns,
+      enablePagination: false,
+      enableSorting: false,
+      enableColumnFilters: false,
+      enableBottomToolbar: false,
+      enableColumnActions: false,
+      enableGlobalFilter: false,
+      enableFullScreenToggle: false,
+      enableHiding: false,
+      mantinePaperProps: {
+        shadow: 'sm',
+        radius: 'md',
+      },
+    }),
+    [order, columns],
+  );
+  const orderServiceLinesTableConfig: MRT_TableOptions<OrderServiceLine> =
+    useMemo(
       () => ({
-        data: order?.orderLines || [],
-        columns,
+        data: order?.orderServiceLines || [],
+        columns: serviceLinesColumns,
         enablePagination: false,
         enableSorting: false,
         enableColumnFilters: false,
@@ -49,20 +140,20 @@ export function OrderPage(): ReactNode {
           radius: 'md',
         },
       }),
-      [order, columns],
-    ),
-    confirmOrderLinesTableConfig: MRT_TableOptions<OrderLine> | undefined =
-      hasConfirmation
-        ? {
-            ...orderLinesTableConfig,
-            columns: [...columns].filter(
-              (column: MRT_ColumnDef<OrderLine>) => column.id !== 'batchRename',
-            ),
-            data: order?.confirmation?.orderLines || [],
-          }
-        : undefined,
-    [showConfirmLinesTable, setShowConfirmLinesTable] =
-      useState<boolean>(false);
+      [order, serviceLinesColumns],
+    );
+  const confirmOrderLinesTableConfig: MRT_TableOptions<OrderLine> | undefined =
+    hasConfirmation
+      ? {
+          ...orderLinesTableConfig,
+          columns: [...columns].filter(
+            (column: MRT_ColumnDef<OrderLine>) => column.id !== 'batchRename',
+          ),
+          data: order?.confirmation?.orderLines || [],
+        }
+      : undefined;
+  const [showConfirmLinesTable, setShowConfirmLinesTable] =
+    useState<boolean>(false);
 
   return (
     <>
@@ -77,7 +168,8 @@ export function OrderPage(): ReactNode {
       {!loading && !error && order && (
         <>
           <Card shadow='sm' p='md' radius='md' withBorder mb='xs' mt='6'>
-            <Grid gutter='xs' align='flex-start'>
+            <Group justify='space-between' align='flex-start' mb='xs'>
+              <Grid gutter='xs' align='flex-start' style={{ flex: 1 }}>
               <Grid.Col span={hasConfirmation ? 8 : 12}>
                 <Group justify='flex-start' wrap='nowrap' gap='2'>
                   {order.status ? (
@@ -126,8 +218,62 @@ export function OrderPage(): ReactNode {
                   </Text>
                 </Grid.Col>
               )}
-            </Grid>
+              </Grid>
+              <DocumentActions
+                loading={mutationLoading}
+                canEdit={!order.status}
+                onEdit={() =>
+                  navigate(`${UrlConstants.ORDERS_URL}/${orderId}/edit`)
+                }
+                onDelete={() => setPendingAction('delete')}
+                onChangeStatus={() => setPendingAction('changeStatus')}
+              />
+            </Group>
+            <Group justify='flex-end'>
+              {!order.status && (
+                <Button
+                  variant='light'
+                  size='xs'
+                  component={Link}
+                  to={`${UrlConstants.ORDERS_URL}/${orderId}/confirmation/new`}
+                >
+                  {t('documents:documents.createConfirmation')}
+                </Button>
+              )}
+              {hasConfirmation && (
+                <Button
+                  variant='light'
+                  size='xs'
+                  component={Link}
+                  to={`${UrlConstants.ORDERS_URL}/${orderId}/confirmation/edit`}
+                >
+                  {t('documents:documents.editConfirmation')}
+                </Button>
+              )}
+              <Button
+                variant='light'
+                size='xs'
+                component={Link}
+                to={`${UrlConstants.INVOICES_URL}/new?orderIds=${orderId}`}
+              >
+                {t('documents:documents.createInvoiceFromOrders')}
+              </Button>
+            </Group>
           </Card>
+
+          {confirmModalProps && (
+            <ConfirmActionModal
+              opened={pendingAction !== null}
+              title={confirmModalProps.title}
+              message={confirmModalProps.message}
+              confirmLabel={confirmModalProps.confirmLabel}
+              cancelLabel={t('common:actions.cancel')}
+              confirmColor={confirmModalProps.confirmColor}
+              loading={mutationLoading}
+              onConfirm={handleConfirm}
+              onCancel={() => setPendingAction(null)}
+            />
+          )}
 
           <Card shadow='sm' p='md' radius='md' withBorder mb='sm'>
             <Text fw={StylesConstants.HEAVY_FONT_WEIGHT} size='md' mb='5'>
@@ -215,9 +361,11 @@ export function OrderPage(): ReactNode {
                   primary: 'documents:documents.expectedDate',
                 }}
                 baseValue={{
-                  primary: new Date(order.expectedDate).toLocaleDateString(
-                    'uk-UA',
-                  ),
+                  primary: order.isDateAsap
+                    ? t('documents:documents.expectedDateAsap')
+                    : order.expectedDate
+                      ? new Date(order.expectedDate).toLocaleDateString('uk-UA')
+                      : CommonConstants.EMPTY_STRING,
                 }}
                 confirmValue={
                   order.confirmation
@@ -321,6 +469,12 @@ export function OrderPage(): ReactNode {
                 }
               />
             )}
+          {order.orderServiceLines && order.orderServiceLines.length > 0 && (
+            <HoldingTable
+              tableOptions={orderServiceLinesTableConfig}
+              title={t('documents:documents.services')}
+            />
+          )}
         </>
       )}
     </>

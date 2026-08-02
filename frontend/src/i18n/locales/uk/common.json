@@ -8,6 +8,7 @@
     "orders": "Замовлення",
     "invoices": "Рахунки",
     "payments": "Платежі",
+    "paymentsByCreation": "Платежі (за датою)",
     "commissionInvoices": "Комісійні рахунки",
     "commissioPayments": "Комісійні платежі",
     "shipments": "Відвантаження",
@@ -21,11 +22,20 @@
     "edit": "Редагувати",
     "delete": "Видалити",
     "save": "Зберегти",
-    "cancel": "Скасувати"
+    "cancel": "Скасувати",
+    "changeStatus": "Змінити статус",
+    "confirmDelete": "Підтвердити видалення",
+    "confirmChangeStatus": "Підтвердити зміну статусу",
+    "comingSoon": "Скоро"
   },
   "messages": {
     "error": "Помилка завантаження даних:",
-    "noData": "Немає даних"
+    "noData": "Немає даних",
+    "saveSuccess": "Збережено успішно",
+    "deleteSuccess": "Видалено успішно",
+    "changeStatusSuccess": "Статус змінено успішно",
+    "confirmDeleteMessage": "Ви впевнені, що хочете видалити цей документ?",
+    "confirmChangeStatusMessage": "Ви впевнені, що хочете змінити статус цього документу?"
   },
   "common": {
     "kg": "кг",

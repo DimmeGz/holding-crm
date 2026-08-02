@@ -1,46 +1,48 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
 import type {
+  CreatePaymentPayload,
   GetPaymentDto,
   GetPaymentsDto,
+  Payment,
+  UpdatePaymentPayload,
 } from '@/types/documents/payments.types';
 
-export const paymentsApi: {
-  getList(): Promise<GetPaymentsDto[]>;
-  getById(contractId: number): Promise<GetPaymentDto>;
-} = {
-  async getList(): Promise<GetPaymentsDto[]> {
-    try {
-      const response: AxiosResponse<GetPaymentsDto[]> = await http.get<
-        GetPaymentsDto[]
-      >(UrlConstants.PAYMENTS_URL);
-
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
-
-      throw new Error('An unexpected error occurred');
-    }
+export const paymentsApi = {
+  getList(): Promise<GetPaymentsDto[]> {
+    return apiClient.get<GetPaymentsDto[]>(UrlConstants.PAYMENTS_URL);
   },
 
-  async getById(paymentId: number): Promise<GetPaymentDto> {
-    try {
-      const response: AxiosResponse<GetPaymentDto> =
-        await http.get<GetPaymentDto>(
-          `${UrlConstants.PAYMENTS_URL}/${paymentId}`,
-        );
+  getByCreationList(): Promise<GetPaymentsDto[]> {
+    return apiClient.get<GetPaymentsDto[]>(
+      `${UrlConstants.PAYMENTS_URL}/by-creation`,
+    );
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  getById(paymentId: number): Promise<GetPaymentDto> {
+    return apiClient.get<GetPaymentDto>(
+      `${UrlConstants.PAYMENTS_URL}/${paymentId}`,
+    );
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  create(payload: CreatePaymentPayload): Promise<Payment> {
+    return apiClient.post<Payment>(UrlConstants.PAYMENTS_URL, payload);
+  },
+
+  update(paymentId: number, payload: UpdatePaymentPayload): Promise<Payment> {
+    return apiClient.patch<Payment>(
+      `${UrlConstants.PAYMENTS_URL}/${paymentId}`,
+      payload,
+    );
+  },
+
+  remove(paymentId: number): Promise<Payment> {
+    return apiClient.del<Payment>(`${UrlConstants.PAYMENTS_URL}/${paymentId}`);
+  },
+
+  changeStatus(paymentId: number): Promise<Payment> {
+    return apiClient.patch<Payment>(
+      `${UrlConstants.PAYMENTS_URL}/change-status/${paymentId}`,
+    );
   },
 };

@@ -27,6 +27,12 @@ export class PaymentController {
     return this.paymentService.getPayments(query);
   }
 
+  // Must be before @Get(':paymentId') so "by-creation" is not parsed as id
+  @Get('by-creation')
+  getPaymentsByCreation(): Promise<Payment[]> {
+    return this.paymentService.getPaymentsByCreation();
+  }
+
   @Get(':paymentId')
   @UsePipes(new ParseIntPipe())
   getPaymentById(
@@ -38,6 +44,12 @@ export class PaymentController {
   @Post()
   createPayment(@Body() createPaymentDTO: CreatePaymentDTO): Promise<Payment> {
     return this.paymentService.createPayment(createPaymentDTO);
+  }
+
+  @Patch('change-status/:paymentId')
+  @UsePipes(new ParseIntPipe())
+  changeInvoiceStatus(@Param('paymentId') paymentId: number): Promise<Payment> {
+    return this.paymentService.changePaymentStatus(paymentId);
   }
 
   @Patch(':paymentId')
@@ -52,11 +64,5 @@ export class PaymentController {
   @UsePipes(new ParseIntPipe())
   removePayment(@Param('paymentId') paymentId: number): Promise<Payment> {
     return this.paymentService.removePayment(paymentId);
-  }
-
-  @Patch('change-status/:paymentId')
-  @UsePipes(new ParseIntPipe())
-  changeInvoiceStatus(@Param('paymentId') paymentId: number): Promise<Payment> {
-    return this.paymentService.changePaymentStatus(paymentId);
   }
 }

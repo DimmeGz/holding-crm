@@ -18,7 +18,7 @@ import { ProductTransportServiceLine } from './product-transport-service-line.en
 @Entity({ name: 'documents_producttransport' })
 export class ProductTransport extends AbstractEntity {
   @ManyToOne(() => Company, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   @JoinColumn({ name: 'company_id' })
   company: Company;

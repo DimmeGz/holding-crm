@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import { getErrorMessage } from '@/api/api-client';
 
 interface UseApiDataOptions<T> {
   initialData?: T;
   dependencies?: unknown[];
+  enabled?: boolean;
 }
 
 export const useApiData: <T>(
@@ -27,15 +29,18 @@ export const useApiData: <T>(
     const [error, setError] = useState<string | null>(null);
 
     const fetchData: () => void = (): void => {
+      if (options?.enabled === false) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
 
       fetchFn()
         .then(setData)
         .catch((e: unknown) => {
-          const message: string =
-            e instanceof Error ? e.message : 'Unknown error';
-          setError(message);
+          setError(getErrorMessage(e));
         })
         .finally(() => setLoading(false));
     };

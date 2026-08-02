@@ -218,6 +218,14 @@ export class GoodsService {
     return processes;
   }
 
+  async getBatchesStoreData() {
+    return await this.batchesRepository
+      .createQueryBuilder('batch')
+      .select(['batch.id', 'batch.name', 'batch.productId'])
+      .where('batch.isArchived = :archived', { archived: false })
+      .getMany();
+  }
+
   async getProductsStoreData() {
     return await this.productsRepository
       .createQueryBuilder('product')

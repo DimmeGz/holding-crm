@@ -2,10 +2,12 @@ import { Type } from 'class-transformer';
 import {
   IsDate,
   IsInt,
+  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   Length,
+  Min,
 } from 'class-validator';
 
 export class BaseContractDTO {
@@ -41,12 +43,13 @@ export class BaseContractDTO {
   currencyId: number;
 
   @IsOptional()
-  @IsPositive()
+  @IsNumber()
+  @Min(0)
   vat: number;
 
   @IsOptional()
-  @IsPositive()
   @IsInt()
+  @Min(0)
   paymentDelay: number;
 
   @IsOptional()
@@ -61,7 +64,7 @@ export class BaseContractDTO {
 
   @IsOptional()
   @IsString()
-  @Length(0, 20)
+  @Length(0, 6)
   orderPrefix: string;
 
   @IsOptional()

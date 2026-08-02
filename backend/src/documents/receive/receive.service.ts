@@ -72,6 +72,7 @@ export class ReceiveService {
         'receive.expectedDate',
         'receive.documentSum',
         'receive.status',
+        'receive.incotermsId',
         'receive.incoterms',
         'receive.transportPlace',
         'receive.transportAmount',
@@ -251,21 +252,28 @@ export class ReceiveService {
       );
     }
 
-    const updatedReceiveLinesIds = updateReceiveDTO.receiveLines
+    const receiveLines = updateReceiveDTO.receiveLines ?? [];
+    const receiveServiceLines = updateReceiveDTO.receiveServiceLines ?? [];
+
+    const updatedReceiveLinesIds = receiveLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const receiveLinesToDelete = receive.receiveLines.filter(
       (line) => !updatedReceiveLinesIds.includes(line.id),
     );
 
-    const updatedReceiveServiceLinesIds = updateReceiveDTO.receiveServiceLines
+    const updatedReceiveServiceLinesIds = receiveServiceLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const receiveServiceLinesToDelete = receive.receiveServiceLines.filter(
       (line) => !updatedReceiveServiceLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(receive, updateReceiveDTO);
+    const updated = Object.assign(receive, {
+      ...updateReceiveDTO,
+      receiveLines,
+      receiveServiceLines,
+    });
     updated.documentSum = this.calculateDocumentSum(updated);
     updated.technicalProcesses = await this.getTechnicalProcesses(updated);
 

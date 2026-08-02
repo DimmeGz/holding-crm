@@ -21,7 +21,7 @@ export function useTransportLinesColumns(): MRT_ColumnDef<TransportLine>[] {
         header: t('tables:columns.product'),
         id: 'product',
         accessorFn: (row: TransportLine): string =>
-          row.product?.name || getProductName(row.productId),
+          getProductName(row.productId),
         size: 240,
         Cell: ({ cell }: { cell: MRT_Cell<TransportLine> }) =>
           cell.getValue<string>() || CommonConstants.EMPTY_STRING,
@@ -39,7 +39,7 @@ export function useTransportLinesColumns(): MRT_ColumnDef<TransportLine>[] {
         header: t('tables:columns.package'),
         id: 'package',
         accessorFn: (row: TransportLine): string =>
-          row.package?.name || getPackageName(row.packageId),
+          getPackageName(row.packageId),
         size: 180,
         Cell: ({ cell }: { cell: MRT_Cell<TransportLine> }) =>
           cell.getValue<string>() || CommonConstants.EMPTY_STRING,

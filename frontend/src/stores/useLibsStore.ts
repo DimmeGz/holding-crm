@@ -5,12 +5,15 @@ import type { LibsData, LibsStore } from '@/types/common.types';
 export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
   create<LibsStore>((set, get) => ({
     companies: {},
+    companyTypes: {},
     warehouses: {},
     currencies: {},
     products: {},
     packages: {},
     services: {},
     countries: {},
+    incoterms: {},
+    batches: {},
     isLoaded: false,
 
     loadAll: async (): Promise<void> => {
@@ -19,6 +22,8 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
         set({
           ...data,
+          companyTypes: data.companyTypes ?? {},
+          batches: data.batches ?? {},
           isLoaded: true,
         });
       } catch (error) {
@@ -52,5 +57,13 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
     getCountryName: (id: number): string => {
       return get().countries[id] || `Unknown country (ID: ${id})`;
+    },
+
+    getIncotermsName: (id: number): string => {
+      return get().incoterms[id] || `Unknown incoterms (ID: ${id})`;
+    },
+
+    getBatchName: (id: number): string => {
+      return get().batches[id]?.name || `Unknown batch (ID: ${id})`;
     },
   }));

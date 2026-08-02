@@ -172,6 +172,28 @@ export class WarehouseService {
     await this.warehouseAccountingRepository.save(warehouseAccounting);
   }
 
+  async hasEnoughQty(params: {
+    companyId: number;
+    warehouseId: number;
+    batchId: number;
+    packageId: number;
+    qty: number;
+  }): Promise<boolean> {
+    const { companyId, warehouseId, batchId, packageId, qty } = params;
+
+    if (!batchId || !packageId) {
+      return false;
+    }
+
+    const warehouseAccounting = await this.warehouseAccountingRepository.findOne(
+      {
+        where: { companyId, warehouseId, batchId, packageId },
+      },
+    );
+
+    return (warehouseAccounting?.qty ?? 0) >= qty;
+  }
+
   async decreaseShipGoodsCount(
     decreaseGoodsCountDTO: ChangeShipGoodsCountDTO,
   ): Promise<void> {

@@ -1,46 +1,46 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
 import type {
-  GetTransportsDto,
+  CreateTransportPayload,
   GetTransportDto,
+  GetTransportsDto,
+  UpdateTransportPayload,
 } from '@/types/documents/transports.types';
 
-export const transportsApi: {
-  getList(): Promise<GetTransportsDto[]>;
-  getById(transportId: number): Promise<GetTransportDto>;
-} = {
-  async getList(): Promise<GetTransportsDto[]> {
-    try {
-      const response: AxiosResponse<GetTransportsDto[]> = await http.get<
-        GetTransportsDto[]
-      >(UrlConstants.TRANSPORT_URL);
-
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
-
-      throw new Error('An unexpected error occurred');
-    }
+export const transportsApi = {
+  getList(): Promise<GetTransportsDto[]> {
+    return apiClient.get<GetTransportsDto[]>(UrlConstants.TRANSPORT_URL);
   },
 
-  async getById(transportId: number): Promise<GetTransportDto> {
-    try {
-      const response: AxiosResponse<GetTransportDto> = await http.get<
-        GetTransportDto
-      >(`${UrlConstants.TRANSPORT_URL}/${transportId}`);
+  getById(transportId: number): Promise<GetTransportDto> {
+    return apiClient.get<GetTransportDto>(
+      `${UrlConstants.TRANSPORT_URL}/${transportId}`,
+    );
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  create(payload: CreateTransportPayload): Promise<GetTransportDto> {
+    return apiClient.post<GetTransportDto>(UrlConstants.TRANSPORT_URL, payload);
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  update(
+    transportId: number,
+    payload: UpdateTransportPayload,
+  ): Promise<GetTransportDto> {
+    return apiClient.patch<GetTransportDto>(
+      `${UrlConstants.TRANSPORT_URL}/${transportId}`,
+      payload,
+    );
+  },
+
+  remove(transportId: number): Promise<GetTransportDto> {
+    return apiClient.del<GetTransportDto>(
+      `${UrlConstants.TRANSPORT_URL}/${transportId}`,
+    );
+  },
+
+  changeStatus(transportId: number): Promise<GetTransportDto> {
+    return apiClient.patch<GetTransportDto>(
+      `${UrlConstants.TRANSPORT_URL}/change-status/${transportId}`,
+    );
   },
 };
-

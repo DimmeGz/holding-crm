@@ -1,45 +1,46 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
 import type {
+  CreateProductionPayload,
   GetProductionsDto,
   Production,
+  UpdateProductionPayload,
 } from '@/types/documents/productions.types';
 
-export const productionsApi: {
-  getList(): Promise<GetProductionsDto[]>;
-  getById(productionId: number): Promise<Production>;
-} = {
-  async getList(): Promise<GetProductionsDto[]> {
-    try {
-      const response: AxiosResponse<GetProductionsDto[]> = await http.get<
-        GetProductionsDto[]
-      >(UrlConstants.PRODUCTION_URL);
-
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
-
-      throw new Error('An unexpected error occurred');
-    }
+export const productionsApi = {
+  getList(): Promise<GetProductionsDto[]> {
+    return apiClient.get<GetProductionsDto[]>(UrlConstants.PRODUCTION_URL);
   },
 
-  async getById(productionId: number): Promise<Production> {
-    try {
-      const response: AxiosResponse<Production> = await http.get<Production>(
-        `${UrlConstants.PRODUCTION_URL}/${productionId}`,
-      );
+  getById(productionId: number): Promise<Production> {
+    return apiClient.get<Production>(
+      `${UrlConstants.PRODUCTION_URL}/${productionId}`,
+    );
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  create(payload: CreateProductionPayload): Promise<Production> {
+    return apiClient.post<Production>(UrlConstants.PRODUCTION_URL, payload);
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  update(
+    productionId: number,
+    payload: UpdateProductionPayload,
+  ): Promise<Production> {
+    return apiClient.patch<Production>(
+      `${UrlConstants.PRODUCTION_URL}/${productionId}`,
+      payload,
+    );
+  },
+
+  remove(productionId: number): Promise<Production> {
+    return apiClient.del<Production>(
+      `${UrlConstants.PRODUCTION_URL}/${productionId}`,
+    );
+  },
+
+  changeStatus(productionId: number): Promise<Production> {
+    return apiClient.patch<Production>(
+      `${UrlConstants.PRODUCTION_URL}/change-status/${productionId}`,
+    );
   },
 };

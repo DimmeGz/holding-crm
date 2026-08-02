@@ -33,7 +33,7 @@ export class ContractsService {
     private readonly shipmentsService: ShipmentService,
     private readonly goodsService: GoodsService,
     @InjectDataSource() private dataSource: DataSource,
-  ) {}
+  ) { }
 
   private createBaseQueryBuilder(): SelectQueryBuilder<Contract> {
     return this.contractsRepository.createQueryBuilder('contract');
@@ -88,6 +88,9 @@ export class ContractsService {
         'contract.sellerId',
         'contract.buyerId',
         'contract.currencyId',
+        'contract.comment',
+        'contract.parentId',
+        'contract.incotermsId',
         'incoterms.name',
         'contractLine.id',
         'contractLine.qty',
@@ -96,6 +99,7 @@ export class ContractsService {
         'contractLine.productId',
         'contractLine.packageId',
         'contractServiceLine.id',
+        'contractServiceLine.serviceId',
         'contractServiceLine.price',
         'contractServiceLine.qty',
         'service.name',
@@ -240,22 +244,27 @@ export class ContractsService {
       );
     }
 
-    const updatedContractLinesIds = updateContractDTO.contractLines
+    const contractLines = updateContractDTO.contractLines ?? [];
+    const contractServiceLines = updateContractDTO.contractServiceLines ?? [];
+
+    const updatedContractLinesIds = contractLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const contractLinesToDelete = contract.contractLines.filter(
       (line) => !updatedContractLinesIds.includes(line.id),
     );
 
-    const updatedContractServiceLinesIds =
-      updateContractDTO.contractServiceLines
-        .filter((line) => line['id'])
-        .map((line) => line['id']);
+    const updatedContractServiceLinesIds = contractServiceLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const contractServiceLinesToDelete = contract.contractServiceLines.filter(
       (line) => !updatedContractServiceLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(contract, updateContractDTO);
+    const updated = Object.assign(contract, updateContractDTO, {
+      contractLines,
+      contractServiceLines,
+    });
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -280,7 +289,9 @@ export class ContractsService {
       return updated;
     } catch (e) {
       await queryRunner.rollbackTransaction();
-      throw new BadRequestException();
+      const message =
+        e instanceof Error ? e.message : 'Failed to update contract';
+      throw new BadRequestException(message);
     } finally {
       await queryRunner.release();
     }
@@ -289,14 +300,22 @@ export class ContractsService {
   async removeContract(contractId: number): Promise<Contract> {
     const contract = await this.contractsRepository.findOne({
       where: { id: contractId },
-      relations: ['contractLines', 'contractServiceLines'],
+      select: ['id', 'name'],
     });
 
     if (!contract) {
       throw new NotFoundException(`Contract with id: ${contractId} not found`);
     }
 
-    return await this.contractsRepository.remove(contract);
+    const { affected } = await this.contractsRepository.delete({
+      id: contractId,
+    });
+
+    if (!affected) {
+      throw new NotFoundException(`Contract with id: ${contractId} not found`);
+    }
+
+    return contract;
   }
 
   async changeContractStatus(contractId: number): Promise<Contract> {
