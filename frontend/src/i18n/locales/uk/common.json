@@ -8,6 +8,7 @@
     "orders": "Замовлення",
     "invoices": "Рахунки",
     "payments": "Платежі",
+    "paymentsByCreation": "Платежі (за датою)",
     "commissionInvoices": "Комісійні рахунки",
     "commissioPayments": "Комісійні платежі",
     "shipments": "Відвантаження",

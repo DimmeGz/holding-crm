@@ -34,10 +34,22 @@ export class LibsService {
   async getTechnicalProcessesByCommissionInvoiceId(
     commissionInvoiceId: number,
   ): Promise<TechnicalProcess[]> {
+    return this.getTechnicalProcessesByCommissionInvoiceIds([
+      commissionInvoiceId,
+    ]);
+  }
+
+  async getTechnicalProcessesByCommissionInvoiceIds(
+    commissionInvoiceIds: number[],
+  ): Promise<TechnicalProcess[]> {
+    if (!commissionInvoiceIds.length) {
+      return [];
+    }
+
     return await this.createBaseQueryBuilder()
       .leftJoin('technicalProcess.commissionInvoices', 'commissionInvoice')
-      .where('commissionInvoice.id = :commissionInvoiceId', {
-        commissionInvoiceId,
+      .where('commissionInvoice.id IN (:...commissionInvoiceIds)', {
+        commissionInvoiceIds,
       })
       .getMany();
   }

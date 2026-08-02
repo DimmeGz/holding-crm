@@ -1,25 +1,39 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CompaniesService } from '../../companies';
 import { LibsService } from '../../libs';
+import { CommissionInvoiceService } from '../commission-invoice';
 
-import { CommissionPayment } from './entities';
-import { CreateCommissionPaymentDTO, UpdateCommissionPaymentDTO } from './dto';
+import { CommissionPayment, CommissionPaymentLine } from './entities';
+import {
+  CreateCommissionPaymentDTO,
+  UpdateCommissionPaymentDTO,
+} from './dto';
 
 @Injectable()
 export class CommissionPaymentService {
   constructor(
     @InjectRepository(CommissionPayment)
     private readonly commissionPaymentsRepository: Repository<CommissionPayment>,
+    @InjectDataSource() private dataSource: DataSource,
     private readonly companiesService: CompaniesService,
     private readonly libsService: LibsService,
+    @Inject(forwardRef(() => CommissionInvoiceService))
+    private readonly commissionInvoiceService: CommissionInvoiceService,
   ) {}
 
   private createBaseQueryBuilder(): SelectQueryBuilder<CommissionPayment> {
-    return this.commissionPaymentsRepository
-      .createQueryBuilder('commissionPayment')
+    return this.commissionPaymentsRepository.createQueryBuilder(
+      'commissionPayment',
+    );
   }
 
   private applyBaseSelect(
@@ -37,10 +51,26 @@ export class CommissionPaymentService {
         'commissionPayment.status',
         'commissionPayment.expectedDate',
         'commissionPayment.currencyId',
+        'commissionPayment.comment',
         'commissionPaymentLine.id',
         'commissionPaymentLine.commissionInvoiceId',
         'commissionPaymentLine.amount',
       ]);
+  }
+
+  private extractLinesData(
+    commissionPaymentLines: Partial<CommissionPaymentLine>[],
+  ): { commissionInvoiceIds: number[]; totalAmount: number } {
+    return commissionPaymentLines.reduce(
+      (acc, cur) => {
+        if (cur.commissionInvoiceId) {
+          acc.commissionInvoiceIds.push(cur.commissionInvoiceId);
+        }
+        acc.totalAmount += Number(cur.amount) || 0;
+        return acc;
+      },
+      { commissionInvoiceIds: [] as number[], totalAmount: 0 },
+    );
   }
 
   async getCommisionPayments(): Promise<CommissionPayment[]> {
@@ -53,7 +83,6 @@ export class CommissionPaymentService {
       .getMany();
 
     return payments.map((payment) => {
-
       const totalAmount =
         payment.commissionPaymentLines?.reduce((acc, line) => {
           return acc + ((line as { amount: number }).amount || 0);
@@ -62,7 +91,7 @@ export class CommissionPaymentService {
       return {
         ...payment,
         totalAmount,
-      } as CommissionPayment & { commissionLineIds: number[]; totalAmount: number };
+      } as CommissionPayment & { totalAmount: number };
     });
   }
 
@@ -91,19 +120,26 @@ export class CommissionPaymentService {
   async createCommissionPayment(
     createCommissionPaymentDTO: CreateCommissionPaymentDTO,
   ): Promise<CommissionPayment> {
-    const { expectedDate, ...restDto } = createCommissionPaymentDTO;
+    const newCommissionPayment = this.commissionPaymentsRepository.create(
+      createCommissionPaymentDTO,
+    );
 
-    const newCommissionPayment =
-      this.commissionPaymentsRepository.create(restDto);
-
-    newCommissionPayment.expectedDate = expectedDate || new Date();
+    newCommissionPayment.expectedDate =
+      createCommissionPaymentDTO.expectedDate || new Date();
     newCommissionPayment.createdAt = new Date();
     newCommissionPayment.comment = newCommissionPayment.comment || '';
     newCommissionPayment.status = false;
 
+    const { commissionInvoiceIds } = this.extractLinesData(
+      newCommissionPayment.commissionPaymentLines,
+    );
+
+    // Legacy header FK: sync from first line (column remains, no drop)
+    newCommissionPayment.commissionInvoiceId = commissionInvoiceIds[0];
+
     newCommissionPayment.technicalProcesses =
-      await this.libsService.getTechnicalProcessesByCommissionInvoiceId(
-        newCommissionPayment.commissionInvoiceId,
+      await this.libsService.getTechnicalProcessesByCommissionInvoiceIds(
+        commissionInvoiceIds,
       );
 
     return await this.commissionPaymentsRepository.save(newCommissionPayment);
@@ -113,12 +149,16 @@ export class CommissionPaymentService {
     commissionPaymentId: number,
     updateCommissionPaymentDTO: UpdateCommissionPaymentDTO,
   ): Promise<CommissionPayment> {
-    const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
-      {
-        id: commissionPaymentId,
-        status: false,
-      },
-    );
+    const commissionPayment = await this.createBaseQueryBuilder()
+      .where('commissionPayment.id = :commissionPaymentId', {
+        commissionPaymentId,
+      })
+      .andWhere('commissionPayment.status = false')
+      .leftJoinAndSelect(
+        'commissionPayment.commissionPaymentLines',
+        'commissionPaymentLine',
+      )
+      .getOne();
 
     if (!commissionPayment) {
       throw new NotFoundException(
@@ -126,20 +166,53 @@ export class CommissionPaymentService {
       );
     }
 
-    Object.assign(commissionPayment, updateCommissionPaymentDTO);
+    const updatedLineIds = (updateCommissionPaymentDTO.commissionPaymentLines || [])
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
+    const linesToDelete = commissionPayment.commissionPaymentLines.filter(
+      (line) => !updatedLineIds.includes(line.id),
+    );
 
-    return await this.commissionPaymentsRepository.save(commissionPayment);
+    const updated = Object.assign(commissionPayment, updateCommissionPaymentDTO);
+
+    const { commissionInvoiceIds } = this.extractLinesData(
+      updated.commissionPaymentLines,
+    );
+    updated.commissionInvoiceId = commissionInvoiceIds[0];
+    updated.technicalProcesses =
+      await this.libsService.getTechnicalProcessesByCommissionInvoiceIds(
+        commissionInvoiceIds,
+      );
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (linesToDelete.length) {
+        await queryRunner.manager.remove(linesToDelete);
+      }
+
+      await queryRunner.manager.save(updated);
+
+      await queryRunner.commitTransaction();
+
+      return updated;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async removeCommissionPayment(
     commissionPaymentId: number,
   ): Promise<CommissionPayment> {
-    const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
-      {
-        id: commissionPaymentId,
-        status: false,
-      },
-    );
+    const commissionPayment = await this.commissionPaymentsRepository.findOne({
+      where: { id: commissionPaymentId, status: false },
+      relations: ['commissionPaymentLines'],
+    });
 
     if (!commissionPayment) {
       throw new NotFoundException(
@@ -153,11 +226,10 @@ export class CommissionPaymentService {
   async changeCommissionPaymentStatus(
     commissionPaymentId: number,
   ): Promise<CommissionPayment> {
-    const commissionPayment = await this.commissionPaymentsRepository.findOneBy(
-      {
-        id: commissionPaymentId,
-      },
-    );
+    const commissionPayment = await this.commissionPaymentsRepository.findOne({
+      where: { id: commissionPaymentId },
+      relations: ['commissionPaymentLines'],
+    });
 
     if (!commissionPayment) {
       throw new NotFoundException(
@@ -167,14 +239,22 @@ export class CommissionPaymentService {
 
     commissionPayment.status = !commissionPayment.status;
 
-    // TODO: change amount by lines
-    // await this.companiesService.changeAccountsBalances({
-    //   sellerId: commissionPayment.sellerId,
-    //   buyerId: commissionPayment.buyerId,
-    //   currencyId: commissionPayment.currencyId,
-    //   status: commissionPayment.status,
-    //   amount: commissionPayment.amount,
-    // });
+    const { totalAmount } = this.extractLinesData(
+      commissionPayment.commissionPaymentLines,
+    );
+
+    await this.companiesService.changeAccountsBalances({
+      sellerId: commissionPayment.sellerId,
+      buyerId: commissionPayment.buyerId,
+      currencyId: commissionPayment.currencyId,
+      status: commissionPayment.status,
+      amount: totalAmount,
+    });
+
+    await this.commissionInvoiceService.changeCommissionPaymentBalance({
+      status: commissionPayment.status,
+      commissionPaymentLines: commissionPayment.commissionPaymentLines,
+    });
 
     return await this.commissionPaymentsRepository.save(commissionPayment);
   }

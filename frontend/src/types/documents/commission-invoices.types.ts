@@ -4,6 +4,7 @@ export type GetCommissionInvoicesDto = {
   buyerId: number;
   rate: number;
   documentSum: number;
+  paymentBalance?: number;
   currencyId: number;
   status: boolean;
   invoice: {
@@ -22,27 +23,46 @@ export type GetCommissionInvoiceDto = {
   sellerId: number;
   buyerId: number;
   creationDate: Date;
+  comment?: string;
+  rate?: number;
+  paymentBalance?: number;
   invoice: {
     id: number;
     invoiceNumber: string;
     children: {
       id: number;
       invoiceNumber: string;
+      documentSum?: number;
     }[];
   };
   documentSum: number;
   currencyId: number;
 };
 
-export type CommissionInvoiceLine = {
-  order: { id: number; orderNumber: string };
-  productId: number;
-  batch: { id: number; name: string };
-  packageId: number;
-  qty: number;
-  price: number;
-  cost: number;
-  palletsQty: number;
-  grossWeight: number;
-  countryOfOriginId: number;
+export type CommissionInvoiceFormValues = {
+  sellerId: string | null;
+  buyerId: string | null;
+  invoiceId: string | null;
+  currencyId: string | null;
+  creationDate: Date | null;
+  rate: number;
+  comment: string;
+};
+
+export type CreateCommissionInvoicePayload = {
+  sellerId: number;
+  buyerId: number;
+  invoiceId: number;
+  currencyId: number;
+  creationDate?: Date;
+  rate: number;
+  comment?: string;
+};
+
+export type UpdateCommissionInvoicePayload = {
+  sellerId?: number;
+  currencyId?: number;
+  creationDate?: Date;
+  rate?: number;
+  comment?: string;
 };

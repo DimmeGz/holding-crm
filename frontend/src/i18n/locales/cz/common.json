@@ -8,6 +8,7 @@
     "orders": "Objednávky",
     "invoices": "Faktury",
     "payments": "Platby",
+    "paymentsByCreation": "Platby (podle data)",
     "commissionInvoices": "Provizní faktury",
     "commissioPayments": "Provizní platby",
     "shipments": "Expedice",

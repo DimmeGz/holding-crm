@@ -16,5 +16,6 @@ import { CommissionInvoiceController } from './commission-invoice.controller';
   ],
   providers: [CommissionInvoiceService],
   controllers: [CommissionInvoiceController],
+  exports: [CommissionInvoiceService],
 })
 export class CommissionInvoiceModule {}

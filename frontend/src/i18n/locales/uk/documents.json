@@ -99,6 +99,23 @@
     "invoiceNumberRequired": "Вкажіть номер рахунку",
     "invoiceNumberMaxLength": "Номер рахунку не може перевищувати 15 символів",
     "cannotCreateChildInvoice": "Неможливо створити рахунок: у батьківського немає отримувача",
-    "reportDuplicating": "Дублювати у звіті"
+    "reportDuplicating": "Дублювати у звіті",
+    "paymentCreate": "Новий платіж",
+    "paymentEdit": "Редагування платежу",
+    "cannotEditClosedPayment": "Проведений платіж не можна редагувати",
+    "paymentLinesRequired": "Додайте хоча б одну лінію з рахунком і сумою",
+    "createPayment": "Створити платіж",
+    "commissionInvoiceCreate": "Новий комісійний рахунок",
+    "commissionInvoiceEdit": "Редагування комісійного рахунку",
+    "cannotEditClosedCommissionInvoice": "Проведений комісійний рахунок не можна редагувати",
+    "createCommissionInvoice": "Створити комісійний рахунок",
+    "rate": "Ставка",
+    "rateRequired": "Вкажіть ставку",
+    "commissionPaymentCreate": "Новий комісійний платіж",
+    "commissionPaymentEdit": "Редагування комісійного платежу",
+    "cannotEditClosedCommissionPayment": "Проведений комісійний платіж не можна редагувати",
+    "commissionPaymentLinesRequired": "Додайте хоча б одну лінію з комісійним рахунком і сумою",
+    "createCommissionPayment": "Створити комісійний платіж",
+    "byCommissionInvoice": "На підставі комісійного рахунку"
   }
 }

@@ -5,6 +5,7 @@ import type { LibsData, LibsStore } from '@/types/common.types';
 export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
   create<LibsStore>((set, get) => ({
     companies: {},
+    companyTypes: {},
     warehouses: {},
     currencies: {},
     products: {},
@@ -21,6 +22,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
 
         set({
           ...data,
+          companyTypes: data.companyTypes ?? {},
           batches: data.batches ?? {},
           isLoaded: true,
         });

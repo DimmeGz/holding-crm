@@ -7,6 +7,7 @@ export type GetInvoicesDto = {
   buyerId: number;
   recipientId: number;
   documentSum: number;
+  paymentBalance?: number;
   currencyId: number;
   status: boolean;
   expectedDate: Date;

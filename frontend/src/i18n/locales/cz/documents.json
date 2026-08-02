@@ -99,6 +99,23 @@
     "invoiceNumberRequired": "Zadejte číslo faktury",
     "invoiceNumberMaxLength": "Číslo faktury nesmí přesáhnout 15 znaků",
     "cannotCreateChildInvoice": "Nelze vytvořit fakturu: u nadřazené chybí příjemce",
-    "reportDuplicating": "Duplikovat ve výkazu"
+    "reportDuplicating": "Duplikovat ve výkazu",
+    "paymentCreate": "Nová platba",
+    "paymentEdit": "Úprava platby",
+    "cannotEditClosedPayment": "Provedenou platbu nelze upravovat",
+    "paymentLinesRequired": "Přidejte alespoň jednu řádku s fakturou a částkou",
+    "createPayment": "Vytvořit platbu",
+    "commissionInvoiceCreate": "Nová provizní faktura",
+    "commissionInvoiceEdit": "Úprava provizní faktury",
+    "cannotEditClosedCommissionInvoice": "Provedenou provizní fakturu nelze upravovat",
+    "createCommissionInvoice": "Vytvořit provizní fakturu",
+    "rate": "Sazba",
+    "rateRequired": "Zadejte sazbu",
+    "commissionPaymentCreate": "Nová provizní platba",
+    "commissionPaymentEdit": "Úprava provizní platby",
+    "cannotEditClosedCommissionPayment": "Provedenou provizní platbu nelze upravovat",
+    "commissionPaymentLinesRequired": "Přidejte alespoň jednu řádku s provizní fakturou a částkou",
+    "createCommissionPayment": "Vytvořit provizní platbu",
+    "byCommissionInvoice": "Na základě provizní faktury"
   }
 }

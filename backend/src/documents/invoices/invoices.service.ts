@@ -68,6 +68,7 @@ export class InvoiceService {
       'invoice.recipientId',
       'invoice.status',
       'invoice.documentSum',
+      'invoice.paymentBalance',
       'invoice.currencyId',
       'parent.id',
       'parent.invoiceNumber',

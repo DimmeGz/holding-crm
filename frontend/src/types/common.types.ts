@@ -12,6 +12,7 @@ export type BatchStoreItem = {
 
 export type LibsData = {
   companies: Record<number, string>;
+  companyTypes: Record<number, string>;
   warehouses: Record<number, string>;
   currencies: Record<number, string>;
   products: Record<number, string>;

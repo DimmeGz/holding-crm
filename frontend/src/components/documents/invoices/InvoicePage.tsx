@@ -203,18 +203,36 @@ export function InvoicePage(): ReactNode {
                 onChangeStatus={() => setPendingAction('changeStatus')}
               />
             </Group>
-            {invoice.recipientId && (
-              <Group justify='flex-end' mt='xs'>
-                <Button
-                  variant='light'
-                  size='xs'
-                  component={Link}
-                  to={`${UrlConstants.INVOICES_URL}/new?invoiceId=${invoiceId}`}
-                >
-                  {t('documents:documents.createChildInvoice')}
-                </Button>
-              </Group>
-            )}
+            <Group justify='flex-end' mt='xs'>
+              <Button
+                variant='light'
+                size='xs'
+                component={Link}
+                to={`${UrlConstants.PAYMENTS_URL}/new?invoiceIds=${invoiceId}`}
+              >
+                {t('documents:documents.createPayment')}
+              </Button>
+              {invoice.recipientId && (
+                <>
+                  <Button
+                    variant='light'
+                    size='xs'
+                    component={Link}
+                    to={`${UrlConstants.INVOICES_URL}/new?invoiceId=${invoiceId}`}
+                  >
+                    {t('documents:documents.createChildInvoice')}
+                  </Button>
+                  <Button
+                    variant='light'
+                    size='xs'
+                    component={Link}
+                    to={`${UrlConstants.COMMISSION_INVOICES_URL}/new?invoiceId=${invoiceId}`}
+                  >
+                    {t('documents:documents.createCommissionInvoice')}
+                  </Button>
+                </>
+              )}
+            </Group>
           </Card>
 
           {confirmModalProps && (

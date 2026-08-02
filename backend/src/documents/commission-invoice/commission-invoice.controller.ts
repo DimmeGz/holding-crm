@@ -43,6 +43,14 @@ export class CommissionInvoiceController {
     );
   }
 
+  @Patch('change-status/:commissionId')
+  @UsePipes(new ParseIntPipe())
+  changeCommissionStatus(
+    @Param('commissionId') commissionId: number,
+  ): Promise<CommissionInvoice> {
+    return this.commissionInvoiceService.changeCommissionStatus(commissionId);
+  }
+
   @Patch(':commissionId')
   updateCommissionInvoice(
     @Param('commissionId', new ParseIntPipe()) commissionId: number,
@@ -61,13 +69,5 @@ export class CommissionInvoiceController {
     @Param('commissionId') commissionId: number,
   ): Promise<CommissionInvoice> {
     return this.commissionInvoiceService.removeCommission(commissionId);
-  }
-
-  @Patch('change-status/:commissionId')
-  @UsePipes(new ParseIntPipe())
-  changeCommissionStatus(
-    @Param('commissionId') commissionId: number,
-  ): Promise<CommissionInvoice> {
-    return this.commissionInvoiceService.changeCommissionStatus(commissionId);
   }
 }

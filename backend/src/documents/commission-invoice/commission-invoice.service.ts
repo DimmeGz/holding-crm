@@ -6,7 +6,11 @@ import { CompaniesService } from '../../companies';
 import { InvoiceService } from '../invoices';
 
 import { CommissionInvoice } from './entities';
-import { CreateCommissionInvoiceDTO, UpdateCommissionInvoiceDTO } from './dto';
+import {
+  CreateCommissionInvoiceDTO,
+  UpdateCommissionInvoiceDTO,
+  UpdateCommissionPaymentBalanceDTO,
+} from './dto';
 
 @Injectable()
 export class CommissionInvoiceService {
@@ -34,6 +38,7 @@ export class CommissionInvoiceService {
       'commission.status',
       'commission.rate',
       'commission.documentSum',
+      'commission.paymentBalance',
       'commission.currencyId',
       'invoice.id',
       'invoice.invoiceNumber',
@@ -169,5 +174,50 @@ export class CommissionInvoiceService {
     });
 
     return await this.commissionRepository.save(commission);
+  }
+
+  async changeCommissionPaymentBalance(
+    updateBalanceDTO: UpdateCommissionPaymentBalanceDTO,
+  ): Promise<void> {
+    const changeBalanceData =
+      updateBalanceDTO.commissionPaymentLines.reduce(
+        (acc, cur) => {
+          if (!cur.commissionInvoiceId) {
+            return acc;
+          }
+          if (!acc[cur.commissionInvoiceId]) {
+            acc[cur.commissionInvoiceId] = Number(cur.amount) || 0;
+          } else {
+            acc[cur.commissionInvoiceId] += Number(cur.amount) || 0;
+          }
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
+
+    const commissionInvoiceIds = Object.keys(changeBalanceData).map(Number);
+    if (!commissionInvoiceIds.length) {
+      return;
+    }
+
+    const commissions = await this.createBaseQueryBuilder()
+      .where('commission.id IN (:...commissionInvoiceIds)', {
+        commissionInvoiceIds,
+      })
+      .getMany();
+
+    if (updateBalanceDTO.status) {
+      commissions.forEach(
+        (commission) =>
+          (commission.paymentBalance -= changeBalanceData[commission.id]),
+      );
+    } else {
+      commissions.forEach(
+        (commission) =>
+          (commission.paymentBalance += changeBalanceData[commission.id]),
+      );
+    }
+
+    await this.commissionRepository.save(commissions);
   }
 }

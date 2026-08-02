@@ -15,7 +15,8 @@ export class StoreDataService {
 
   async getAllStoreData() {
     const allStoreData = {
-      companies: {},
+      companies: {} as Record<number, string>,
+      companyTypes: {} as Record<number, string>,
       warehouses: {},
       currencies: {},
       products: {},
@@ -36,9 +37,10 @@ export class StoreDataService {
     const rawIncoterms = await this.libsService.getIncotermsStoreData();
     const rawBatches = await this.goodsService.getBatchesStoreData();
 
-    rawCompanies.forEach(
-      (company) => (allStoreData.companies[company.id] = company.name),
-    );
+    rawCompanies.forEach((company) => {
+      allStoreData.companies[company.id] = company.name;
+      allStoreData.companyTypes[company.id] = company.companyType;
+    });
     rawWarehouses.forEach(
       (warehouse) => (allStoreData.warehouses[warehouse.id] = warehouse.name),
     );

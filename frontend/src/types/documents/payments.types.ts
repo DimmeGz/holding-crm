@@ -6,6 +6,7 @@ export type GetPaymentsDto = {
   documentSum: number;
   currencyId: number;
   expectedDate: Date;
+  createdAt?: Date;
   paymentLines: {
     id: number;
     invoice: {
@@ -26,32 +27,53 @@ export type Payment = {
   expectedDate: Date;
   sellerId: number;
   buyerId: number;
-  // invoiceNumber: string;
-  // parent?: {
-  //   id: number;
-  //   invoiceNumber: string;
-  // };
-  // sellerWarehouseId: number;
-  // buyerWarehouseId: number;
-  // recipientId?: number;
-  // recipientWarehouseId?: number;
-  // vat: number;
-  // paymentBalance: number;
-  // paymentDelay: number;
-  // incoterms?: { name: string };
-  // transportPlace: string;
-  // ponz: number;
-  // grossWeight: number;
-  // transportAmount: number;
-  // separation: boolean;
-  // reportPeriod: Date;
-  // contractInfo: string;
+  comment?: string;
+  documentSum?: number;
   paymentLines: PaymentLine[];
-  // comment?: string;
 };
 
 export type PaymentLine = {
-  invoice: { id: number; invoiceNumber: string };
-  id: string;
+  id: number;
   amount: number;
+  invoice: { id: number; invoiceNumber: string };
+  invoiceId?: number;
+};
+
+export type PaymentLineFormValue = {
+  id?: number;
+  invoiceId: string | null;
+  amount: number;
+};
+
+export type PaymentFormValues = {
+  sellerId: string | null;
+  buyerId: string | null;
+  currencyId: string | null;
+  expectedDate: Date | null;
+  comment: string;
+  paymentLines: PaymentLineFormValue[];
+};
+
+export type CreatePaymentLinePayload = {
+  invoiceId: number;
+  amount: number;
+};
+
+export type UpdatePaymentLinePayload = CreatePaymentLinePayload & {
+  id?: number;
+};
+
+export type CreatePaymentPayload = {
+  sellerId: number;
+  buyerId: number;
+  currencyId: number;
+  expectedDate: Date;
+  comment?: string;
+  paymentLines: CreatePaymentLinePayload[];
+};
+
+export type UpdatePaymentPayload = Partial<
+  Omit<CreatePaymentPayload, 'paymentLines'>
+> & {
+  paymentLines: UpdatePaymentLinePayload[];
 };

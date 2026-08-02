@@ -226,7 +226,7 @@ export class CompaniesService {
   async getStoreData() {
     return await this.companiesRepository
       .createQueryBuilder('company')
-      .select(['company.id', 'company.name'])
+      .select(['company.id', 'company.name', 'company.companyType'])
       .getMany();
   }
 }
