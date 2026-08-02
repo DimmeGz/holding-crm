@@ -20,11 +20,17 @@ export function BatchedProductLineEditor({
   onChange,
   currencyLabel = '',
   showPrice = true,
+  title,
+  priceColumnLabel,
+  decimalScale = 3,
 }: {
   lines: BatchedProductLineFormValue[];
   onChange: (lines: BatchedProductLineFormValue[]) => void;
   currencyLabel?: string;
   showPrice?: boolean;
+  title?: string;
+  priceColumnLabel?: string;
+  decimalScale?: number;
 }): ReactNode {
   const { t } = useTranslation(['documents', 'tables', 'common']);
   const products = useLibsStore(s => s.products);
@@ -33,6 +39,8 @@ export function BatchedProductLineEditor({
 
   const productOptions = useMemo(() => recordToSelectData(products), [products]);
   const packageOptions = useMemo(() => recordToSelectData(packages), [packages]);
+  const sectionTitle = title ?? t('documents:documents.productLines');
+  const priceLabel = priceColumnLabel ?? t('tables:columns.price');
 
   const getBatchOptions = (productId: string | null) => {
     if (!productId) {
@@ -63,7 +71,7 @@ export function BatchedProductLineEditor({
   return (
     <>
       <Group justify='space-between' mb='xs'>
-        <Text fw={600}>{t('documents:documents.productLines')}</Text>
+        <Text fw={600}>{sectionTitle}</Text>
         <Button
           variant='light'
           size='xs'
@@ -84,7 +92,7 @@ export function BatchedProductLineEditor({
             <Table.Th>{t('tables:columns.qty')}</Table.Th>
             {showPrice && (
               <Table.Th>
-                {t('tables:columns.price')} {currencyLabel}
+                {priceLabel} {currencyLabel}
               </Table.Th>
             )}
             <Table.Th w={40} />
@@ -145,7 +153,7 @@ export function BatchedProductLineEditor({
                       updateLine(index, { price: Number(value) || 0 })
                     }
                     min={0}
-                    decimalScale={3}
+                    decimalScale={decimalScale}
                     fixedDecimalScale
                     size='xs'
                     hideControls

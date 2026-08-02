@@ -63,6 +63,8 @@ export class ProductionService {
         'production.status',
         'production.expectedDate',
         'production.comment',
+        'production.companyId',
+        'production.warehouseId',
         'company.name',
         'warehouse.name',
         'productionOutLine',
@@ -130,31 +132,39 @@ export class ProductionService {
   ): Promise<Production> {
     const production = await this.createBaseQueryBuilder()
       .where('production.id = :productionId', { productionId })
+      .andWhere('production.status = FALSE')
       .leftJoinAndSelect('production.productionInLines', 'productionInLine')
       .leftJoinAndSelect('production.productionOutLines', 'productionOutLine')
       .getOne();
 
     if (!production) {
       throw new NotFoundException(
-        `Production with id: ${productionId} not found`,
+        `Production with id: ${productionId} and status: false not found`,
       );
     }
 
-    const updatedInLinesIds = updateProductionDTO.productionInLines
+    const productionInLines = updateProductionDTO.productionInLines ?? [];
+    const productionOutLines = updateProductionDTO.productionOutLines ?? [];
+
+    const updatedInLinesIds = productionInLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const inLinesToDelete = production.productionInLines.filter(
       (line) => !updatedInLinesIds.includes(line.id),
     );
 
-    const updatedOutLinesIds = updateProductionDTO.productionOutLines
+    const updatedOutLinesIds = productionOutLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const outLinesToDelete = production.productionOutLines.filter(
       (line) => !updatedOutLinesIds.includes(line.id),
     );
 
-    const updated = Object.assign(production, updateProductionDTO);
+    const updated = Object.assign(production, {
+      ...updateProductionDTO,
+      productionInLines,
+      productionOutLines,
+    });
 
     const productIds = new Set([
       ...updated.productionInLines.map((line) => line.productId),

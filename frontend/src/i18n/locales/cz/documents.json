@@ -133,6 +133,11 @@
     "cannotEditClosedTransport": "Provedený přesun nelze upravovat",
     "createTransport": "Vytvořit přesun",
     "companyRequired": "Vyberte společnost",
-    "prefillMissingBatch": "U některých položek chybí šarže — před uložením ji vyberte ručně"
+    "prefillMissingBatch": "U některých položek chybí šarže — před uložením ji vyberte ručně",
+    "productionCreate": "Nová výroba",
+    "productionEdit": "Úprava výroby",
+    "cannotEditClosedProduction": "Provedenou výrobu nelze upravovat",
+    "productionOutLinesRequired": "Přidejte alespoň jednu položku odpisu s náklady",
+    "productionInLinesRequired": "Přidejte alespoň jednu položku příjmu"
   }
 }

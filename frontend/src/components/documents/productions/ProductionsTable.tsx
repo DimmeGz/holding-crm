@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { Button } from '@mantine/core';
 import type { MRT_ColumnDef, MRT_TableOptions } from 'mantine-react-table';
 import { HoldingTable } from '@/components/shared/HoldingTable';
 import { Spinner } from '@/components/shared/Spinner';
+import { UrlConstants } from '@/constants/url-constants';
 import { useProductionsColumns } from '@/hooks/documents/table-columns/useProductionsColumns';
 import { useProductions } from '@/hooks/documents/useProductions';
 import type { GetProductionsDto } from '@/types/documents/productions.types';
@@ -35,6 +38,11 @@ export function ProductionsTable(): ReactNode {
         <HoldingTable
           tableOptions={tableConfig}
           title={t('common:nav.production')}
+          toolBarControls={
+            <Button component={Link} to={`${UrlConstants.PRODUCTION_URL}/new`}>
+              {t('common:actions.create')}
+            </Button>
+          }
         />
       )}
     </>

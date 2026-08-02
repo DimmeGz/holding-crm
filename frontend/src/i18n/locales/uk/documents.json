@@ -133,6 +133,11 @@
     "cannotEditClosedTransport": "Проведене переміщення не можна редагувати",
     "createTransport": "Створити переміщення",
     "companyRequired": "Оберіть компанію",
-    "prefillMissingBatch": "У деяких позиціях немає партії — оберіть вручну перед збереженням"
+    "prefillMissingBatch": "У деяких позиціях немає партії — оберіть вручну перед збереженням",
+    "productionCreate": "Нове виробництво",
+    "productionEdit": "Редагування виробництва",
+    "cannotEditClosedProduction": "Проведене виробництво не можна редагувати",
+    "productionOutLinesRequired": "Додайте хоча б одну позицію списання з собівартістю",
+    "productionInLinesRequired": "Додайте хоча б одну позицію надходження"
   }
 }

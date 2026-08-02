@@ -220,6 +220,11 @@ export type LocaleDict = {
       createTransport: string;
       companyRequired: string;
       prefillMissingBatch: string;
+      productionCreate: string;
+      productionEdit: string;
+      cannotEditClosedProduction: string;
+      productionOutLinesRequired: string;
+      productionInLinesRequired: string;
     };
   };
 };
