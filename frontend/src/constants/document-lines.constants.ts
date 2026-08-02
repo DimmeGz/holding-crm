@@ -1,4 +1,5 @@
 import type {
+  BatchedProductLineFormValue,
   ProductLineFormValue,
   ServiceLineFormValue,
 } from '@/types/documents/contracts.types';
@@ -10,6 +11,14 @@ export const EMPTY_PRODUCT_LINE: ProductLineFormValue = {
   packageId: null,
   qty: 1,
   shipQty: 1,
+  price: 0,
+};
+
+export const EMPTY_BATCHED_PRODUCT_LINE: BatchedProductLineFormValue = {
+  productId: null,
+  batchId: null,
+  packageId: null,
+  qty: 1,
   price: 0,
 };
 

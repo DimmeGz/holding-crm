@@ -1,7 +1,10 @@
 import type { RouteObject } from 'react-router-dom';
-
-import { TransportsTable } from '@/components/documents/transports/TransportsTable';
+import {
+  TransportCreatePage,
+  TransportEditPage,
+} from '@/components/documents/transports/TransportFormPage';
 import { TransportPage } from '@/components/documents/transports/TransportPage';
+import { TransportsTable } from '@/components/documents/transports/TransportsTable';
 import { UrlConstants } from '@/constants/url-constants';
 
 export const transportsRoutes: RouteObject = {
@@ -12,9 +15,16 @@ export const transportsRoutes: RouteObject = {
       element: <TransportsTable />,
     },
     {
+      path: 'new',
+      element: <TransportCreatePage />,
+    },
+    {
+      path: ':id/edit',
+      element: <TransportEditPage />,
+    },
+    {
       path: ':id',
       element: <TransportPage />,
     },
   ],
 };
-

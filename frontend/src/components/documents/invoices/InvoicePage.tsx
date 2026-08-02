@@ -212,6 +212,14 @@ export function InvoicePage(): ReactNode {
               >
                 {t('documents:documents.createPayment')}
               </Button>
+              <Button
+                variant='light'
+                size='xs'
+                component={Link}
+                to={`${UrlConstants.SHIPMENTS_URL}/new?invoiceId=${invoiceId}`}
+              >
+                {t('documents:documents.createShipment')}
+              </Button>
               {invoice.recipientId && (
                 <>
                   <Button

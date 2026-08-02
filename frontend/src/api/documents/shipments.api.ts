@@ -1,47 +1,47 @@
-import type { AxiosResponse } from 'axios';
-import axios from 'axios';
-import { http } from '@/api/http';
+import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
 import type {
+  CreateShipmentPayload,
   GetShipmentDto,
   GetShipmentsDto,
+  Shipment,
+  UpdateShipmentPayload,
 } from '@/types/documents/shipments.types';
 
-export const shipmentsApi: {
-  getList(): Promise<GetShipmentsDto[]>;
-  getById(shipmentId: number): Promise<GetShipmentDto>;
-} = {
-  async getList(): Promise<GetShipmentsDto[]> {
-    try {
-      const response: AxiosResponse<GetShipmentsDto[]> = await http.get<
-        GetShipmentsDto[]
-      >(UrlConstants.SHIPMENTS_URL);
-
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
-
-      throw new Error('An unexpected error occurred');
-    }
+export const shipmentsApi = {
+  getList(): Promise<GetShipmentsDto[]> {
+    return apiClient.get<GetShipmentsDto[]>(UrlConstants.SHIPMENTS_URL);
   },
 
-  async getById(shipmentId: number): Promise<GetShipmentDto> {
-    try {
-      const response: AxiosResponse<GetShipmentDto> =
-        await http.get<GetShipmentDto>(
-          `${UrlConstants.SHIPMENTS_URL}/${shipmentId}`,
-        );
+  getById(shipmentId: number): Promise<GetShipmentDto> {
+    return apiClient.get<GetShipmentDto>(
+      `${UrlConstants.SHIPMENTS_URL}/${shipmentId}`,
+    );
+  },
 
-      return response.data;
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        throw new Error(e.message);
-      }
+  create(payload: CreateShipmentPayload): Promise<Shipment> {
+    return apiClient.post<Shipment>(UrlConstants.SHIPMENTS_URL, payload);
+  },
 
-      throw new Error('An unexpected error occurred');
-    }
+  update(
+    shipmentId: number,
+    payload: UpdateShipmentPayload,
+  ): Promise<Shipment> {
+    return apiClient.patch<Shipment>(
+      `${UrlConstants.SHIPMENTS_URL}/${shipmentId}`,
+      payload,
+    );
+  },
+
+  remove(shipmentId: number): Promise<Shipment> {
+    return apiClient.del<Shipment>(
+      `${UrlConstants.SHIPMENTS_URL}/${shipmentId}`,
+    );
+  },
+
+  changeStatus(shipmentId: number): Promise<Shipment> {
+    return apiClient.patch<Shipment>(
+      `${UrlConstants.SHIPMENTS_URL}/change-status/${shipmentId}`,
+    );
   },
 };
-

@@ -16,7 +16,10 @@ export function useShipments(): {
   });
 }
 
-export function useShipment(shipmentId: number): {
+export function useShipment(
+  shipmentId: number,
+  enabled = true,
+): {
   data: GetShipmentDto | null;
   loading: boolean;
   error: string | null;
@@ -25,7 +28,8 @@ export function useShipment(shipmentId: number): {
   return useApiData<GetShipmentDto>(
     () => ShipmentsService.getById(shipmentId),
     {
-      dependencies: [shipmentId],
+      dependencies: [shipmentId, enabled],
+      enabled: enabled && shipmentId > 0,
     },
   );
 }

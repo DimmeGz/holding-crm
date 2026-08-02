@@ -116,6 +116,23 @@
     "cannotEditClosedCommissionPayment": "Provedenou provizní platbu nelze upravovat",
     "commissionPaymentLinesRequired": "Přidejte alespoň jednu řádku s provizní fakturou a částkou",
     "createCommissionPayment": "Vytvořit provizní platbu",
-    "byCommissionInvoice": "Na základě provizní faktury"
+    "byCommissionInvoice": "Na základě provizní faktury",
+    "shipmentCreate": "Nová expedice",
+    "shipmentEdit": "Úprava expedice",
+    "cannotEditClosedShipment": "Provedenou expedici nelze upravovat",
+    "createShipment": "Vytvořit expedici",
+    "invoiceRequired": "Vyberte fakturu",
+    "receiveCreate": "Nový příjem",
+    "receiveEdit": "Úprava příjmu",
+    "cannotEditClosedReceive": "Provedený příjem nelze upravovat",
+    "createReceive": "Vytvořit příjem",
+    "shipmentRequired": "Vyberte expedici",
+    "byShipment": "Na základě expedice",
+    "transportCreate": "Nový přesun",
+    "transportEdit": "Úprava přesunu",
+    "cannotEditClosedTransport": "Provedený přesun nelze upravovat",
+    "createTransport": "Vytvořit přesun",
+    "companyRequired": "Vyberte společnost",
+    "prefillMissingBatch": "U některých položek chybí šarže — před uložením ji vyberte ručně"
   }
 }

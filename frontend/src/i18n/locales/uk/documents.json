@@ -116,6 +116,23 @@
     "cannotEditClosedCommissionPayment": "Проведений комісійний платіж не можна редагувати",
     "commissionPaymentLinesRequired": "Додайте хоча б одну лінію з комісійним рахунком і сумою",
     "createCommissionPayment": "Створити комісійний платіж",
-    "byCommissionInvoice": "На підставі комісійного рахунку"
+    "byCommissionInvoice": "На підставі комісійного рахунку",
+    "shipmentCreate": "Нове відвантаження",
+    "shipmentEdit": "Редагування відвантаження",
+    "cannotEditClosedShipment": "Проведене відвантаження не можна редагувати",
+    "createShipment": "Створити відвантаження",
+    "invoiceRequired": "Оберіть рахунок",
+    "receiveCreate": "Нове надходження",
+    "receiveEdit": "Редагування надходження",
+    "cannotEditClosedReceive": "Проведене надходження не можна редагувати",
+    "createReceive": "Створити надходження",
+    "shipmentRequired": "Оберіть відвантаження",
+    "byShipment": "На підставі відвантаження",
+    "transportCreate": "Нове переміщення",
+    "transportEdit": "Редагування переміщення",
+    "cannotEditClosedTransport": "Проведене переміщення не можна редагувати",
+    "createTransport": "Створити переміщення",
+    "companyRequired": "Оберіть компанію",
+    "prefillMissingBatch": "У деяких позиціях немає партії — оберіть вручну перед збереженням"
   }
 }

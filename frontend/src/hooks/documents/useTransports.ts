@@ -1,9 +1,9 @@
+import { useApiData } from '@/hooks/useApiData';
 import { TransportService } from '@/services/documents/transports.service';
 import type {
   GetTransportDto,
   GetTransportsDto,
 } from '@/types/documents/transports.types';
-import { useApiData } from '@/hooks/useApiData';
 
 export function useTransports(): {
   data: GetTransportsDto[] | null;
@@ -11,15 +11,15 @@ export function useTransports(): {
   error: string | null;
   refetch: () => void;
 } {
-  return useApiData<GetTransportsDto[]>(
-    () => TransportService.getList(),
-    {
-      initialData: [],
-    },
-  );
+  return useApiData<GetTransportsDto[]>(() => TransportService.getList(), {
+    initialData: [],
+  });
 }
 
-export function useTransport(transportId: number): {
+export function useTransport(
+  transportId: number,
+  enabled = true,
+): {
   data: GetTransportDto | null;
   loading: boolean;
   error: string | null;
@@ -28,8 +28,8 @@ export function useTransport(transportId: number): {
   return useApiData<GetTransportDto>(
     () => TransportService.getById(transportId),
     {
-      dependencies: [transportId],
+      dependencies: [transportId, enabled],
+      enabled: enabled && transportId > 0,
     },
   );
 }
-

@@ -1,19 +1,38 @@
-import type {
-  GetTransportsDto,
-  GetTransportDto,
-} from '@/types/documents/transports.types';
 import { transportsApi } from '@/api/documents/transports.api';
+import type {
+  CreateTransportPayload,
+  GetTransportDto,
+  GetTransportsDto,
+  UpdateTransportPayload,
+} from '@/types/documents/transports.types';
 
 export class TransportService {
   static async getList(): Promise<GetTransportsDto[]> {
-    const shipments: GetTransportsDto[] = await transportsApi.getList();
-
-    return shipments;
+    return transportsApi.getList();
   }
 
-  static async getById(shipmentId: number): Promise<GetTransportDto> {
-    const shipment: GetTransportDto = await transportsApi.getById(shipmentId);
+  static async getById(transportId: number): Promise<GetTransportDto> {
+    return transportsApi.getById(transportId);
+  }
 
-    return shipment;
+  static async create(
+    payload: CreateTransportPayload,
+  ): Promise<GetTransportDto> {
+    return transportsApi.create(payload);
+  }
+
+  static async update(
+    transportId: number,
+    payload: UpdateTransportPayload,
+  ): Promise<GetTransportDto> {
+    return transportsApi.update(transportId, payload);
+  }
+
+  static async remove(transportId: number): Promise<GetTransportDto> {
+    return transportsApi.remove(transportId);
+  }
+
+  static async changeStatus(transportId: number): Promise<GetTransportDto> {
+    return transportsApi.changeStatus(transportId);
   }
 }

@@ -1,3 +1,8 @@
+import type {
+  BatchedProductLineFormValue,
+  ServiceLineFormValue,
+} from '@/types/documents/contracts.types';
+
 export type GetShipmentsDto = {
   id: number;
   sellerId: number;
@@ -11,7 +16,7 @@ export type GetShipmentsDto = {
 
 export type GetShipmentDto = {
   shipment: Shipment;
-  receives: Receive[];
+  receives: ReceiveRef[];
 };
 
 export type Shipment = {
@@ -21,7 +26,12 @@ export type Shipment = {
   buyerId: number;
   currencyId: number;
   status: boolean;
-  invoice: { id: number, invoiceNumber: string };
+  invoice: {
+    id: number;
+    invoiceNumber: string;
+    buyerWarehouseId?: number;
+  };
+  incotermsId?: number;
   incoterms?: { name: string };
   documentSum: number;
   expectedDate: Date;
@@ -48,7 +58,75 @@ export type ShipmentServiceLine = {
   price: number;
 };
 
-export type Receive = {
+export type ReceiveRef = {
   id: number;
   status: boolean;
+};
+
+export type ShipmentFormValues = {
+  sellerId: string | null;
+  sellerWarehouseId: string | null;
+  buyerId: string | null;
+  currencyId: string | null;
+  invoiceId: string | null;
+  expectedDate: Date | null;
+  incotermsId: string | null;
+  transportPlace: string;
+  transportAmount: number | null;
+  comment: string;
+  shipmentLines: BatchedProductLineFormValue[];
+  shipmentServiceLines: ServiceLineFormValue[];
+};
+
+export type CreateShipmentLinePayload = {
+  productId: number;
+  batchId: number;
+  packageId: number;
+  qty: number;
+  price: number;
+};
+
+export type UpdateShipmentLinePayload = CreateShipmentLinePayload & {
+  id?: number;
+};
+
+export type CreateShipmentServiceLinePayload = {
+  serviceId: number;
+  qty: number;
+  price: number;
+};
+
+export type UpdateShipmentServiceLinePayload =
+  CreateShipmentServiceLinePayload & {
+    id?: number;
+  };
+
+export type CreateShipmentPayload = {
+  sellerId: number;
+  sellerWarehouseId: number;
+  buyerId: number;
+  currencyId: number;
+  invoiceId: number;
+  expectedDate: Date;
+  incotermsId: number;
+  transportPlace?: string;
+  transportAmount?: number;
+  comment?: string;
+  shipmentLines: CreateShipmentLinePayload[];
+  shipmentServiceLines: CreateShipmentServiceLinePayload[];
+};
+
+export type UpdateShipmentPayload = {
+  sellerId: number;
+  sellerWarehouseId: number;
+  buyerId: number;
+  currencyId: number;
+  invoiceId: number;
+  expectedDate: Date;
+  incotermsId: number;
+  transportPlace?: string;
+  transportAmount?: number;
+  comment?: string;
+  shipmentLines: UpdateShipmentLinePayload[];
+  shipmentServiceLines: UpdateShipmentServiceLinePayload[];
 };

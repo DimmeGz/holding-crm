@@ -134,6 +134,15 @@ export type ProductLineFormValue = {
   price: number;
 };
 
+export type BatchedProductLineFormValue = {
+  id?: number;
+  productId: string | null;
+  batchId: string | null;
+  packageId: string | null;
+  qty: number;
+  price: number;
+};
+
 export type ServiceLineFormValue = {
   id?: number;
   serviceId: string | null;

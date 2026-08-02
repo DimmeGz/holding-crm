@@ -16,14 +16,17 @@ export function useReceives(): {
   });
 }
 
-export function useReceive(receiveId: number): {
+export function useReceive(
+  receiveId: number,
+  enabled = true,
+): {
   data: Receive | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 } {
   return useApiData<Receive>(() => ReceivesService.getById(receiveId), {
-    dependencies: [receiveId],
+    dependencies: [receiveId, enabled],
+    enabled: enabled && receiveId > 0,
   });
 }
-

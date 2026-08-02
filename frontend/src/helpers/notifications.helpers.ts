@@ -13,3 +13,10 @@ export function showError(message: string): void {
     color: 'red',
   });
 }
+
+export function showWarning(message: string): void {
+  notifications.show({
+    message,
+    color: 'yellow',
+  });
+}

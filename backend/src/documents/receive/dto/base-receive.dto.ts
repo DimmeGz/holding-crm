@@ -2,10 +2,12 @@ import { Type } from 'class-transformer';
 import {
   IsDate,
   IsInt,
+  IsNumber,
   IsOptional,
   IsPositive,
   IsString,
   Length,
+  Min,
 } from 'class-validator';
 
 export class BaseReceiveDTO {
@@ -39,12 +41,12 @@ export class BaseReceiveDTO {
 
   @IsOptional()
   @IsString()
-  @Length(1, 20)
+  @Length(0, 20)
   transportPlace?: string;
 
   @IsOptional()
-  @IsPositive()
-  @IsInt()
+  @IsNumber()
+  @Min(0)
   transportAmount?: number;
 
   @IsOptional()

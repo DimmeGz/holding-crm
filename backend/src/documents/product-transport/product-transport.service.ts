@@ -63,7 +63,9 @@ export class ProductTransportService {
         'productTransport.status',
         'productTransport.expectedDate',
         'productTransport.comment',
+        'productTransportLine.id',
         'productTransportLine.productId',
+        'productTransportLine.batchId',
         'productTransportLine.packageId',
         'productTransportLine.qty',
         'productTransportServiceLine.id',
@@ -152,23 +154,31 @@ export class ProductTransportService {
       );
     }
 
-    const updatedTransportLinesIds = updateTransportDTO.productTransportLines
+    const productTransportLines =
+      updateTransportDTO.productTransportLines ?? [];
+    const productTransportServiceLines =
+      updateTransportDTO.productTransportServiceLines ?? [];
+
+    const updatedTransportLinesIds = productTransportLines
       .filter((line) => line['id'])
       .map((line) => line['id']);
     const transportLinesToDelete = transport.productTransportLines.filter(
       (line) => !updatedTransportLinesIds.includes(line.id),
     );
 
-    const updatedTransportServiceLinesIds =
-      updateTransportDTO.productTransportServiceLines
-        .filter((line) => line['id'])
-        .map((line) => line['id']);
+    const updatedTransportServiceLinesIds = productTransportServiceLines
+      .filter((line) => line['id'])
+      .map((line) => line['id']);
     const transportServiceLinesToDelete =
       transport.productTransportServiceLines.filter(
         (line) => !updatedTransportServiceLinesIds.includes(line.id),
       );
 
-    const updated = Object.assign(transport, updateTransportDTO);
+    const updated = Object.assign(transport, {
+      ...updateTransportDTO,
+      productTransportLines,
+      productTransportServiceLines,
+    });
 
     const productIds = updated.productTransportLines.map(
       (line) => line.productId,
