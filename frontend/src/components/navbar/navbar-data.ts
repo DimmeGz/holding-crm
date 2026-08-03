@@ -200,7 +200,7 @@ export function getGeneralMenu(
     {
       labelKey: 'common:nav.companies',
       icon: IconBuildingSkyscraper,
-      url: '/companies',
+      url: UrlConstants.COMPANIES_URL,
     },
     {
       labelKey: 'common:nav.warehouse',

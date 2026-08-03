@@ -1,0 +1,22 @@
+{
+  "title": "Компанії",
+  "balances": "Баланси",
+  "waiting": "Очікування надходжень",
+  "debt": "Борги",
+  "dueDate": "Дата оплати",
+  "createPayment": "Створити платіж",
+  "defaultWarehouse": "Основний склад",
+  "overdue": "Прострочено",
+  "currency": "Валюта",
+  "balance": "Баланс",
+  "wait": "Очікування",
+  "debtAmount": "Борг",
+  "company": "Компанія",
+  "invoice": "Інвойс",
+  "expectedDate": "Дата виставлення",
+  "amount": "Сума",
+  "subtotal": "Сума",
+  "selectForPayment": "В платіж",
+  "mixedSelectionError": "Оберіть інвойси з однаковими контрагентом і валютою",
+  "noSelectionError": "Оберіть хоча б один інвойс"
+}

@@ -3,7 +3,31 @@ export type I18nResources = {
   cz: LocaleDict;
 };
 
+export type CompaniesDict = {
+  title: string;
+  balances: string;
+  waiting: string;
+  debt: string;
+  dueDate: string;
+  createPayment: string;
+  defaultWarehouse: string;
+  overdue: string;
+  currency: string;
+  balance: string;
+  wait: string;
+  debtAmount: string;
+  company: string;
+  invoice: string;
+  expectedDate: string;
+  amount: string;
+  subtotal: string;
+  selectForPayment: string;
+  mixedSelectionError: string;
+  noSelectionError: string;
+};
+
 export type LocaleDict = {
+  companies: CompaniesDict;
   common: {
     nav: {
       companies: string;

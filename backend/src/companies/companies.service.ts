@@ -174,6 +174,7 @@ export class CompaniesService {
         'account.balance != 0 OR account.debt != 0 OR account.wait != 0',
       )
       .leftJoin('account.currency', 'currency')
+      .leftJoin('company.defaultWarehouse', 'defaultWarehouse')
       .leftJoin(
         'company.incomeInvoices',
         'incomeInvoice',
@@ -190,6 +191,8 @@ export class CompaniesService {
         'company.id',
         'company.name',
         'company.defaultWarehouseId',
+        'defaultWarehouse.id',
+        'defaultWarehouse.name',
         'account.id',
         'account.balance',
         'account.debt',
@@ -200,12 +203,20 @@ export class CompaniesService {
         'incomeInvoice.invoiceNumber',
         'incomeInvoice.paymentBalance',
         'incomeInvoice.expectedDate',
+        'incomeInvoice.paymentDelay',
+        'incomeInvoice.sellerId',
+        'incomeInvoice.buyerId',
+        'incomeInvoice.currencyId',
         'seller.id',
         'seller.name',
         'outcomeInvoice.id',
         'outcomeInvoice.invoiceNumber',
         'outcomeInvoice.paymentBalance',
         'outcomeInvoice.expectedDate',
+        'outcomeInvoice.paymentDelay',
+        'outcomeInvoice.sellerId',
+        'outcomeInvoice.buyerId',
+        'outcomeInvoice.currencyId',
         'buyer.id',
         'buyer.name',
       ])
@@ -215,7 +226,7 @@ export class CompaniesService {
       throw new NotFoundException(`Company with id ${companyId} not found`);
     }
 
-    if (company.incomeInvoices.length) {
+    if (company.incomeInvoices?.length) {
       company.incomeInvoices = company.incomeInvoices.sort(
         (a, b) =>
           a.sellerId - b.sellerId ||
@@ -224,7 +235,7 @@ export class CompaniesService {
       );
     }
 
-    if (company.outcomeInvoices.length) {
+    if (company.outcomeInvoices?.length) {
       company.outcomeInvoices = company.outcomeInvoices.sort(
         (a, b) =>
           a.buyerId - b.buyerId ||

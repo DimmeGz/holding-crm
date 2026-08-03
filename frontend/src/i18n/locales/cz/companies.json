@@ -1,0 +1,22 @@
+{
+  "title": "Společnosti",
+  "balances": "Zůstatky",
+  "waiting": "Očekávané příjmy",
+  "debt": "Dluhy",
+  "dueDate": "Datum splatnosti",
+  "createPayment": "Vytvořit platbu",
+  "defaultWarehouse": "Hlavní sklad",
+  "overdue": "Po splatnosti",
+  "currency": "Měna",
+  "balance": "Zůstatek",
+  "wait": "Očekávání",
+  "debtAmount": "Dluh",
+  "company": "Společnost",
+  "invoice": "Faktura",
+  "expectedDate": "Datum vystavení",
+  "amount": "Částka",
+  "subtotal": "Součet",
+  "selectForPayment": "Do platby",
+  "mixedSelectionError": "Vyberte faktury se stejným partnerem a měnou",
+  "noSelectionError": "Vyberte alespoň jednu fakturu"
+}
