@@ -2,6 +2,7 @@ import {
   IconArrowMoveRight,
   IconBuildingSkyscraper,
   IconCalendar,
+  IconChartBar,
   IconContract,
   IconCurrencyEuro,
   IconEdit,
@@ -196,6 +197,30 @@ export function getGeneralMenu(
     }),
   );
 
+  const monthReportLinks: Link[] = getInnerCompanies(
+    companies,
+    companyTypes,
+  ).map((company) => ({
+    label: company.name,
+    url: `${UrlConstants.MONTH_REPORT_URL}/${company.id}`,
+  }));
+
+  const yearReportLinks: Link[] = getInnerCompanies(
+    companies,
+    companyTypes,
+  ).map((company) => ({
+    label: company.name,
+    url: `${UrlConstants.YEAR_REPORT_URL}/${company.id}`,
+  }));
+
+  const productionReportLinks: Link[] = getInnerCompanies(
+    companies,
+    companyTypes,
+  ).map((company) => ({
+    label: company.name,
+    url: `${UrlConstants.PRODUCTION_REPORT_URL}/${company.id}`,
+  }));
+
   return [
     {
       labelKey: 'common:nav.companies',
@@ -207,6 +232,29 @@ export function getGeneralMenu(
       icon: IconForklift,
       url: UrlConstants.WAREHOUSE_URL,
       links: warehouseLinks,
+    },
+    {
+      labelKey: 'common:nav.monthReport',
+      icon: IconChartBar,
+      url: UrlConstants.MONTH_REPORT_URL,
+      links: monthReportLinks,
+    },
+    {
+      labelKey: 'common:nav.yearReport',
+      icon: IconChartBar,
+      url: UrlConstants.YEAR_REPORT_URL,
+      links: yearReportLinks,
+    },
+    {
+      labelKey: 'common:nav.productionReport',
+      icon: IconChartBar,
+      url: UrlConstants.PRODUCTION_REPORT_URL,
+      links: productionReportLinks,
+    },
+    {
+      labelKey: 'common:nav.technoReport',
+      icon: IconChartBar,
+      url: UrlConstants.TECHNO_REPORT_URL,
     },
     {
       labelKey: 'common:nav.calendar',

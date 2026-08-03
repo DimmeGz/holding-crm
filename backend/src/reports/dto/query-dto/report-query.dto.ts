@@ -20,5 +20,5 @@ export class ReportQueryDTO {
       return `${args.property} must match the pattern YYYY-MM`;
     },
   })
-  date: string;
+  date?: string;
 }

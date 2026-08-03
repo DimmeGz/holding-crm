@@ -18,5 +18,8 @@
   "subtotal": "Сума",
   "selectForPayment": "В платіж",
   "mixedSelectionError": "Оберіть інвойси з однаковими контрагентом і валютою",
-  "noSelectionError": "Оберіть хоча б один інвойс"
+  "noSelectionError": "Оберіть хоча б один інвойс",
+  "monthReport": "Місячний звіт",
+  "yearReport": "Річний звіт",
+  "productionReport": "Звіт по виробництву"
 }

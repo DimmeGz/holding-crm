@@ -75,6 +75,20 @@ async function request<T>(
   }
 }
 
+function parseContentDispositionFilename(
+  header: string | undefined,
+): string | null {
+  if (!header) {
+    return null;
+  }
+  const utfMatch = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utfMatch?.[1]) {
+    return decodeURIComponent(utfMatch[1]);
+  }
+  const plainMatch = /filename="?([^"]+)"?/i.exec(header);
+  return plainMatch?.[1] ?? null;
+}
+
 export const apiClient = {
   get<T>(url: string): Promise<T> {
     return request(() => http.get<T>(url));
@@ -90,5 +104,21 @@ export const apiClient = {
 
   del<T>(url: string): Promise<T> {
     return request(() => http.delete<T>(url));
+  },
+
+  async getBlob(
+    url: string,
+  ): Promise<{ blob: Blob; filename: string | null }> {
+    try {
+      const response = await http.get<Blob>(url, { responseType: 'blob' });
+      return {
+        blob: response.data,
+        filename: parseContentDispositionFilename(
+          response.headers['content-disposition'] as string | undefined,
+        ),
+      };
+    } catch (error: unknown) {
+      throw toApiError(error);
+    }
   },
 };
