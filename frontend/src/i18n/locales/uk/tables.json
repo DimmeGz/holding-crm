@@ -30,7 +30,10 @@
     "countryOfOrigin": "Країна походження",
     "byOrder": "Згідно замовлення",
     "byInvoice": "Згідно рахунку",
-    "rate": "Відсоток"
+    "rate": "Відсоток",
+    "shipmentExpectedDate": "Дата відвантаження",
+    "plannedReceive": "Заплановане надходження",
+    "receiveExpectedDate": "Запланована дата отримання"
   },
   "showArchived": "показати архівні"
 }

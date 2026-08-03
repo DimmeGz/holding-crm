@@ -81,6 +81,9 @@ export type LocaleDict = {
       byOrder: string;
       byInvoice: string;
       rate: string;
+      shipmentExpectedDate: string;
+      plannedReceive: string;
+      receiveExpectedDate: string;
     };
     showArchived: string;
   };

@@ -38,7 +38,11 @@ export const generalMenu: NavLinkGroupProps[] = [
     })),
   },
   { labelKey: 'common:nav.calendar', icon: IconCalendar },
-  { labelKey: 'common:nav.transit', icon: IconTruckDelivery },
+  {
+    labelKey: 'common:nav.transit',
+    icon: IconTruckDelivery,
+    url: UrlConstants.TRANSIT_URL,
+  },
 ];
 
 export const documentsMenu: NavLinkGroupProps[] = [
