@@ -326,7 +326,11 @@ export class GoodsService {
   async getProductsStoreData() {
     return await this.productsRepository
       .createQueryBuilder('product')
-      .select(['product.id', 'product.name'])
+      .select([
+        'product.id',
+        'product.name',
+        'product.countryOfOriginId',
+      ])
       .getMany();
   }
 

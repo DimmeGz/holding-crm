@@ -237,6 +237,15 @@ export type LocaleDict = {
       cannotEditClosedProduction: string;
       productionOutLinesRequired: string;
       productionInLinesRequired: string;
+      batchesList: string;
+      batchUpdate: string;
+      batchCreate: string;
+      batchEditModal: string;
+      batchNameRequired: string;
+      batchProductRequired: string;
+      defaultValueHint: string;
+      createBatch: string;
+      editBatch: string;
     };
   };
 };

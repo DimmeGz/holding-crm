@@ -11,6 +11,7 @@ export class CustomField extends AbstractEntity {
   name: string;
 
   @Column({
+    name: 'description_1',
     type: 'varchar',
     length: 50,
     nullable: true,
@@ -18,6 +19,7 @@ export class CustomField extends AbstractEntity {
   description: string;
 
   @Column({
+    name: 'description_2',
     type: 'varchar',
     length: 50,
     nullable: true,
@@ -50,5 +52,5 @@ export class CustomField extends AbstractEntity {
     type: 'smallint',
     default: 0,
   })
-  priority: string;
+  priority: number;
 }

@@ -1,6 +1,7 @@
 import { useProductTableColumns } from './useProductTableColumns';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { Text } from '@mantine/core';
 import type { MRT_Cell, MRT_ColumnDef, MRT_Row } from 'mantine-react-table';
 import { CommonConstants } from '@/constants/common.constants';
@@ -11,6 +12,7 @@ import type { InvoiceLine } from '@/types/documents/invoices.types';
 
 export function useInvoiceLinesColumns(
   currency: string,
+  invoiceId?: number,
 ): MRT_ColumnDef<InvoiceLine>[] {
   const { t } = useTranslation(['common', 'documents', 'tables']),
     commonColumns: UseProductTableColumns = useProductTableColumns(currency),
@@ -24,16 +26,23 @@ export function useInvoiceLinesColumns(
         header: t('tables:columns.byOrder'),
         accessorKey: 'orderName',
         id: 'orderName',
-        Cell: ({ row }: { row: MRT_Row<InvoiceLine> }) => (
-          <Text
-            component='a'
-            href={`${UrlConstants.ORDERS_URL}/${row.original.order.id}`}
-            td='underline'
-            style={{ cursor: 'pointer' }}
-          >
-            {row.original.order.orderNumber}
-          </Text>
-        ),
+        Cell: ({ row }: { row: MRT_Row<InvoiceLine> }) => {
+          const order = row.original.order;
+          if (!order) {
+            return CommonConstants.EMPTY_STRING;
+          }
+
+          return (
+            <Text
+              component='a'
+              href={`${UrlConstants.ORDERS_URL}/${order.id}`}
+              td='underline'
+              style={{ cursor: 'pointer' }}
+            >
+              {order.orderNumber}
+            </Text>
+          );
+        },
       },
       commonColumns.product<InvoiceLine>(),
       {
@@ -41,6 +50,28 @@ export function useInvoiceLinesColumns(
         accessorFn: (row: InvoiceLine) => row.batch?.name,
         id: 'batch',
         size: 100,
+        Cell: ({ row }: { row: MRT_Row<InvoiceLine> }) => {
+          const batch = row.original.batch;
+          if (!batch) {
+            return CommonConstants.EMPTY_STRING;
+          }
+
+          const editUrl =
+            invoiceId && invoiceId > 0
+              ? `${UrlConstants.BATCHES_URL}/${batch.id}/edit?invoiceId=${invoiceId}`
+              : `${UrlConstants.BATCHES_URL}/${batch.id}/edit`;
+
+          return (
+            <Text
+              component={Link}
+              to={editUrl}
+              td='underline'
+              c='inherit'
+            >
+              {batch.name}
+            </Text>
+          );
+        },
       },
       commonColumns.package<InvoiceLine>(),
       commonColumns.qty<InvoiceLine>(),
@@ -75,6 +106,6 @@ export function useInvoiceLinesColumns(
       },
       commonColumns.amount<InvoiceLine>(),
     ],
-    [t, commonColumns, getCountryName],
+    [t, commonColumns, getCountryName, invoiceId],
   );
 }

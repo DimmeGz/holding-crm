@@ -19,7 +19,8 @@ export class StoreDataService {
       companyTypes: {} as Record<number, string>,
       warehouses: {},
       currencies: {},
-      products: {},
+      products: {} as Record<number, string>,
+      productCountries: {} as Record<number, number | null>,
       packages: {},
       services: {},
       countries: {},
@@ -50,9 +51,11 @@ export class StoreDataService {
     rawCurrencies.forEach(
       (currency) => (allStoreData.currencies[currency.id] = currency.name),
     );
-    rawProducts.forEach(
-      (product) => (allStoreData.products[product.id] = product.name),
-    );
+    rawProducts.forEach((product) => {
+      allStoreData.products[product.id] = product.name;
+      allStoreData.productCountries[product.id] =
+        product.countryOfOriginId ?? null;
+    });
     rawPackages.forEach((pack) => (allStoreData.packages[pack.id] = pack.name));
     rawServices.forEach(
       (service) => (allStoreData.services[service.id] = service.name),

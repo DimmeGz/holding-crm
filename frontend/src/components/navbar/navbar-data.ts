@@ -76,7 +76,11 @@ export const documentsMenu: NavLinkGroupProps[] = [
 ];
 
 export const adminMenu: NavLinkGroupProps[] = [
-  { labelKey: 'common:nav.batchEdit', icon: IconEdit },
+  {
+    labelKey: 'common:nav.batchEdit',
+    icon: IconEdit,
+    url: UrlConstants.BATCHES_URL,
+  },
 ];
 
 export function getGeneralMenu(

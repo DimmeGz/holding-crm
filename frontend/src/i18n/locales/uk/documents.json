@@ -146,6 +146,15 @@
     "productionEdit": "Редагування виробництва",
     "cannotEditClosedProduction": "Проведене виробництво не можна редагувати",
     "productionOutLinesRequired": "Додайте хоча б одну позицію списання з собівартістю",
-    "productionInLinesRequired": "Додайте хоча б одну позицію надходження"
+    "productionInLinesRequired": "Додайте хоча б одну позицію надходження",
+    "batchesList": "Редагування партій",
+    "batchUpdate": "Редагування партії товару",
+    "batchCreate": "Додати партію",
+    "batchEditModal": "Редагування партії",
+    "batchNameRequired": "Вкажіть назву партії",
+    "batchProductRequired": "Оберіть продукт",
+    "defaultValueHint": "за замовчуванням",
+    "createBatch": "Створити партію",
+    "editBatch": "Редагувати партію"
   }
 }

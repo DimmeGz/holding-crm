@@ -1,6 +1,6 @@
 import { create, type StoreApi, type UseBoundStore } from 'zustand';
 import { LibsDataService } from '@/services/libs-data.service';
-import type { LibsData, LibsStore } from '@/types/common.types';
+import type { BatchStoreItem, LibsData, LibsStore } from '@/types/common.types';
 
 export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
   create<LibsStore>((set, get) => ({
@@ -9,6 +9,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
     warehouses: {},
     currencies: {},
     products: {},
+    productCountries: {},
     packages: {},
     services: {},
     countries: {},
@@ -24,6 +25,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
         set({
           ...data,
           companyTypes: data.companyTypes ?? {},
+          productCountries: data.productCountries ?? {},
           technicalProcesses: data.technicalProcesses ?? {},
           batches: data.batches ?? {},
           isLoaded: true,
@@ -31,6 +33,15 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
       } catch (error) {
         console.error('Failed to load references:', error);
       }
+    },
+
+    upsertBatch: (id: number, batch: BatchStoreItem): void => {
+      set(state => ({
+        batches: {
+          ...state.batches,
+          [id]: batch,
+        },
+      }));
     },
 
     getCompanyName: (id: number): string => {

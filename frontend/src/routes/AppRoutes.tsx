@@ -13,6 +13,7 @@ import { productionsRoutes } from '@/routes/documents/productions.routes';
 import { transportsRoutes } from '@/routes/documents/transports.routes';
 import { transitRoutes } from '@/routes/documents/transit.routes';
 import { warehouseRoutes } from '@/routes/warehouse.routes';
+import { batchesRoutes } from '@/routes/batches.routes';
 
 export function AppRoutes(): ReactNode {
   return useRoutes([
@@ -36,6 +37,7 @@ export function AppRoutes(): ReactNode {
         transportsRoutes,
         transitRoutes,
         warehouseRoutes,
+        batchesRoutes,
       ],
     },
   ]);

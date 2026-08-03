@@ -146,6 +146,15 @@
     "productionEdit": "Úprava výroby",
     "cannotEditClosedProduction": "Provedenou výrobu nelze upravovat",
     "productionOutLinesRequired": "Přidejte alespoň jednu položku odpisu s náklady",
-    "productionInLinesRequired": "Přidejte alespoň jednu položku příjmu"
+    "productionInLinesRequired": "Přidejte alespoň jednu položku příjmu",
+    "batchesList": "Úprava šarží",
+    "batchUpdate": "Úprava šarže produktu",
+    "batchCreate": "Přidat šarži",
+    "batchEditModal": "Úprava šarže",
+    "batchNameRequired": "Zadejte název šarže",
+    "batchProductRequired": "Vyberte produkt",
+    "defaultValueHint": "výchozí hodnota",
+    "createBatch": "Vytvořit šarži",
+    "editBatch": "Upravit šarži"
   }
 }
