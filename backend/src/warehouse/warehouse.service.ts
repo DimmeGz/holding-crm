@@ -45,11 +45,14 @@ export class WarehouseService {
         'product.name',
         'batch.id',
         'batch.name',
+        'package.id',
         'package.name',
         'warehouse.id',
         'warehouse.name',
         'company.id',
         'company.name',
+        'company.companyType',
+        'currency.id',
         'currency.name',
       ]);
   }

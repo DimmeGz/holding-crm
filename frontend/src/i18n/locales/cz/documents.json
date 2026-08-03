@@ -34,6 +34,8 @@
     "productionOutputProduct": "Výstupní produkt",
     "productionOut": "Vyskladnění",
     "productionIn": "Příjem",
+    "productReport": "zpráva o produktu",
+    "batchReport": "zpráva o šarži",
     "payment": "Platba",
     "byInvoice": "Na základě účtu",
     "payed": "Zaplaceno",

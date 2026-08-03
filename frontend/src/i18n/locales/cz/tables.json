@@ -33,7 +33,8 @@
     "rate": "Zajímat",
     "shipmentExpectedDate": "Datum odeslání",
     "plannedReceive": "Plánované přijetí",
-    "receiveExpectedDate": "Plánované datum přijetí"
+    "receiveExpectedDate": "Plánované datum přijetí",
+    "totalCost": "Celková hodnota"
   },
   "showArchived": "zobrazit archivované"
 }

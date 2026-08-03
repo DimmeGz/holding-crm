@@ -13,6 +13,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
     services: {},
     countries: {},
     incoterms: {},
+    technicalProcesses: {},
     batches: {},
     isLoaded: false,
 
@@ -23,6 +24,7 @@ export const useLibsStore: UseBoundStore<StoreApi<LibsStore>> =
         set({
           ...data,
           companyTypes: data.companyTypes ?? {},
+          technicalProcesses: data.technicalProcesses ?? {},
           batches: data.batches ?? {},
           isLoaded: true,
         });

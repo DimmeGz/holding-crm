@@ -33,7 +33,8 @@
     "rate": "Відсоток",
     "shipmentExpectedDate": "Дата відвантаження",
     "plannedReceive": "Заплановане надходження",
-    "receiveExpectedDate": "Запланована дата отримання"
+    "receiveExpectedDate": "Запланована дата отримання",
+    "totalCost": "Загальна вартість"
   },
   "showArchived": "показати архівні"
 }

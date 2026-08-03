@@ -11,5 +11,10 @@ export const UrlConstants: Record<string, string> = {
   PRODUCTION_URL: '/production',
   TRANSPORT_URL: '/transport',
   TRANSIT_URL: '/transit',
+  WAREHOUSE_URL: '/warehouse',
+  PRODUCT_REPORT_URL: '/warehouse/product',
+  BATCH_REPORT_URL: '/warehouse/batch',
+  GOODS_PRODUCT_URL: '/goods/product',
+  GOODS_BATCH_URL: '/goods/batch',
   LIBS_DATA_URL: '/store-data',
 };

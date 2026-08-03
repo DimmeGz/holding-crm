@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Collapse,
@@ -10,7 +11,7 @@ import {
 } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
 import classes from '@/components/navbar/LinksGroup.module.css';
-import type { Link, NavLinkGroupProps } from '@/types/base-ui.types';
+import type { Link as NavLinkItem, NavLinkGroupProps } from '@/types/base-ui.types';
 
 export function LinksGroup({
   icon: Icon,
@@ -20,37 +21,55 @@ export function LinksGroup({
   links,
 }: NavLinkGroupProps): ReactNode {
   const { t } = useTranslation(['common']);
+  const navigate = useNavigate();
 
   const hasLinks: boolean = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
-  const items: ReactNode = (hasLinks ? links! : []).map((link: Link) => (
-    <Text<'a'>
-      component='a'
+
+  const items: ReactNode = (hasLinks ? links! : []).map((item: NavLinkItem) => (
+    <Text
+      component={Link}
+      to={item.url}
       className={classes.link}
-      href={link.url}
-      key={link.label}
-      onClick={(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) =>
-        event.preventDefault()
-      }
+      key={`${item.label}-${item.url}`}
     >
-      {link.label}
+      {item.label}
     </Text>
   ));
 
+  const handleControlClick = (): void => {
+    if (hasLinks) {
+      setOpened((current: boolean) => !current);
+      return;
+    }
+
+    if (link) {
+      navigate(link);
+    }
+  };
+
   return (
     <>
-      <UnstyledButton
-        onClick={() => setOpened((opened: boolean) => !opened)}
-        className={classes.control}
-      >
+      <UnstyledButton onClick={handleControlClick} className={classes.control}>
         <Group justify='space-between' gap={0}>
           <Box style={{ display: 'flex', alignItems: 'center' }}>
             <ThemeIcon variant='light' size={30}>
               <Icon size={18} />
             </ThemeIcon>
-            <Text<'a'> component='a' ml='md' href={link}>
-              {t(labelKey)}
-            </Text>
+            {link ? (
+              <Text
+                component={Link}
+                to={link}
+                ml='md'
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                  event.stopPropagation();
+                }}
+              >
+                {t(labelKey)}
+              </Text>
+            ) : (
+              <Text ml='md'>{t(labelKey)}</Text>
+            )}
           </Box>
           {hasLinks && (
             <IconChevronRight

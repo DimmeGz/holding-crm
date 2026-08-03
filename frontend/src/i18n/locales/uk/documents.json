@@ -34,6 +34,8 @@
     "productionOutputProduct": "Вихідний продукт",
     "productionOut": "Списання",
     "productionIn": "Надходження",
+    "productReport": "звіт по продукту",
+    "batchReport": "звіт по партії",
     "payment": "Платіж",
     "byInvoice": "На підставі рахунку",
     "payed": "Сплачено",

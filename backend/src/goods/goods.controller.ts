@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, UsePipes } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 
 import { GoodsService } from './goods.service';
 
@@ -9,17 +9,15 @@ export class GoodsController {
   constructor(private readonly goodsService: GoodsService) {}
 
   @Get('batch/:batchId')
-  @UsePipes(new ParseIntPipe())
   getBatchData(
-    @Param('batchId') batchId: number,
+    @Param('batchId', ParseIntPipe) batchId: number,
   ): Promise<GetBatchDataResponseDTO> {
     return this.goodsService.getBatchData(batchId);
   }
 
-  @Get('/product/:productId')
-  @UsePipes(new ParseIntPipe())
+  @Get('product/:productId')
   getProductData(
-    @Param('productId') productId: number,
+    @Param('productId', ParseIntPipe) productId: number,
   ): Promise<GetProductDataResponseDTO> {
     return this.goodsService.getProductData(productId);
   }

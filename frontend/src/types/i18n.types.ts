@@ -84,6 +84,7 @@ export type LocaleDict = {
       shipmentExpectedDate: string;
       plannedReceive: string;
       receiveExpectedDate: string;
+      totalCost: string;
     };
     showArchived: string;
   };
@@ -122,6 +123,8 @@ export type LocaleDict = {
       receive: string;
       productionOut: string;
       productionIn: string;
+      productReport: string;
+      batchReport: string;
       productionOutputProduct: string;
       payment: string;
       byInvoice: string;

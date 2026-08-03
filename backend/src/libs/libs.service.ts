@@ -77,6 +77,14 @@ export class LibsService {
       .getMany();
   }
 
+  async getTechnicalProcessesStoreData() {
+    return await this.technicalProcessesRepository
+      .createQueryBuilder('technicalProcess')
+      .select(['technicalProcess.id', 'technicalProcess.name'])
+      .orderBy('technicalProcess.name', 'ASC')
+      .getMany();
+  }
+
   async getCurrenciesStoreData() {
     return await this.currenciesRepository
       .createQueryBuilder('currency')

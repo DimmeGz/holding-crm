@@ -20,6 +20,7 @@ export type LibsData = {
   services: Record<number, string>;
   countries: Record<number, string>;
   incoterms: Record<number, string>;
+  technicalProcesses: Record<number, string>;
   batches: Record<number, BatchStoreItem>;
 };
 
