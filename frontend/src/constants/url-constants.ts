@@ -16,6 +16,7 @@ export const UrlConstants: Record<string, string> = {
   BATCH_REPORT_URL: '/warehouse/batch',
   BATCHES_URL: '/batches',
   CALENDAR_URL: '/calendar',
+  MONTH_REPORT_URL: '/reports/month',
   COMPANIES_URL: '/companies',
   GOODS_PRODUCT_URL: '/goods/product',
   GOODS_BATCH_URL: '/goods/batch',

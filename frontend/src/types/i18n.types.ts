@@ -24,15 +24,50 @@ export type CompaniesDict = {
   selectForPayment: string;
   mixedSelectionError: string;
   noSelectionError: string;
+  monthReport: string;
+};
+
+export type ReportsDict = {
+  title: string;
+  monthReport: string;
+  filter: string;
+  prevMonth: string;
+  nextMonth: string;
+  operatingOutgoings: string;
+  factVatReturn: string;
+  countVatReturn: string;
+  saveData: string;
+  incomes: string;
+  outgoings: string;
+  product: string;
+  qty: string;
+  sum: string;
+  vat: string;
+  cost: string;
+  transport: string;
+  payments: string;
+  partner: string;
+  invoice: string;
+  orders: string;
+  seller: string;
+  buyer: string;
+  delta: string;
+  commission: string;
+  service: string;
+  doubles: string;
+  totals: string;
+  quarterBlock: string;
 };
 
 export type LocaleDict = {
   companies: CompaniesDict;
+  reports: ReportsDict;
   common: {
     nav: {
       companies: string;
       warehouse: string;
       calendar: string;
+      monthReport: string;
       transit: string;
       contracts: string;
       orders: string;

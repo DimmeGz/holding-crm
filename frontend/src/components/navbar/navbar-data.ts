@@ -2,6 +2,7 @@ import {
   IconArrowMoveRight,
   IconBuildingSkyscraper,
   IconCalendar,
+  IconChartBar,
   IconContract,
   IconCurrencyEuro,
   IconEdit,
@@ -196,6 +197,14 @@ export function getGeneralMenu(
     }),
   );
 
+  const monthReportLinks: Link[] = getInnerCompanies(
+    companies,
+    companyTypes,
+  ).map((company) => ({
+    label: company.name,
+    url: `${UrlConstants.MONTH_REPORT_URL}/${company.id}`,
+  }));
+
   return [
     {
       labelKey: 'common:nav.companies',
@@ -207,6 +216,12 @@ export function getGeneralMenu(
       icon: IconForklift,
       url: UrlConstants.WAREHOUSE_URL,
       links: warehouseLinks,
+    },
+    {
+      labelKey: 'common:nav.monthReport',
+      icon: IconChartBar,
+      url: UrlConstants.MONTH_REPORT_URL,
+      links: monthReportLinks,
     },
     {
       labelKey: 'common:nav.calendar',

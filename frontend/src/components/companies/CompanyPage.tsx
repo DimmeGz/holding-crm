@@ -1,7 +1,7 @@
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { Card, Grid, Group, Table, Text, Title } from '@mantine/core';
+import { Button, Card, Grid, Group, Table, Text, Title } from '@mantine/core';
 import { CompanyInvoiceSection } from '@/components/companies/CompanyInvoiceSection';
 import { Spinner } from '@/components/shared/Spinner';
 import { CommonConstants } from '@/constants/common.constants';
@@ -53,6 +53,13 @@ export function CompanyPage(): ReactNode {
           </Text>
           <Title order={3}>{data.name}</Title>
         </div>
+        <Button
+          component={Link}
+          to={`${UrlConstants.MONTH_REPORT_URL}/${companyId}`}
+          variant='light'
+        >
+          {t('companies:monthReport')}
+        </Button>
       </Group>
 
       <Grid mb='md'>
