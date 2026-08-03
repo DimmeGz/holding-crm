@@ -48,5 +48,18 @@
   "capitalization": "Capitalization",
   "yearDelta": "Дельта з початку року",
   "cashflow": "Cashflow",
-  "savedData": "Збережені дані"
+  "savedData": "Збережені дані",
+  "productionReport": "Звіт по виробництву",
+  "technoReport": "Techno звіт",
+  "exportCsv": "Вивантажити CSV",
+  "selectProcess": "Оберіть технічний процес",
+  "consumed": "Використано",
+  "produced": "Виготовлено",
+  "productionDoc": "Виробництво",
+  "batch": "Партія",
+  "linkedInvoices": "Інвойси",
+  "technoDyumans": "Supplier →",
+  "technoEwbIn": "Вхід →",
+  "technoEwbOut": "Вихід →",
+  "technoKlimana": "Klimana →"
 }

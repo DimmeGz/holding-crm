@@ -213,6 +213,14 @@ export function getGeneralMenu(
     url: `${UrlConstants.YEAR_REPORT_URL}/${company.id}`,
   }));
 
+  const productionReportLinks: Link[] = getInnerCompanies(
+    companies,
+    companyTypes,
+  ).map((company) => ({
+    label: company.name,
+    url: `${UrlConstants.PRODUCTION_REPORT_URL}/${company.id}`,
+  }));
+
   return [
     {
       labelKey: 'common:nav.companies',
@@ -236,6 +244,17 @@ export function getGeneralMenu(
       icon: IconChartBar,
       url: UrlConstants.YEAR_REPORT_URL,
       links: yearReportLinks,
+    },
+    {
+      labelKey: 'common:nav.productionReport',
+      icon: IconChartBar,
+      url: UrlConstants.PRODUCTION_REPORT_URL,
+      links: productionReportLinks,
+    },
+    {
+      labelKey: 'common:nav.technoReport',
+      icon: IconChartBar,
+      url: UrlConstants.TECHNO_REPORT_URL,
     },
     {
       labelKey: 'common:nav.calendar',

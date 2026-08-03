@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Link,
@@ -20,7 +20,9 @@ import { ReportType2Tables } from '@/components/reports/ReportType2Tables';
 import { ReportType3Tables } from '@/components/reports/ReportType3Tables';
 import { Spinner } from '@/components/shared/Spinner';
 import { UrlConstants } from '@/constants/url-constants';
+import { getErrorMessage } from '@/api/api-client';
 import { useMonthReport } from '@/hooks/reports/useMonthReport';
+import { ReportsService } from '@/services/reports/reports.service';
 import { useLibsStore } from '@/stores/useLibsStore';
 
 function currentYearMonth(): string {
@@ -59,12 +61,33 @@ export function MonthReportPage(): ReactNode {
     date,
     process,
   );
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const showProcessFilter =
     data?.reportType === 0 ||
     data?.reportType === 1 ||
     data?.reportType === 3 ||
     data == null;
+
+  const canExportCsv =
+    data != null &&
+    (data.reportType === 0 ||
+      data.reportType === 1 ||
+      data.reportType === 3) &&
+    process === null;
+
+  const handleExportCsv = async (): Promise<void> => {
+    setExporting(true);
+    setExportError(null);
+    try {
+      await ReportsService.exportMonthReport(companyId, { date });
+    } catch (err: unknown) {
+      setExportError(getErrorMessage(err));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const setDate = (nextDate: string): void => {
     const next = new URLSearchParams(searchParams);
@@ -107,7 +130,23 @@ export function MonthReportPage(): ReactNode {
             {data ? ` — ${data.company.name}` : ''}
           </Title>
         </div>
+        {canExportCsv && (
+          <Button
+            variant='light'
+            loading={exporting}
+            onClick={() => {
+              void handleExportCsv();
+            }}
+          >
+            {t('reports:exportCsv')}
+          </Button>
+        )}
       </Group>
+      {exportError && (
+        <Text c='red' size='sm'>
+          {t('common:messages.error')} {exportError}
+        </Text>
+      )}
 
       <Group>
         <Button

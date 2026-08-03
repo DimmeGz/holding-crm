@@ -20,5 +20,6 @@
   "mixedSelectionError": "Vyberte faktury se stejným partnerem a měnou",
   "noSelectionError": "Vyberte alespoň jednu fakturu",
   "monthReport": "Měsíční přehled",
-  "yearReport": "Roční přehled"
+  "yearReport": "Roční přehled",
+  "productionReport": "Přehled výroby"
 }

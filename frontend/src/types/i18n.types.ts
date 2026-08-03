@@ -26,6 +26,7 @@ export type CompaniesDict = {
   noSelectionError: string;
   monthReport: string;
   yearReport: string;
+  productionReport: string;
 };
 
 export type ReportsDict = {
@@ -79,6 +80,19 @@ export type ReportsDict = {
   yearDelta: string;
   cashflow: string;
   savedData: string;
+  productionReport: string;
+  technoReport: string;
+  exportCsv: string;
+  selectProcess: string;
+  consumed: string;
+  produced: string;
+  productionDoc: string;
+  batch: string;
+  linkedInvoices: string;
+  technoDyumans: string;
+  technoEwbIn: string;
+  technoEwbOut: string;
+  technoKlimana: string;
 };
 
 export type LocaleDict = {
@@ -91,6 +105,8 @@ export type LocaleDict = {
       calendar: string;
       monthReport: string;
       yearReport: string;
+      productionReport: string;
+      technoReport: string;
       transit: string;
       contracts: string;
       orders: string;

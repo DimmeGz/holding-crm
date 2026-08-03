@@ -19,6 +19,8 @@ import { calendarRoutes } from '@/routes/calendar.routes';
 import { companiesRoutes } from '@/routes/companies.routes';
 import { reportsRoutes } from '@/routes/reports.routes';
 import { yearReportsRoutes } from '@/routes/year-reports.routes';
+import { productionReportsRoutes } from '@/routes/production-reports.routes';
+import { technoReportsRoutes } from '@/routes/techno-reports.routes';
 
 export function AppRoutes(): ReactNode {
   return useRoutes([
@@ -47,6 +49,8 @@ export function AppRoutes(): ReactNode {
         calendarRoutes,
         reportsRoutes,
         yearReportsRoutes,
+        productionReportsRoutes,
+        technoReportsRoutes,
       ],
     },
   ]);

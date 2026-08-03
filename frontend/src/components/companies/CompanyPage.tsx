@@ -68,6 +68,13 @@ export function CompanyPage(): ReactNode {
           >
             {t('companies:yearReport')}
           </Button>
+          <Button
+            component={Link}
+            to={`${UrlConstants.PRODUCTION_REPORT_URL}/${companyId}`}
+            variant='light'
+          >
+            {t('companies:productionReport')}
+          </Button>
         </Group>
       </Group>
 

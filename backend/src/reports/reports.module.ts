@@ -5,6 +5,7 @@ import { MonthReportService } from './month-report.service';
 import { MonthDataService } from './month-data.service';
 import { YearReportService } from './year-report.service';
 import { ProductionReportService } from './production-report.service';
+import { TechnoReportService } from './techno-report.service';
 import { ReportsController } from './reports.controller';
 import { MonthData } from './entities';
 
@@ -14,6 +15,11 @@ import {
   InvoiceLine,
   InvoiceServiceLine,
 } from '../documents/invoices/entities';
+import {
+  Production,
+  ProductionInLine,
+  ProductionOutLine,
+} from '../documents/production/entities';
 import { PaymentLine } from '../documents/payment/entities';
 import { CommissionInvoice } from '../documents/commission-invoice/entities';
 import { CommissionPaymentLine } from '../documents/commission-payment/entities';
@@ -37,10 +43,14 @@ import { WarehouseAccounting } from '../warehouse/entities';
       Order,
       MonthData,
       WarehouseAccounting,
+      Production,
+      ProductionInLine,
+      ProductionOutLine,
     ]),
   ],
   providers: [
     ProductionReportService,
+    TechnoReportService,
     MonthReportService,
     MonthDataService,
     YearReportService,

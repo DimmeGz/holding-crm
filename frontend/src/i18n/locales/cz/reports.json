@@ -48,5 +48,18 @@
   "capitalization": "Capitalization",
   "yearDelta": "Delta od začátku roku",
   "cashflow": "Cashflow",
-  "savedData": "Uložená data"
+  "savedData": "Uložená data",
+  "productionReport": "Přehled výroby",
+  "technoReport": "Techno přehled",
+  "exportCsv": "Stáhnout CSV",
+  "selectProcess": "Vyberte technický proces",
+  "consumed": "Spotřebováno",
+  "produced": "Vyrobeno",
+  "productionDoc": "Výroba",
+  "batch": "Šarže",
+  "linkedInvoices": "Faktury",
+  "technoDyumans": "Supplier →",
+  "technoEwbIn": "Vstup →",
+  "technoEwbOut": "Výstup →",
+  "technoKlimana": "Klimana →"
 }
