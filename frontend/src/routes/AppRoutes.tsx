@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { useRoutes } from 'react-router-dom';
+import { Navigate, useRoutes } from 'react-router-dom';
+import { UrlConstants } from '@/constants/url-constants';
 import MainLayout from '@/layout/MainLayout';
 import { commissionInvoicesRoutes } from '@/routes/documents/commission-invoices.routes';
 import { commissionPaymentsRoutes } from '@/routes/documents/commission-payments.routes';
@@ -24,7 +25,7 @@ export function AppRoutes(): ReactNode {
       children: [
         {
           index: true,
-          element: <div className='w-full h-full'></div>,
+          element: <Navigate to={UrlConstants.CALENDAR_URL} replace />,
         },
         ordersRoutes,
         contractsRoutes,

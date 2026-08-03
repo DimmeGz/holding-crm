@@ -1,3 +1,4 @@
+import type { DatedDocumentsListQuery } from '@/helpers/documents-query.helpers';
 import { useApiData } from '@/hooks/useApiData';
 import { InvoicesService } from '@/services/documents/invoices.service';
 import type {
@@ -5,14 +6,17 @@ import type {
   GetInvoicesDto,
 } from '@/types/documents/invoices.types';
 
-export function useInvoices(): {
+export function useInvoices(query?: DatedDocumentsListQuery): {
   data: GetInvoicesDto[] | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 } {
-  return useApiData<GetInvoicesDto[]>(() => InvoicesService.getList(), {
+  const queryKey = JSON.stringify(query ?? {});
+
+  return useApiData<GetInvoicesDto[]>(() => InvoicesService.getList(query), {
     initialData: [],
+    dependencies: [queryKey],
   });
 }
 

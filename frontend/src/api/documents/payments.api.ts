@@ -1,5 +1,9 @@
 import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
+import {
+  buildDocumentsQueryString,
+  type PaymentsListQuery,
+} from '@/helpers/documents-query.helpers';
 import type {
   CreatePaymentPayload,
   GetPaymentDto,
@@ -9,8 +13,10 @@ import type {
 } from '@/types/documents/payments.types';
 
 export const paymentsApi = {
-  getList(): Promise<GetPaymentsDto[]> {
-    return apiClient.get<GetPaymentsDto[]>(UrlConstants.PAYMENTS_URL);
+  getList(query?: PaymentsListQuery): Promise<GetPaymentsDto[]> {
+    return apiClient.get<GetPaymentsDto[]>(
+      `${UrlConstants.PAYMENTS_URL}${buildDocumentsQueryString(query)}`,
+    );
   },
 
   getByCreationList(): Promise<GetPaymentsDto[]> {

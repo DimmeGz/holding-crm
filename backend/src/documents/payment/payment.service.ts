@@ -87,17 +87,17 @@ export class PaymentService {
 
     if (query.type) {
       if (query.type === DocumentTypeEnum.SELLER) {
-        qb.andWhere('contract.sellerId = :sellerId', {
+        qb.andWhere('payment.sellerId = :sellerId', {
           sellerId: query.company,
         });
       } else {
-        qb.andWhere('contract.buyerId = :buyerId', {
+        qb.andWhere('payment.buyerId = :buyerId', {
           buyerId: query.company,
         });
       }
     } else if (query.company) {
       qb.andWhere(
-        '(contract.sellerId = :company OR contract.buyerId = :company)',
+        '(payment.sellerId = :company OR payment.buyerId = :company)',
         { company: query.company },
       );
     }

@@ -1,3 +1,4 @@
+import type { DatedDocumentsListQuery } from '@/helpers/documents-query.helpers';
 import { useApiData } from '@/hooks/useApiData';
 import { ReceivesService } from '@/services/documents/receives.service';
 import type {
@@ -5,14 +6,17 @@ import type {
   Receive,
 } from '@/types/documents/receives.types';
 
-export function useReceives(): {
+export function useReceives(query?: DatedDocumentsListQuery): {
   data: GetReceivesDto[] | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 } {
-  return useApiData<GetReceivesDto[]>(() => ReceivesService.getList(), {
+  const queryKey = JSON.stringify(query ?? {});
+
+  return useApiData<GetReceivesDto[]>(() => ReceivesService.getList(query), {
     initialData: [],
+    dependencies: [queryKey],
   });
 }
 

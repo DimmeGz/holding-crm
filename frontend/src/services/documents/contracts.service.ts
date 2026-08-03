@@ -1,4 +1,5 @@
 import { contractsApi } from '@/api/documents/contracts.api';
+import type { ContractsListQuery } from '@/helpers/documents-query.helpers';
 import type {
   Contract,
   CreateContractPayload,
@@ -8,8 +9,8 @@ import type {
 } from '@/types/documents/contracts.types';
 
 export class ContractsService {
-  static async getList(): Promise<GetContractsDto[]> {
-    return contractsApi.getList();
+  static async getList(query?: ContractsListQuery): Promise<GetContractsDto[]> {
+    return contractsApi.getList(query);
   }
 
   static async getById(contractId: number): Promise<GetContractDto> {

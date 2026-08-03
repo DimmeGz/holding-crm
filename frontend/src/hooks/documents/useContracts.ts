@@ -1,3 +1,4 @@
+import type { ContractsListQuery } from '@/helpers/documents-query.helpers';
 import { useApiData } from '@/hooks/useApiData';
 import { ContractsService } from '@/services/documents/contracts.service';
 import type {
@@ -5,14 +6,17 @@ import type {
   GetContractsDto,
 } from '@/types/documents/contracts.types';
 
-export function useContracts(): {
+export function useContracts(query?: ContractsListQuery): {
   data: GetContractsDto[] | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 } {
-  return useApiData<GetContractsDto[]>(() => ContractsService.getList(), {
+  const queryKey = JSON.stringify(query ?? {});
+
+  return useApiData<GetContractsDto[]>(() => ContractsService.getList(query), {
     initialData: [],
+    dependencies: [queryKey],
   });
 }
 

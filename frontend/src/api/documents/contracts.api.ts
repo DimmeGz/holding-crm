@@ -1,5 +1,9 @@
 import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
+import {
+  buildDocumentsQueryString,
+  type ContractsListQuery,
+} from '@/helpers/documents-query.helpers';
 import type {
   Contract,
   CreateContractPayload,
@@ -9,8 +13,10 @@ import type {
 } from '@/types/documents/contracts.types';
 
 export const contractsApi = {
-  getList(): Promise<GetContractsDto[]> {
-    return apiClient.get<GetContractsDto[]>(UrlConstants.CONTRACTS_URL);
+  getList(query?: ContractsListQuery): Promise<GetContractsDto[]> {
+    return apiClient.get<GetContractsDto[]>(
+      `${UrlConstants.CONTRACTS_URL}${buildDocumentsQueryString(query)}`,
+    );
   },
 
   getById(contractId: number): Promise<GetContractDto> {

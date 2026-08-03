@@ -95,6 +95,10 @@ export class ReceiveService {
     qb: SelectQueryBuilder<Receive>,
     query?: GetReceivesQueryDTO,
   ): SelectQueryBuilder<Receive> {
+    if (!query || Object.keys(query).length === 0) {
+      return qb;
+    }
+
     if (query.company) {
       if (query.type) {
         if (query.type === DocumentTypeEnum.BUYER) {

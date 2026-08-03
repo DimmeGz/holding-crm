@@ -1,5 +1,9 @@
 import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
+import {
+  buildDocumentsQueryString,
+  type DatedDocumentsListQuery,
+} from '@/helpers/documents-query.helpers';
 import type {
   CreateReceivePayload,
   GetReceivesDto,
@@ -8,8 +12,10 @@ import type {
 } from '@/types/documents/receives.types';
 
 export const receivesApi = {
-  getList(): Promise<GetReceivesDto[]> {
-    return apiClient.get<GetReceivesDto[]>(UrlConstants.RECEIVES_URL);
+  getList(query?: DatedDocumentsListQuery): Promise<GetReceivesDto[]> {
+    return apiClient.get<GetReceivesDto[]>(
+      `${UrlConstants.RECEIVES_URL}${buildDocumentsQueryString(query)}`,
+    );
   },
 
   getById(receiveId: number): Promise<Receive> {

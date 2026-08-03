@@ -1,5 +1,6 @@
 import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
+import { buildDocumentsQueryString } from '@/helpers/documents-query.helpers';
 import type {
   CreateOrderPayload,
   GetOrderDto,
@@ -9,53 +10,10 @@ import type {
   UpdateOrderPayload,
 } from '@/types/documents/orders.types';
 
-function buildOrdersQueryString(query?: GetOrdersQuery): string {
-  if (!query) {
-    return '';
-  }
-
-  const params = new URLSearchParams();
-
-  if (query.status !== undefined) {
-    params.set('status', String(query.status));
-  }
-
-  if (query.hidden !== undefined) {
-    params.set('hidden', String(query.hidden));
-  }
-
-  if (query.sellerId !== undefined) {
-    params.set('sellerId', String(query.sellerId));
-  }
-
-  if (query.buyerId !== undefined) {
-    params.set('buyerId', String(query.buyerId));
-  }
-
-  if (query.recipientId !== undefined) {
-    params.set('recipientId', String(query.recipientId));
-  }
-
-  if (query.year !== undefined) {
-    params.set('year', String(query.year));
-  }
-
-  if (query.type !== undefined) {
-    params.set('type', query.type);
-  }
-
-  if (query.process !== undefined) {
-    params.set('process', String(query.process));
-  }
-
-  const qs = params.toString();
-  return qs ? `?${qs}` : '';
-}
-
 export const ordersApi = {
   getList(query?: GetOrdersQuery): Promise<GetOrdersDto[]> {
     return apiClient.get<GetOrdersDto[]>(
-      `${UrlConstants.ORDERS_URL}${buildOrdersQueryString(query)}`,
+      `${UrlConstants.ORDERS_URL}${buildDocumentsQueryString(query)}`,
     );
   },
 

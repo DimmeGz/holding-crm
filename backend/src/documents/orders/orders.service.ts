@@ -109,6 +109,8 @@ export class OrdersService {
     }
 
     if (query.type) {
+      qb.leftJoin('order.seller', 'seller').leftJoin('order.buyer', 'buyer');
+
       if (query.type === DocumentTypeEnum.SELLER) {
         qb.andWhere('seller.companyType = :companyType', {
           companyType: CompanyType.INNER_COMPANY,

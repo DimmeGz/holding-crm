@@ -1,5 +1,9 @@
 import { apiClient } from '@/api/api-client';
 import { UrlConstants } from '@/constants/url-constants';
+import {
+  buildDocumentsQueryString,
+  type DatedDocumentsListQuery,
+} from '@/helpers/documents-query.helpers';
 import type {
   CreateInvoiceByContractPayload,
   CreateInvoicePayload,
@@ -11,8 +15,10 @@ import type {
 } from '@/types/documents/invoices.types';
 
 export const invoicesApi = {
-  getList(): Promise<GetInvoicesDto[]> {
-    return apiClient.get<GetInvoicesDto[]>(UrlConstants.INVOICES_URL);
+  getList(query?: DatedDocumentsListQuery): Promise<GetInvoicesDto[]> {
+    return apiClient.get<GetInvoicesDto[]>(
+      `${UrlConstants.INVOICES_URL}${buildDocumentsQueryString(query)}`,
+    );
   },
 
   getById(invoiceId: number): Promise<GetInvoiceDto> {

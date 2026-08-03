@@ -1,4 +1,5 @@
 import { shipmentsApi } from '@/api/documents/shipments.api';
+import type { DatedDocumentsListQuery } from '@/helpers/documents-query.helpers';
 import type {
   CreateShipmentPayload,
   GetShipmentDto,
@@ -8,8 +9,10 @@ import type {
 } from '@/types/documents/shipments.types';
 
 export class ShipmentsService {
-  static async getList(): Promise<GetShipmentsDto[]> {
-    return shipmentsApi.getList();
+  static async getList(
+    query?: DatedDocumentsListQuery,
+  ): Promise<GetShipmentsDto[]> {
+    return shipmentsApi.getList(query);
   }
 
   static async getById(shipmentId: number): Promise<GetShipmentDto> {

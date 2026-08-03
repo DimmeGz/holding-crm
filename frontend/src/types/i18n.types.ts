@@ -53,6 +53,17 @@ export type LocaleDict = {
       incoming: string;
       outgoing: string;
     };
+    filters: {
+      incoming: string;
+      outgoing: string;
+      inner: string;
+      open: string;
+      closed: string;
+      all: string;
+      old: string;
+      year: string;
+      quarter: string;
+    };
   };
   tables: {
     columns: {

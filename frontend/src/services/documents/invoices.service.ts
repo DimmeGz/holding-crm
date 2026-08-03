@@ -1,4 +1,5 @@
 import { invoicesApi } from '@/api/documents/invoices.api';
+import type { DatedDocumentsListQuery } from '@/helpers/documents-query.helpers';
 import type {
   CreateInvoiceByContractPayload,
   CreateInvoicePayload,
@@ -10,8 +11,10 @@ import type {
 } from '@/types/documents/invoices.types';
 
 export class InvoicesService {
-  static async getList(): Promise<GetInvoicesDto[]> {
-    return invoicesApi.getList();
+  static async getList(
+    query?: DatedDocumentsListQuery,
+  ): Promise<GetInvoicesDto[]> {
+    return invoicesApi.getList(query);
   }
 
   static async getById(invoiceId: number): Promise<GetInvoiceDto> {

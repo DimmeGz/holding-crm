@@ -1,4 +1,5 @@
 import { paymentsApi } from '@/api/documents/payments.api';
+import type { PaymentsListQuery } from '@/helpers/documents-query.helpers';
 import type {
   CreatePaymentPayload,
   GetPaymentDto,
@@ -8,8 +9,8 @@ import type {
 } from '@/types/documents/payments.types';
 
 export class PaymentsService {
-  static async getList(): Promise<GetPaymentsDto[]> {
-    return paymentsApi.getList();
+  static async getList(query?: PaymentsListQuery): Promise<GetPaymentsDto[]> {
+    return paymentsApi.getList(query);
   }
 
   static async getByCreationList(): Promise<GetPaymentsDto[]> {

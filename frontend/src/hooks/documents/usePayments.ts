@@ -1,3 +1,4 @@
+import type { PaymentsListQuery } from '@/helpers/documents-query.helpers';
 import { useApiData } from '@/hooks/useApiData';
 import { PaymentsService } from '@/services/documents/payments.service';
 import type {
@@ -5,14 +6,17 @@ import type {
   GetPaymentsDto,
 } from '@/types/documents/payments.types';
 
-export function usePayments(): {
+export function usePayments(query?: PaymentsListQuery): {
   data: GetPaymentsDto[] | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 } {
-  return useApiData<GetPaymentsDto[]>(() => PaymentsService.getList(), {
+  const queryKey = JSON.stringify(query ?? {});
+
+  return useApiData<GetPaymentsDto[]>(() => PaymentsService.getList(query), {
     initialData: [],
+    dependencies: [queryKey],
   });
 }
 

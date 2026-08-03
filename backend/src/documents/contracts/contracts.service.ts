@@ -20,8 +20,11 @@ import {
 import { Contract } from './entities';
 import { CreateContractDTO, UpdateContractDTO } from './dto';
 import { GetContractResponseDTO } from './dto/response-dto';
-import { GetContractsQueryDTO } from './dto/query-dto';
-import { DocumentTypeEnum } from '../common/enums';
+import {
+  ContractQueryTypeEnum,
+  GetContractsQueryDTO,
+} from './dto/query-dto';
+import { CompanyType } from '../../companies/enums';
 
 @Injectable()
 export class ContractsService {
@@ -114,8 +117,17 @@ export class ContractsService {
       return qb; // Return the query builder unmodified if query is empty
     }
 
-    if (query.type) {
-      if (query.type === DocumentTypeEnum.SELLER) {
+    if (query.type === ContractQueryTypeEnum.INNER) {
+      qb.leftJoin('contract.seller', 'seller')
+        .leftJoin('contract.buyer', 'buyer')
+        .andWhere('seller.companyType = :innerCompanyType', {
+          innerCompanyType: CompanyType.INNER_COMPANY,
+        })
+        .andWhere('buyer.companyType = :innerCompanyType', {
+          innerCompanyType: CompanyType.INNER_COMPANY,
+        });
+    } else if (query.type) {
+      if (query.type === ContractQueryTypeEnum.SELLER) {
         qb.andWhere('contract.sellerId = :sellerId', {
           sellerId: query.company,
         });

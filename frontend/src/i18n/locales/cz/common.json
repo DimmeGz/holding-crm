@@ -46,5 +46,16 @@
     "nextMonth": "Další měsíc",
     "incoming": "Příchozí",
     "outgoing": "Odchozí"
+  },
+  "filters": {
+    "incoming": "Příchozí",
+    "outgoing": "Odchozí",
+    "inner": "Vnitřní smlouvy",
+    "open": "Platné",
+    "closed": "Splněné",
+    "all": "Vše",
+    "old": "Starší",
+    "year": "Rok",
+    "quarter": "{{n}}. čtvrt."
   }
 }

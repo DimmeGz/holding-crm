@@ -1,3 +1,4 @@
+import type { DatedDocumentsListQuery } from '@/helpers/documents-query.helpers';
 import { useApiData } from '@/hooks/useApiData';
 import { ShipmentsService } from '@/services/documents/shipments.service';
 import type {
@@ -5,14 +6,17 @@ import type {
   GetShipmentsDto,
 } from '@/types/documents/shipments.types';
 
-export function useShipments(): {
+export function useShipments(query?: DatedDocumentsListQuery): {
   data: GetShipmentsDto[] | null;
   loading: boolean;
   error: string | null;
   refetch: () => void;
 } {
-  return useApiData<GetShipmentsDto[]>(() => ShipmentsService.getList(), {
+  const queryKey = JSON.stringify(query ?? {});
+
+  return useApiData<GetShipmentsDto[]>(() => ShipmentsService.getList(query), {
     initialData: [],
+    dependencies: [queryKey],
   });
 }
 

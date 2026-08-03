@@ -1,4 +1,5 @@
 import { receivesApi } from '@/api/documents/receives.api';
+import type { DatedDocumentsListQuery } from '@/helpers/documents-query.helpers';
 import type {
   CreateReceivePayload,
   GetReceivesDto,
@@ -7,8 +8,10 @@ import type {
 } from '@/types/documents/receives.types';
 
 export class ReceivesService {
-  static async getList(): Promise<GetReceivesDto[]> {
-    return receivesApi.getList();
+  static async getList(
+    query?: DatedDocumentsListQuery,
+  ): Promise<GetReceivesDto[]> {
+    return receivesApi.getList(query);
   }
 
   static async getById(receiveId: number): Promise<Receive> {
