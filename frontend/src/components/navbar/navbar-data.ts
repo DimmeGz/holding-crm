@@ -205,6 +205,14 @@ export function getGeneralMenu(
     url: `${UrlConstants.MONTH_REPORT_URL}/${company.id}`,
   }));
 
+  const yearReportLinks: Link[] = getInnerCompanies(
+    companies,
+    companyTypes,
+  ).map((company) => ({
+    label: company.name,
+    url: `${UrlConstants.YEAR_REPORT_URL}/${company.id}`,
+  }));
+
   return [
     {
       labelKey: 'common:nav.companies',
@@ -222,6 +230,12 @@ export function getGeneralMenu(
       icon: IconChartBar,
       url: UrlConstants.MONTH_REPORT_URL,
       links: monthReportLinks,
+    },
+    {
+      labelKey: 'common:nav.yearReport',
+      icon: IconChartBar,
+      url: UrlConstants.YEAR_REPORT_URL,
+      links: yearReportLinks,
     },
     {
       labelKey: 'common:nav.calendar',

@@ -18,6 +18,7 @@ import { batchesRoutes } from '@/routes/batches.routes';
 import { calendarRoutes } from '@/routes/calendar.routes';
 import { companiesRoutes } from '@/routes/companies.routes';
 import { reportsRoutes } from '@/routes/reports.routes';
+import { yearReportsRoutes } from '@/routes/year-reports.routes';
 
 export function AppRoutes(): ReactNode {
   return useRoutes([
@@ -45,6 +46,7 @@ export function AppRoutes(): ReactNode {
         batchesRoutes,
         calendarRoutes,
         reportsRoutes,
+        yearReportsRoutes,
       ],
     },
   ]);

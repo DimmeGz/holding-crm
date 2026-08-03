@@ -5,8 +5,10 @@ import { Repository } from 'typeorm';
 import { Company } from '../companies/entities';
 import { MonthData } from './entities';
 import { UpdateMonthDataDTO } from './dto/update-month-data.dto';
+import { SaveCashflowDTO } from './dto/save-cashflow.dto';
 import { MonthReportService } from './month-report.service';
 import { monthFirstDay } from './helpers';
+import { nextJanuaryFirst } from './helpers/year-report.helpers';
 import { ReportTypeEnum } from './types/month-report.types';
 
 @Injectable()
@@ -65,6 +67,36 @@ export class MonthDataService {
       cashflow,
       warehouse,
     });
+
+    return this.monthDataRepository.save(entity);
+  }
+
+  async saveCashflow(
+    companyId: number,
+    dto: SaveCashflowDTO,
+  ): Promise<MonthData> {
+    const company = await this.companiesRepository.findOne({
+      where: { id: companyId },
+      select: { id: true },
+    });
+    if (!company) {
+      throw new NotFoundException(`Company with id: ${companyId} not found`);
+    }
+
+    const month = nextJanuaryFirst(dto.year);
+    let entity = await this.monthDataRepository.findOne({
+      where: { companyId, month },
+    });
+
+    if (!entity) {
+      entity = this.monthDataRepository.create({
+        companyId,
+        month,
+        cashflow: dto.amount,
+      });
+    } else {
+      entity.cashflow = dto.amount;
+    }
 
     return this.monthDataRepository.save(entity);
   }

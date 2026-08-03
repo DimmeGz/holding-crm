@@ -53,13 +53,22 @@ export function CompanyPage(): ReactNode {
           </Text>
           <Title order={3}>{data.name}</Title>
         </div>
-        <Button
-          component={Link}
-          to={`${UrlConstants.MONTH_REPORT_URL}/${companyId}`}
-          variant='light'
-        >
-          {t('companies:monthReport')}
-        </Button>
+        <Group gap='xs'>
+          <Button
+            component={Link}
+            to={`${UrlConstants.MONTH_REPORT_URL}/${companyId}`}
+            variant='light'
+          >
+            {t('companies:monthReport')}
+          </Button>
+          <Button
+            component={Link}
+            to={`${UrlConstants.YEAR_REPORT_URL}/${companyId}`}
+            variant='light'
+          >
+            {t('companies:yearReport')}
+          </Button>
+        </Group>
       </Group>
 
       <Grid mb='md'>

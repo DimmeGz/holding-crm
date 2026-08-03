@@ -25,11 +25,14 @@ export type CompaniesDict = {
   mixedSelectionError: string;
   noSelectionError: string;
   monthReport: string;
+  yearReport: string;
 };
 
 export type ReportsDict = {
   title: string;
   monthReport: string;
+  yearReport: string;
+  yearReportUnsupported: string;
   filter: string;
   prevMonth: string;
   nextMonth: string;
@@ -43,8 +46,12 @@ export type ReportsDict = {
   qty: string;
   sum: string;
   vat: string;
+  vatReturn: string;
+  vatFact: string;
+  vatCalculated: string;
   cost: string;
   transport: string;
+  transportCosts: string;
   payments: string;
   partner: string;
   invoice: string;
@@ -57,6 +64,21 @@ export type ReportsDict = {
   doubles: string;
   totals: string;
   quarterBlock: string;
+  salesVolume: string;
+  purchase: string;
+  ytd3: string;
+  ytd6: string;
+  ytd9: string;
+  ytd12: string;
+  forQuarter: string;
+  cashflowPrevious: string;
+  salesYtd: string;
+  buyYtd: string;
+  warehouse: string;
+  capitalization: string;
+  yearDelta: string;
+  cashflow: string;
+  savedData: string;
 };
 
 export type LocaleDict = {
@@ -68,6 +90,7 @@ export type LocaleDict = {
       warehouse: string;
       calendar: string;
       monthReport: string;
+      yearReport: string;
       transit: string;
       contracts: string;
       orders: string;

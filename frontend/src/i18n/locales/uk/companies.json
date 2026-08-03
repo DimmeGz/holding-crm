@@ -19,5 +19,6 @@
   "selectForPayment": "В платіж",
   "mixedSelectionError": "Оберіть інвойси з однаковими контрагентом і валютою",
   "noSelectionError": "Оберіть хоча б один інвойс",
-  "monthReport": "Місячний звіт"
+  "monthReport": "Місячний звіт",
+  "yearReport": "Річний звіт"
 }

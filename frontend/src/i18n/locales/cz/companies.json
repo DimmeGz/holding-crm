@@ -19,5 +19,6 @@
   "selectForPayment": "Do platby",
   "mixedSelectionError": "Vyberte faktury se stejným partnerem a měnou",
   "noSelectionError": "Vyberte alespoň jednu fakturu",
-  "monthReport": "Měsíční přehled"
+  "monthReport": "Měsíční přehled",
+  "yearReport": "Roční přehled"
 }
