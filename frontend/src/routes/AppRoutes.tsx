@@ -11,6 +11,10 @@ import { shipmentsRoutes } from '@/routes/documents/shipments.routes';
 import { receivesRoutes } from '@/routes/documents/receives.routes';
 import { productionsRoutes } from '@/routes/documents/productions.routes';
 import { transportsRoutes } from '@/routes/documents/transports.routes';
+import { transitRoutes } from '@/routes/documents/transit.routes';
+import { warehouseRoutes } from '@/routes/warehouse.routes';
+import { batchesRoutes } from '@/routes/batches.routes';
+import { calendarRoutes } from '@/routes/calendar.routes';
 
 export function AppRoutes(): ReactNode {
   return useRoutes([
@@ -32,6 +36,10 @@ export function AppRoutes(): ReactNode {
         receivesRoutes,
         productionsRoutes,
         transportsRoutes,
+        transitRoutes,
+        warehouseRoutes,
+        batchesRoutes,
+        calendarRoutes,
       ],
     },
   ]);

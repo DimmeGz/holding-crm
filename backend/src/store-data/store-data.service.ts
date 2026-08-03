@@ -19,11 +19,13 @@ export class StoreDataService {
       companyTypes: {} as Record<number, string>,
       warehouses: {},
       currencies: {},
-      products: {},
+      products: {} as Record<number, string>,
+      productCountries: {} as Record<number, number | null>,
       packages: {},
       services: {},
       countries: {},
       incoterms: {},
+      technicalProcesses: {} as Record<number, string>,
       batches: {} as Record<number, { name: string; productId: number }>,
     };
 
@@ -35,6 +37,8 @@ export class StoreDataService {
     const rawServices = await this.goodsService.getServicesStoreData();
     const rawCountries = await this.libsService.getCountriesOfOriginStoreData();
     const rawIncoterms = await this.libsService.getIncotermsStoreData();
+    const rawTechnicalProcesses =
+      await this.libsService.getTechnicalProcessesStoreData();
     const rawBatches = await this.goodsService.getBatchesStoreData();
 
     rawCompanies.forEach((company) => {
@@ -47,9 +51,11 @@ export class StoreDataService {
     rawCurrencies.forEach(
       (currency) => (allStoreData.currencies[currency.id] = currency.name),
     );
-    rawProducts.forEach(
-      (product) => (allStoreData.products[product.id] = product.name),
-    );
+    rawProducts.forEach((product) => {
+      allStoreData.products[product.id] = product.name;
+      allStoreData.productCountries[product.id] =
+        product.countryOfOriginId ?? null;
+    });
     rawPackages.forEach((pack) => (allStoreData.packages[pack.id] = pack.name));
     rawServices.forEach(
       (service) => (allStoreData.services[service.id] = service.name),
@@ -59,6 +65,10 @@ export class StoreDataService {
     );
     rawIncoterms.forEach(
       (incoterm) => (allStoreData.incoterms[incoterm.id] = incoterm.name),
+    );
+    rawTechnicalProcesses.forEach(
+      (process) =>
+        (allStoreData.technicalProcesses[process.id] = process.name),
     );
     rawBatches.forEach(
       (batch) =>

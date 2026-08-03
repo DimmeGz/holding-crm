@@ -40,5 +40,11 @@
   "common": {
     "kg": "kg",
     "days": "днів"
+  },
+  "calendar": {
+    "prevMonth": "Předchozí měsíc",
+    "nextMonth": "Další měsíc",
+    "incoming": "Příchozí",
+    "outgoing": "Odchozí"
   }
 }

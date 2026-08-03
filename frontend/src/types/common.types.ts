@@ -16,16 +16,19 @@ export type LibsData = {
   warehouses: Record<number, string>;
   currencies: Record<number, string>;
   products: Record<number, string>;
+  productCountries: Record<number, number | null>;
   packages: Record<number, string>;
   services: Record<number, string>;
   countries: Record<number, string>;
   incoterms: Record<number, string>;
+  technicalProcesses: Record<number, string>;
   batches: Record<number, BatchStoreItem>;
 };
 
 export type LibsStore = LibsData & {
   isLoaded: boolean;
   loadAll: () => Promise<void>;
+  upsertBatch: (id: number, batch: BatchStoreItem) => void;
 
   getCompanyName: (id: number) => string;
   getWarehouseName: (id: number) => string;

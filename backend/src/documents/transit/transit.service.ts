@@ -29,20 +29,20 @@ export class TransitService {
     return qb
       .leftJoin('transitLine.shipment', 'shipment')
       .leftJoin('shipment.seller', 'seller')
+      .leftJoin('shipment.buyer', 'buyer')
       .leftJoin('transitLine.receive', 'receive')
-      .leftJoin('receive.buyer', 'buyer')
       .leftJoin('transitLine.batch', 'batch')
       .leftJoin('batch.product', 'product')
       .leftJoin('transitLine.package', 'package')
       .select([
         'transitLine.id',
         'transitLine.qty',
+        'shipment.id',
+        'shipment.expectedDate',
         'seller.id',
         'seller.name',
         'buyer.id',
         'buyer.name',
-        'shipment.id',
-        'shipment.expectedDate',
         'receive.id',
         'receive.expectedDate',
         'product.id',

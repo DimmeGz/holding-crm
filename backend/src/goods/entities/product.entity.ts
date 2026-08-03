@@ -47,9 +47,16 @@ export class Product extends AbstractEntity {
 
   @ManyToOne(() => CountryOfOrigin, {
     onDelete: 'RESTRICT',
+    nullable: true,
   })
   @JoinColumn({ name: 'default_country_of_origin_id' })
-  countryOfOrigin: CountryOfOrigin;
+  countryOfOrigin: CountryOfOrigin | null;
+
+  @Column({
+    name: 'default_country_of_origin_id',
+    nullable: true,
+  })
+  countryOfOriginId: number | null;
 
   @Column({
     type: 'varchar',

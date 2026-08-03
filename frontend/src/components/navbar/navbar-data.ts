@@ -13,33 +13,9 @@ import {
   IconTruckFilled,
   IconWreckingBall,
 } from '@tabler/icons-react';
+import { CompanyType } from '@/constants/company-type.constants';
 import { UrlConstants } from '@/constants/url-constants';
-import type { NavLinkGroupProps } from '@/types/base-ui.types';
-
-const mockCompanies: string[] = [
-  'Klimana CZ',
-  'EAST-WEST-BRIDGE',
-  'Imvend Chemical',
-  'DYUMANS ltd',
-];
-
-export const generalMenu: NavLinkGroupProps[] = [
-  {
-    labelKey: 'common:nav.companies',
-    icon: IconBuildingSkyscraper,
-    url: '/companies',
-  },
-  {
-    labelKey: 'common:nav.warehouse',
-    icon: IconForklift,
-    links: mockCompanies.map((companyName: string) => ({
-      label: companyName,
-      url: '/',
-    })),
-  },
-  { labelKey: 'common:nav.calendar', icon: IconCalendar },
-  { labelKey: 'common:nav.transit', icon: IconTruckDelivery },
-];
+import type { Link, NavLinkGroupProps } from '@/types/base-ui.types';
 
 export const documentsMenu: NavLinkGroupProps[] = [
   {
@@ -80,7 +56,7 @@ export const documentsMenu: NavLinkGroupProps[] = [
   {
     labelKey: 'common:nav.shipments',
     icon: IconTruck,
-    url: UrlConstants.SHIPMENTS_URL
+    url: UrlConstants.SHIPMENTS_URL,
   },
   {
     labelKey: 'common:nav.receives',
@@ -100,5 +76,49 @@ export const documentsMenu: NavLinkGroupProps[] = [
 ];
 
 export const adminMenu: NavLinkGroupProps[] = [
-  { labelKey: 'common:nav.batchEdit', icon: IconEdit },
+  {
+    labelKey: 'common:nav.batchEdit',
+    icon: IconEdit,
+    url: UrlConstants.BATCHES_URL,
+  },
 ];
+
+export function getGeneralMenu(
+  companies: Record<number, string>,
+  companyTypes: Record<number, string>,
+): NavLinkGroupProps[] {
+  const warehouseLinks: Link[] = Object.entries(companies)
+    .filter(
+      ([companyId]) =>
+        companyTypes[Number(companyId)] === CompanyType.INNER_COMPANY,
+    )
+    .map(([companyId, name]) => ({
+      label: name,
+      url: `${UrlConstants.WAREHOUSE_URL}?company=${companyId}`,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  return [
+    {
+      labelKey: 'common:nav.companies',
+      icon: IconBuildingSkyscraper,
+      url: '/companies',
+    },
+    {
+      labelKey: 'common:nav.warehouse',
+      icon: IconForklift,
+      url: UrlConstants.WAREHOUSE_URL,
+      links: warehouseLinks,
+    },
+    {
+      labelKey: 'common:nav.calendar',
+      icon: IconCalendar,
+      url: UrlConstants.CALENDAR_URL,
+    },
+    {
+      labelKey: 'common:nav.transit',
+      icon: IconTruckDelivery,
+      url: UrlConstants.TRANSIT_URL,
+    },
+  ];
+}

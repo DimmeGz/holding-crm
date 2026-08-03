@@ -9,8 +9,11 @@ import {
   ProductionOutLine,
 } from '../documents/production/entities';
 import { InvoiceLine } from '../documents/invoices/entities';
+import { Shipment } from '../documents/shipment/entities';
+import { Receive } from '../documents/receive/entities';
 
 import { GetBatchDataResponseDTO, GetProductDataResponseDTO } from './dto';
+import type { ReportShipment, ReportShipmentReceive } from './types';
 
 @Injectable()
 export class GoodsService {
@@ -43,118 +46,19 @@ export class GoodsService {
       throw new NotFoundException(`Batch with id: ${batchId} not found`);
     }
 
-    const invoiceLines = await this.getInvoiceLinesByBatchIds(batchId);
-    const productionOutLines =
-      await this.getProductionOutLinesByBatchIds(batchId);
-    const productionInLines =
-      await this.getProductionInLinesByBatchIds(batchId);
+    const invoiceLines = await this.getInvoiceLines({ batchId });
+    const productionOutLines = await this.getProductionOutLines({ batchId });
+    const productionInLines = await this.getProductionInLines({ batchId });
 
     return { batch, invoiceLines, productionOutLines, productionInLines };
-  }
-
-  private async getInvoiceLinesByBatchIds(
-    batchIds: number | number[],
-  ): Promise<InvoiceLine[]> {
-    const invoiceLines = await this.batchesRepository.manager.find(
-      InvoiceLine,
-      {
-        where: {
-          batch: { id: Array.isArray(batchIds) ? In(batchIds) : batchIds },
-        },
-        relations: ['invoice', 'invoice.seller', 'invoice.buyer'],
-        select: {
-          id: true,
-          qty: true,
-          price: true,
-          invoice: {
-            id: true,
-            status: true,
-            invoiceNumber: true,
-            expectedDate: true,
-            seller: {
-              id: true,
-              name: true,
-            },
-            buyer: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
-    );
-
-    return invoiceLines;
-  }
-
-  private async getProductionOutLinesByBatchIds(
-    batchIds: number | number[],
-  ): Promise<ProductionOutLine[]> {
-    const productionOutLines = await this.batchesRepository.manager.find(
-      ProductionOutLine,
-      {
-        where: {
-          batch: { id: Array.isArray(batchIds) ? In(batchIds) : batchIds },
-        },
-        relations: ['production', 'production.company'],
-        select: {
-          id: true,
-          qty: true,
-          production: {
-            id: true,
-            status: true,
-            expectedDate: true,
-            company: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
-    );
-
-    return productionOutLines;
-  }
-
-  private async getProductionInLinesByBatchIds(
-    batchIds: number | number[],
-  ): Promise<ProductionInLine[]> {
-    const productionInLines = await this.batchesRepository.manager.find(
-      ProductionInLine,
-      {
-        where: {
-          batch: { id: Array.isArray(batchIds) ? In(batchIds) : batchIds },
-        },
-        relations: ['production', 'production.company'],
-        select: {
-          id: true,
-          qty: true,
-          production: {
-            id: true,
-            status: true,
-            expectedDate: true,
-            company: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      },
-    );
-
-    return productionInLines;
   }
 
   async getProductData(productId: number): Promise<GetProductDataResponseDTO> {
     const product = await this.productsRepository.findOne({
       where: { id: productId },
-      relations: ['batches'],
       select: {
         id: true,
         name: true,
-        batches: {
-          id: true,
-        },
       },
     });
 
@@ -162,15 +66,208 @@ export class GoodsService {
       throw new NotFoundException(`Product with id: ${productId} not found`);
     }
 
-    const batchIds = product.batches.map((batch) => batch.id);
-
-    const invoiceLines = await this.getInvoiceLinesByBatchIds(batchIds);
-    const productionOutLines =
-      await this.getProductionOutLinesByBatchIds(batchIds);
-    const productionInLines =
-      await this.getProductionInLinesByBatchIds(batchIds);
+    const invoiceLines = await this.getInvoiceLines({ productId });
+    const productionOutLines = await this.getProductionOutLines({ productId });
+    const productionInLines = await this.getProductionInLines({ productId });
 
     return { product, invoiceLines, productionOutLines, productionInLines };
+  }
+
+  private async getInvoiceLines(filter: {
+    productId?: number;
+    batchId?: number;
+  }): Promise<InvoiceLine[]> {
+    const where = filter.productId
+      ? { product: { id: filter.productId } }
+      : { batch: { id: filter.batchId } };
+
+    const invoiceLines = await this.batchesRepository.manager.find(InvoiceLine, {
+      where,
+      relations: ['product', 'batch', 'invoice', 'invoice.seller', 'invoice.buyer'],
+      select: {
+        id: true,
+        qty: true,
+        price: true,
+        product: {
+          id: true,
+          name: true,
+        },
+        batch: {
+          id: true,
+          name: true,
+        },
+        invoice: {
+          id: true,
+          status: true,
+          invoiceNumber: true,
+          expectedDate: true,
+          currencyId: true,
+          seller: {
+            id: true,
+            name: true,
+          },
+          buyer: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      order: {
+        invoice: {
+          expectedDate: 'DESC',
+        },
+      },
+    });
+
+    await this.attachShipmentsToInvoiceLines(invoiceLines);
+
+    return invoiceLines;
+  }
+
+  private async attachShipmentsToInvoiceLines(
+    invoiceLines: InvoiceLine[],
+  ): Promise<void> {
+    const invoiceIds = [
+      ...new Set(
+        invoiceLines
+          .map((line) => line.invoice?.id)
+          .filter((id): id is number => Boolean(id)),
+      ),
+    ];
+
+    if (!invoiceIds.length) {
+      return;
+    }
+
+    const shipments = await this.batchesRepository.manager.find(Shipment, {
+      where: { invoiceId: In(invoiceIds) },
+      select: {
+        id: true,
+        status: true,
+        invoiceId: true,
+      },
+      order: { id: 'ASC' },
+    });
+
+    const shipmentIds = shipments.map((shipment) => shipment.id);
+    const receives = shipmentIds.length
+      ? await this.batchesRepository.manager.find(Receive, {
+          where: { shipmentId: In(shipmentIds) },
+          select: {
+            id: true,
+            status: true,
+            shipmentId: true,
+          },
+          order: { id: 'ASC' },
+        })
+      : [];
+
+    const receivesByShipmentId = new Map<number, ReportShipmentReceive[]>();
+    for (const receive of receives) {
+      const list = receivesByShipmentId.get(receive.shipmentId) ?? [];
+      list.push({ id: receive.id, status: receive.status });
+      receivesByShipmentId.set(receive.shipmentId, list);
+    }
+
+    const shipmentsByInvoiceId = new Map<number, ReportShipment[]>();
+    for (const shipment of shipments) {
+      const list = shipmentsByInvoiceId.get(shipment.invoiceId) ?? [];
+      list.push({
+        id: shipment.id,
+        status: shipment.status,
+        receives: receivesByShipmentId.get(shipment.id) ?? [],
+      });
+      shipmentsByInvoiceId.set(shipment.invoiceId, list);
+    }
+
+    for (const line of invoiceLines) {
+      if (!line.invoice) {
+        continue;
+      }
+
+      line.invoice.shipments = (shipmentsByInvoiceId.get(line.invoice.id) ??
+        []) as Partial<Shipment>[];
+    }
+  }
+
+  private async getProductionOutLines(filter: {
+    productId?: number;
+    batchId?: number;
+  }): Promise<ProductionOutLine[]> {
+    const where = filter.productId
+      ? { product: { id: filter.productId } }
+      : { batch: { id: filter.batchId } };
+
+    return this.batchesRepository.manager.find(ProductionOutLine, {
+      where,
+      relations: ['product', 'batch', 'production', 'production.company'],
+      select: {
+        id: true,
+        qty: true,
+        product: {
+          id: true,
+          name: true,
+        },
+        batch: {
+          id: true,
+          name: true,
+        },
+        production: {
+          id: true,
+          status: true,
+          expectedDate: true,
+          company: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      order: {
+        production: {
+          expectedDate: 'DESC',
+        },
+      },
+    });
+  }
+
+  private async getProductionInLines(filter: {
+    productId?: number;
+    batchId?: number;
+  }): Promise<ProductionInLine[]> {
+    const where = filter.productId
+      ? { product: { id: filter.productId } }
+      : { batch: { id: filter.batchId } };
+
+    return this.batchesRepository.manager.find(ProductionInLine, {
+      where,
+      relations: ['product', 'batch', 'production', 'production.company'],
+      select: {
+        id: true,
+        qty: true,
+        product: {
+          id: true,
+          name: true,
+        },
+        batch: {
+          id: true,
+          name: true,
+        },
+        production: {
+          id: true,
+          status: true,
+          expectedDate: true,
+          company: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      order: {
+        production: {
+          expectedDate: 'DESC',
+        },
+      },
+    });
   }
 
   async getTechnicalProcessesFromProductIds(
@@ -229,7 +326,11 @@ export class GoodsService {
   async getProductsStoreData() {
     return await this.productsRepository
       .createQueryBuilder('product')
-      .select(['product.id', 'product.name'])
+      .select([
+        'product.id',
+        'product.name',
+        'product.countryOfOriginId',
+      ])
       .getMany();
   }
 

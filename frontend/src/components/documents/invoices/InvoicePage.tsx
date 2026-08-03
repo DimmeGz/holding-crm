@@ -152,6 +152,7 @@ export function InvoicePage(): ReactNode {
 
   const columns: MRT_ColumnDef<InvoiceLine>[] = useInvoiceLinesColumns(
     invoice ? getCurrencyName(invoice.currencyId) : CommonConstants.EMPTY_STRING,
+    invoiceId,
   );
   const serviceColumns: MRT_ColumnDef<InvoiceServiceLine>[] =
     useInvoiceServiceLinesColumns(

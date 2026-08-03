@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActionIcon,
@@ -9,11 +9,28 @@ import {
   Table,
   Text,
 } from '@mantine/core';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import { BatchFormModal } from '@/components/warehouse/BatchFormModal';
 import { EMPTY_INVOICE_PRODUCT_LINE } from '@/constants/document-lines.constants';
 import { recordToSelectData } from '@/helpers/select.helpers';
 import { useLibsStore } from '@/stores/useLibsStore';
 import type { InvoiceProductLineFormValue } from '@/types/documents/invoices.types';
+
+type BatchModalState =
+  | {
+      mode: 'create';
+      lineIndex: number;
+      productId: number | null;
+      countryOfOriginId: number | null;
+    }
+  | {
+      mode: 'edit';
+      lineIndex: number;
+      batchId: number;
+      productId: number | null;
+      name: string;
+    }
+  | null;
 
 export function InvoiceProductLineEditor({
   lines,
@@ -35,6 +52,7 @@ export function InvoiceProductLineEditor({
   const packages = useLibsStore(s => s.packages);
   const countries = useLibsStore(s => s.countries);
   const batches = useLibsStore(s => s.batches);
+  const [batchModal, setBatchModal] = useState<BatchModalState>(null);
 
   const productOptions = useMemo(() => recordToSelectData(products), [products]);
   const packageOptions = useMemo(() => recordToSelectData(packages), [packages]);
@@ -132,15 +150,63 @@ export function InvoiceProductLineEditor({
                 />
               </Table.Td>
               <Table.Td>
-                <Select
-                  data={getBatchOptions(line.productId)}
-                  value={line.batchId}
-                  onChange={value => updateLine(index, { batchId: value })}
-                  searchable
-                  disabled={!line.productId}
-                  nothingFoundMessage={t('common:messages.noData')}
-                  size='xs'
-                />
+                <Group gap={4} wrap='nowrap'>
+                  <Select
+                    data={getBatchOptions(line.productId)}
+                    value={line.batchId}
+                    onChange={value => updateLine(index, { batchId: value })}
+                    searchable
+                    disabled={!line.productId}
+                    nothingFoundMessage={t('common:messages.noData')}
+                    size='xs'
+                    style={{ flex: 1 }}
+                  />
+                  <ActionIcon
+                    variant='subtle'
+                    size='sm'
+                    type='button'
+                    disabled={!line.productId}
+                    aria-label={t('documents:documents.createBatch')}
+                    onClick={() =>
+                      setBatchModal({
+                        mode: 'create',
+                        lineIndex: index,
+                        productId: line.productId
+                          ? Number(line.productId)
+                          : null,
+                        countryOfOriginId: line.countryOfOriginId
+                          ? Number(line.countryOfOriginId)
+                          : null,
+                      })
+                    }
+                  >
+                    <IconPlus size={14} />
+                  </ActionIcon>
+                  <ActionIcon
+                    variant='subtle'
+                    size='sm'
+                    type='button'
+                    disabled={!line.batchId}
+                    aria-label={t('documents:documents.editBatch')}
+                    onClick={() => {
+                      if (!line.batchId) {
+                        return;
+                      }
+                      const id = Number(line.batchId);
+                      setBatchModal({
+                        mode: 'edit',
+                        lineIndex: index,
+                        batchId: id,
+                        productId: line.productId
+                          ? Number(line.productId)
+                          : batches[id]?.productId ?? null,
+                        name: batches[id]?.name ?? '',
+                      });
+                    }}
+                  >
+                    <IconPencil size={14} />
+                  </ActionIcon>
+                </Group>
               </Table.Td>
               <Table.Td>
                 <Select
@@ -245,6 +311,32 @@ export function InvoiceProductLineEditor({
           ))}
         </Table.Tbody>
       </Table>
+
+      <BatchFormModal
+        opened={batchModal != null}
+        mode={batchModal?.mode ?? 'create'}
+        batchId={batchModal?.mode === 'edit' ? batchModal.batchId : null}
+        initialProductId={batchModal?.productId ?? null}
+        initialName={batchModal?.mode === 'edit' ? batchModal.name : ''}
+        initialCountryOfOriginId={
+          batchModal?.mode === 'create'
+            ? batchModal.countryOfOriginId
+            : null
+        }
+        onClose={() => setBatchModal(null)}
+        onSuccess={batch => {
+          if (!batchModal) {
+            return;
+          }
+          updateLine(batchModal.lineIndex, {
+            productId: String(batch.productId),
+            batchId: String(batch.id),
+            ...(batch.countryOfOriginId != null
+              ? { countryOfOriginId: String(batch.countryOfOriginId) }
+              : {}),
+          });
+        }}
+      />
     </>
   );
 }

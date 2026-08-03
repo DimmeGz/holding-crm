@@ -47,6 +47,12 @@ export type LocaleDict = {
       kg: string;
       days: string;
     };
+    calendar: {
+      prevMonth: string;
+      nextMonth: string;
+      incoming: string;
+      outgoing: string;
+    };
   };
   tables: {
     columns: {
@@ -81,6 +87,10 @@ export type LocaleDict = {
       byOrder: string;
       byInvoice: string;
       rate: string;
+      shipmentExpectedDate: string;
+      plannedReceive: string;
+      receiveExpectedDate: string;
+      totalCost: string;
     };
     showArchived: string;
   };
@@ -119,6 +129,8 @@ export type LocaleDict = {
       receive: string;
       productionOut: string;
       productionIn: string;
+      productReport: string;
+      batchReport: string;
       productionOutputProduct: string;
       payment: string;
       byInvoice: string;
@@ -231,6 +243,15 @@ export type LocaleDict = {
       cannotEditClosedProduction: string;
       productionOutLinesRequired: string;
       productionInLinesRequired: string;
+      batchesList: string;
+      batchUpdate: string;
+      batchCreate: string;
+      batchEditModal: string;
+      batchNameRequired: string;
+      batchProductRequired: string;
+      defaultValueHint: string;
+      createBatch: string;
+      editBatch: string;
     };
   };
 };

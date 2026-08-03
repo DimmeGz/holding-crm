@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AbstractEntity } from '../../common/entities';
 import { CountryOfOrigin } from '../../libs/entities';
 import { Product } from './product.entity';
+import { BatchCustomField } from './batch-custom-field.entity';
 import { InvoiceLine } from '../../documents/invoices/entities';
 import {
   ProductionInLine,
@@ -32,9 +33,19 @@ export class Batch extends AbstractEntity {
 
   @ManyToOne(() => CountryOfOrigin, {
     onDelete: 'RESTRICT',
+    nullable: true,
   })
   @JoinColumn({ name: 'default_country_of_origin_id' })
-  countryOfOrigin: CountryOfOrigin;
+  countryOfOrigin: CountryOfOrigin | null;
+
+  @Column({
+    name: 'default_country_of_origin_id',
+    nullable: true,
+  })
+  countryOfOriginId: number | null;
+
+  @OneToMany(() => BatchCustomField, (customField) => customField.batch)
+  customFields: BatchCustomField[];
 
   @OneToMany(() => InvoiceLine, (invoiceLine) => invoiceLine.batch)
   invoiceLines: InvoiceLine[];

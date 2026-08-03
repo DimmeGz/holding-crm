@@ -30,7 +30,11 @@
     "countryOfOrigin": "Země původu",
     "byOrder": "Podle objednávky",
     "byInvoice": "Podle účtu",
-    "rate": "Zajímat"
+    "rate": "Zajímat",
+    "shipmentExpectedDate": "Datum odeslání",
+    "plannedReceive": "Plánované přijetí",
+    "receiveExpectedDate": "Plánované datum přijetí",
+    "totalCost": "Celková hodnota"
   },
   "showArchived": "zobrazit archivované"
 }
