@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+import { CalendarModule } from './calendar';
 import { CompaniesModule } from './companies/';
 import { DocumentsModule } from './documents';
 
@@ -27,6 +28,7 @@ import { StoreDataModule } from './store-data/store-data.module';
     }),
     CompaniesModule,
     DocumentsModule,
+    CalendarModule,
     ReportsModule,
     StoreDataModule,
   ],

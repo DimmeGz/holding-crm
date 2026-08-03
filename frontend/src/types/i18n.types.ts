@@ -47,6 +47,12 @@ export type LocaleDict = {
       kg: string;
       days: string;
     };
+    calendar: {
+      prevMonth: string;
+      nextMonth: string;
+      incoming: string;
+      outgoing: string;
+    };
   };
   tables: {
     columns: {

@@ -110,7 +110,11 @@ export function getGeneralMenu(
       url: UrlConstants.WAREHOUSE_URL,
       links: warehouseLinks,
     },
-    { labelKey: 'common:nav.calendar', icon: IconCalendar },
+    {
+      labelKey: 'common:nav.calendar',
+      icon: IconCalendar,
+      url: UrlConstants.CALENDAR_URL,
+    },
     {
       labelKey: 'common:nav.transit',
       icon: IconTruckDelivery,
